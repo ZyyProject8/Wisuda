@@ -85,7 +85,7 @@ export default function Admin() {
 
   const getWaMessage = () => {
     const link = getGeneratedUrl();
-    return `🎓 *UNDANGAN RESMI WISUDA & PELEPASAN SISWA SMK NEGERI 1* 🎓\n\nKepada Yth.\n*${genName || 'Siswa/i'}* ${genClass ? `(${genClass})` : ''}\nBeserta 1 Orang Tua / Pendamping (Maks. 2 Kursi)\n\nDengan hormat, kami mengundang Bapak/Ibu serta ananda untuk menghadiri acara Wisuda & Pelepasan Siswa Angkatan 2026.\n\nDetail acara & formulir konfirmasi kehadiran dapat diakses melalui link undangan resmi berikut:\n👉 ${link}\n\n*Catatan: Setiap siswa mendapatkan alokasi maksimal 2 kursi (Siswa + 1 Pendamping).\nMohon konfirmasi kehadiran demi kelancaran persiapan kursi & konsumsi.\nTerima kasih.`;
+    return `🎓 *UNDANGAN RESMI WISUDA & PELEPASAN SISWA SMK NEGERI 1* 🎓\n\nKepada Yth.\n*${genName || 'Siswa/i'}* ${genClass ? `(${genClass})` : ''}\nBeserta Kedua Orang Tua / Pendamping (Maks. 3 Kursi)\n\nDengan hormat, kami mengundang Bapak/Ibu serta ananda untuk menghadiri acara Wisuda & Pelepasan Siswa Angkatan 2026.\n\nDetail acara & formulir konfirmasi kehadiran dapat diakses melalui link undangan resmi berikut:\n👉 ${link}\n\n*Catatan: Setiap siswa mendapatkan alokasi maksimal 3 kursi (1 Siswa + 2 Orang Tua/Pendamping).\nMohon konfirmasi kehadiran demi kelancaran persiapan kursi & konsumsi.\nTerima kasih.`;
   };
 
   if (!isAuthenticated) {

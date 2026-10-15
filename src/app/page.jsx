@@ -35,7 +35,7 @@ function InvitationContent() {
     name: guestNameParam || '',
     student_class: guestClassParam || '',
     attendance: 'yes',
-    pax: '2',
+    pax: '3',
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -259,7 +259,7 @@ function InvitationContent() {
                   </span>
                 )}
                 <span style={{display: 'block', fontSize: '0.85rem', color: 'var(--color-text-light)', marginTop: '0.4rem'}}>
-                  Beserta 1 Orang Tua / Pendamping (Maks. 2 Kursi)
+                  Beserta Kedua Orang Tua / Pendamping (Maks. 3 Kursi)
                 </span>
               </div>
 
@@ -486,7 +486,7 @@ function InvitationContent() {
             <ul style={{paddingLeft: '1.5rem', color: 'var(--color-text-light)', lineHeight: '1.8', fontSize: '0.95rem'}}>
               <li><strong>Pakaian Siswa:</strong> Mengenakan setelan Toga lengkap dengan Gordon/Medali yang telah dibagikan.</li>
               <li><strong>Pakaian Orang Tua / Wali:</strong> Pakaian Batik Formal / Pakaian Adat / Kebaya Rapi & Sopan.</li>
-              <li><strong>Alokasi Kursi:</strong> Setiap siswa mendapatkan alokasi maksimal <strong>2 kursi</strong> (1 kursi siswa + 1 kursi orang tua/pendamping).</li>
+              <li><strong>Alokasi Kursi:</strong> Setiap siswa mendapatkan alokasi maksimal <strong>3 kursi</strong> (1 kursi siswa + 2 kursi orang tua/pendamping).</li>
               <li>Harap hadir 30 menit sebelum acara dimulai demi kelancaran prosesi registrasi.</li>
             </ul>
           </motion.div>
@@ -590,9 +590,10 @@ function InvitationContent() {
                   >
                     <option value="1">1 Kursi (Hanya Siswa)</option>
                     <option value="2">2 Kursi (Siswa + 1 Orang Tua / Pendamping)</option>
+                    <option value="3">3 Kursi (Siswa + 2 Orang Tua / Pendamping)</option>
                   </select>
                   <small style={{display: 'block', marginTop: '0.4rem', color: 'var(--color-text-light)', fontSize: '0.8rem', textAlign: 'left'}}>
-                    *Alokasi kursi dibatasi maksimal 2 kursi per siswa demi keterbatasan kapasitas aula.
+                    *Alokasi kursi dibatasi maksimal 3 kursi per siswa (1 kursi siswa + 2 kursi orang tua/pendamping).
                   </small>
                 </div>
               )}
