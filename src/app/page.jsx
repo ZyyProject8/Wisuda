@@ -240,10 +240,10 @@ function InvitationContent() {
                 Wisuda & Pelepasan Siswa
               </h2>
               <p style={{fontSize: '1.1rem', color: '#fff', fontWeight: 600, letterSpacing: '0.1em'}}>
-                SMK NEGERI 1
+                SMK NEGERI 6 SURAKARTA
               </p>
               <p style={{fontSize: '0.85rem', color: 'var(--color-text-light)', marginBottom: '1.5rem'}}>
-                Tahun Ajaran 2025/2026
+                Tahun Ajaran 2024/2027
               </p>
 
               <div className="recipient-badge">
@@ -287,7 +287,7 @@ function InvitationContent() {
             transition={{ delay: 0.3, duration: 0.8 }}
             className="hero-subtitle"
           >
-            Wisuda & Pelepasan Siswa-Siswi Angkatan Ke-28
+            Wisuda & Pelepasan Siswa-Siswi Angkatan Ke-24
           </motion.div>
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
@@ -295,7 +295,7 @@ function InvitationContent() {
             transition={{ delay: 0.6, duration: 0.8 }}
             className="hero-title"
           >
-            SMK NEGERI 1
+            SMK NEGERI 6 SURAKARTA
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -311,7 +311,7 @@ function InvitationContent() {
             transition={{ delay: 1.1, duration: 1 }}
             className="hero-date"
           >
-            Sabtu, 20 Juni 2026
+            Sabtu, 20 Juni 2027
           </motion.div>
 
           {/* Countdown Timer */}
@@ -368,8 +368,8 @@ function InvitationContent() {
             "Selamat dan sukses kepada seluruh siswa-siswi kelas XII atas kelulusannya. Tiga tahun penuh perjuangan telah kalian lewati dengan gemilang. Jadikan ilmu dan karakter yang didapat di sekolah ini sebagai bekal menapaki dunia kerja, wirausaha, maupun perguruan tinggi. Teruslah berkarya dan harumkan almamater."
           </p>
           <div className="gold-line"></div>
-          <p style={{fontWeight: 'bold', color: '#fff', fontSize: '1.1rem'}}>Drs. H. Sulaiman, M.Pd.</p>
-          <p style={{color: 'var(--color-text-light)', fontSize: '0.85rem', letterSpacing: '0.1em', textTransform: 'uppercase'}}>Kepala SMK Negeri 1</p>
+          <p style={{fontWeight: 'bold', color: '#fff', fontSize: '1.1rem'}}>Drs. Titik, M.Pd.</p>
+          <p style={{color: 'var(--color-text-light)', fontSize: '0.85rem', letterSpacing: '0.1em', textTransform: 'uppercase'}}>Kepala SMK Negeri 6 Surakarta</p>
         </motion.div>
       </section>
 
@@ -385,7 +385,7 @@ function InvitationContent() {
             <h2 style={{fontSize: '3rem', marginBottom: '1rem', color: 'var(--color-secondary)'}}>Rangkaian Acara</h2>
             <div className="gold-line"></div>
             <p style={{marginBottom: '3.5rem', color: 'var(--color-text-light)', fontSize: '1.1rem'}}>
-              Jadwal pelaksanaan Sidang Terbuka Wisuda & Pelepasan Siswa-Siswi Angkatan 2026:
+              Jadwal pelaksanaan Sidang Terbuka Wisuda & Pelepasan Siswa-Siswi Angkatan 2024:
             </p>
           </motion.div>
           
@@ -405,7 +405,7 @@ function InvitationContent() {
               <h3 className="event-title">Waktu & Tempat Pelaksanaan</h3>
               <div className="event-time">
                 <Calendar size={18} style={{display: 'inline', marginRight: '8px', verticalAlign: '-3px', color: 'var(--color-secondary)'}}/>
-                Sabtu, 20 Juni 2026
+                Sabtu, 20 Juni 2027
               </div>
               <div className="event-time" style={{marginBottom: '1.5rem'}}>
                 <Clock size={18} style={{display: 'inline', marginRight: '8px', verticalAlign: '-3px', color: 'var(--color-secondary)'}}/>

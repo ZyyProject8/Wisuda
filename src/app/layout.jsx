@@ -1,8 +1,8 @@
 import './globals.css'
 
 export const metadata = {
-  title: 'Undangan Wisuda & Pelepasan Siswa - SMK Negeri 1',
-  description: 'Undangan Resmi Wisuda & Pelepasan Siswa-Siswi Angkatan 2026',
+  title: 'Undangan Wisuda SMK Negeri 6 Surakarta',
+  description: 'Undangan Resmi Wisuda & Pelepasan Siswa-Siswi Angkatan 2024',
 }
 
 export default function RootLayout({ children }) {
