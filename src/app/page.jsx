@@ -22,6 +22,106 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Ornamen Sudut Emas Mewah (Filigree Corner)
+function FiligreeCorner({ position }) {
+  const isRight = position.includes('right');
+  const isBottom = position.includes('bottom');
+  
+  return (
+    <svg 
+      viewBox="0 0 70 70" 
+      fill="none" 
+      style={{
+        position: 'absolute',
+        top: isBottom ? 'auto' : '10px',
+        bottom: isBottom ? '10px' : 'auto',
+        left: isRight ? 'auto' : '10px',
+        right: isRight ? '10px' : 'auto',
+        width: '44px',
+        height: '44px',
+        transform: `${isRight ? 'scaleX(-1)' : ''} ${isBottom ? 'scaleY(-1)' : ''}`.trim() || undefined,
+        pointerEvents: 'none',
+        zIndex: 4
+      }}
+    >
+      {/* Outer corner curves */}
+      <path 
+        d="M 6 6 Q 30 6 42 16 T 50 42" 
+        stroke="#c59b27" 
+        strokeWidth="1.6" 
+        strokeLinecap="round" 
+      />
+      <path 
+        d="M 6 6 Q 6 30 16 42 T 42 50" 
+        stroke="#c59b27" 
+        strokeWidth="1.6" 
+        strokeLinecap="round" 
+      />
+      {/* Inner flourish swirl */}
+      <path 
+        d="M 12 12 Q 24 12 30 20 Q 36 28 32 34 Q 28 38 22 34 Q 18 30 22 24 Q 26 20 32 24" 
+        stroke="#d4af37" 
+        strokeWidth="1.3" 
+        strokeLinecap="round" 
+      />
+      {/* Corner leaf details */}
+      <path 
+        d="M 8 8 C 14 5 20 8 22 14 C 16 16 11 13 8 8 Z" 
+        fill="#c59b27" 
+        opacity="0.85" 
+      />
+      <path 
+        d="M 8 8 C 5 14 8 20 14 22 C 16 16 13 11 8 8 Z" 
+        fill="#c59b27" 
+        opacity="0.85" 
+      />
+      <circle cx="7" cy="7" r="2" fill="#c59b27" />
+    </svg>
+  );
+}
+
+// Siluet Gedung Sekolah pada Bagian Bawah Kartu
+function SchoolSilhouette() {
+  return (
+    <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '220px', height: '60px', pointerEvents: 'none', opacity: 0.32, zIndex: 1 }}>
+      <svg viewBox="0 0 200 55" fill="#a88950">
+        {/* Tiang & Bendera */}
+        <rect x="99.5" y="2" width="1" height="15" fill="#8c703b" />
+        <path d="M100.5 2 L112 5.5 L100.5 9 Z" fill="#c59b27" />
+        {/* Atap Segitiga Utama (Pediment) */}
+        <polygon points="100,12 80,22 120,22" fill="#bfa373" />
+        {/* Blok Utama Tengah */}
+        <rect x="82" y="22" width="36" height="33" fill="#cfbe9b" />
+        {/* Pintu Lengkung Tengah */}
+        <path d="M95 55 V44 Q100 40 105 44 V55 Z" fill="#ffffff" />
+        {/* Sayap Kiri & Kanan */}
+        <rect x="30" y="24" width="52" height="31" fill="#c4b18c" />
+        <rect x="118" y="24" width="52" height="31" fill="#c4b18c" />
+        {/* Deretan Jendela Atas */}
+        <rect x="38" y="28" width="6" height="7" rx="1" fill="#ffffff" />
+        <rect x="48" y="28" width="6" height="7" rx="1" fill="#ffffff" />
+        <rect x="58" y="28" width="6" height="7" rx="1" fill="#ffffff" />
+        <rect x="68" y="28" width="6" height="7" rx="1" fill="#ffffff" />
+        <rect x="126" y="28" width="6" height="7" rx="1" fill="#ffffff" />
+        <rect x="136" y="28" width="6" height="7" rx="1" fill="#ffffff" />
+        <rect x="146" y="28" width="6" height="7" rx="1" fill="#ffffff" />
+        <rect x="156" y="28" width="6" height="7" rx="1" fill="#ffffff" />
+        {/* Deretan Jendela Bawah */}
+        <rect x="38" y="39" width="6" height="7" rx="1" fill="#ffffff" />
+        <rect x="48" y="39" width="6" height="7" rx="1" fill="#ffffff" />
+        <rect x="58" y="39" width="6" height="7" rx="1" fill="#ffffff" />
+        <rect x="68" y="39" width="6" height="7" rx="1" fill="#ffffff" />
+        <rect x="126" y="39" width="6" height="7" rx="1" fill="#ffffff" />
+        <rect x="136" y="39" width="6" height="7" rx="1" fill="#ffffff" />
+        <rect x="146" y="39" width="6" height="7" rx="1" fill="#ffffff" />
+        <rect x="156" y="39" width="6" height="7" rx="1" fill="#ffffff" />
+        {/* Garis Lis Atap */}
+        <rect x="26" y="22" width="148" height="2" fill="#8c703b" />
+      </svg>
+    </div>
+  );
+}
+
 function InvitationContent() {
   const searchParams = useSearchParams();
   const guestNameParam = useMemo(() => searchParams.get('to') || '', [searchParams]);
@@ -40,6 +140,18 @@ function InvitationContent() {
     pax: '3',
     message: ''
   });
+
+  // Sinkronisasi form jika parameter query berubah
+  useEffect(() => {
+    if (guestNameParam || guestClassParam) {
+      setFormData(prev => ({
+        ...prev,
+        name: guestNameParam || prev.name,
+        student_class: guestClassParam || prev.student_class
+      }));
+    }
+  }, [guestNameParam, guestClassParam]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
   const [guestMessages, setGuestMessages] = useState([]);
@@ -55,7 +167,7 @@ function InvitationContent() {
   useEffect(() => {
     const targetDate = new Date('2027-06-20T08:00:00+07:00').getTime();
 
-    const interval = setInterval(() => {
+    const updateTimer = () => {
       const now = new Date().getTime();
       const difference = targetDate - now;
 
@@ -67,7 +179,10 @@ function InvitationContent() {
           seconds: Math.floor((difference % (1000 * 60)) / 1000)
         });
       }
-    }, 1000);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
 
     return () => clearInterval(interval);
   }, []);
@@ -231,62 +346,97 @@ function InvitationContent() {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, y: -100, transition: { duration: 0.8, ease: "easeInOut" } }}
           >
+            {/* Ambient Glow Orbs */}
+            <div className="ambient-glow-orb orb-gold-cover" />
+            <div className="ambient-glow-orb orb-blue-cover" />
+
+            {/* Floating Golden Celebration Dust */}
+            <div className="floating-particles-container">
+              {[...Array(16)].map((_, i) => (
+                <div 
+                  key={i} 
+                  className="gold-particle"
+                  style={{
+                    left: `${(i * 6.2 + 3) % 94}%`,
+                    width: `${(i % 3) * 3 + 4}px`,
+                    height: `${(i % 3) * 3 + 4}px`,
+                    animationDuration: `${7 + (i % 5) * 2.5}s`,
+                    animationDelay: `${(i * 0.6) % 5}s`
+                  }}
+                />
+              ))}
+            </div>
+
             <motion.div 
               className="cover-card"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.8 }}
             >
-              {/* Official School Logo */}
-              <div className="event-icon-wrapper" style={{ margin: '0 auto 1.4rem', width: '105px', height: '105px', background: '#ffffff', boxShadow: '0 8px 24px rgba(30, 58, 138, 0.12)' }}>
+              {/* Overlapping Top Circular Badge */}
+              <div className="cover-badge-top">
                 <img 
                   src="/images/smk6.png" 
                   alt="Logo Resmi SMK Negeri 6 Surakarta" 
-                  className="cover-school-logo"
+                  className="cover-badge-logo"
                 />
               </div>
 
-              <p style={{ letterSpacing: '0.25em', textTransform: 'uppercase', fontSize: '0.85rem', color: 'var(--color-secondary)', fontWeight: 700, marginBottom: '0.4rem' }}>
-                Undangan Resmi
-              </p>
-              
-              <h2 style={{ fontSize: '2.3rem', color: 'var(--color-primary-dark)', lineHeight: 1.2, marginBottom: '0.4rem' }}>
-                Wisuda & Pelepasan Siswa
-              </h2>
+              {/* Inner Decorative Golden Frame */}
+              <div className="cover-card-inner-frame" />
 
-              <p style={{ fontSize: '1.15rem', color: 'var(--color-primary)', fontWeight: 700, letterSpacing: '0.08em' }}>
-                SMK NEGERI 6 SURAKARTA
-              </p>
+              {/* 4 Corner Filigree Ornaments */}
+              <FiligreeCorner position="top-left" />
+              <FiligreeCorner position="top-right" />
+              <FiligreeCorner position="bottom-left" />
+              <FiligreeCorner position="bottom-right" />
 
-              <p style={{ fontSize: '0.88rem', color: 'var(--color-text-light)', marginBottom: '1.5rem', fontWeight: 500 }}>
-                Tahun Ajaran 2026/2027
-              </p>
+              {/* School Building Silhouette Accent at Card Bottom */}
+              <SchoolSilhouette />
 
-              <div className="recipient-badge">
-                <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--color-text-light)', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '0.4rem', fontWeight: 600 }}>
-                  Kepada Yth. Siswa/i:
-                </span>
-                <strong style={{ display: 'block', fontSize: '1.45rem', color: 'var(--color-primary-dark)', fontWeight: 700 }}>
-                  {guestNameParam || 'Calon Wisudawan / Wisudawati'}
-                </strong>
-                {guestClassParam && (
-                  <span style={{ display: 'inline-block', fontSize: '0.9rem', color: 'var(--color-secondary)', fontWeight: 600, marginTop: '0.2rem' }}>
-                    Kelas {guestClassParam}
+              {/* Card Typography & Content */}
+              <div style={{ position: 'relative', zIndex: 3 }}>
+                <p style={{ letterSpacing: '0.22em', textTransform: 'uppercase', fontSize: '0.84rem', color: '#c59b27', fontWeight: 700, marginBottom: '0.35rem' }}>
+                  Undangan Resmi
+                </p>
+                
+                <h2 className="cover-title-main" style={{ fontSize: '2.15rem', color: '#0f2b5c', lineHeight: 1.15, marginBottom: '0.35rem', fontFamily: 'var(--font-heading)' }}>
+                  Wisuda & Pelepasan Siswa
+                </h2>
+
+                <p style={{ fontSize: '1.05rem', color: '#0f2b5c', fontWeight: 700, letterSpacing: '0.06em', marginBottom: '0.25rem' }}>
+                  SMK NEGERI 6 SURAKARTA
+                </p>
+
+                <p style={{ fontSize: '0.86rem', color: '#64748b', marginBottom: '1.25rem', fontWeight: 500 }}>
+                  Tahun Ajaran 2026/2027
+                </p>
+
+                <div className="recipient-badge-v2">
+                  <span style={{ display: 'block', fontSize: '0.78rem', color: '#92753a', textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: '0.35rem', fontWeight: 700 }}>
+                    Kepada Yth. Siswa/i:
                   </span>
-                )}
-                <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '0.5rem' }}>
-                  Beserta Kedua Orang Tua / Pendamping (Maks. 3 Kursi)
-                </span>
-              </div>
+                  <strong style={{ display: 'block', fontSize: '1.35rem', color: '#0f2b5c', fontWeight: 700, lineHeight: 1.3 }}>
+                    {guestNameParam || 'Calon Wisudawan / Wisudawati'}
+                  </strong>
+                  {guestClassParam && (
+                    <span style={{ display: 'inline-block', fontSize: '0.88rem', color: '#c59b27', fontWeight: 600, marginTop: '0.2rem' }}>
+                      Kelas {guestClassParam}
+                    </span>
+                  )}
+                  <span style={{ display: 'block', fontSize: '0.82rem', color: '#556274', marginTop: '0.4rem' }}>
+                    Beserta Kedua Orang Tua / Pendamping (Maks. 3 Kursi)
+                  </span>
+                </div>
 
-              <button 
-                className="btn-primary" 
-                onClick={handleOpenInvitation} 
-                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem' }}
-              >
-                <MailOpen size={20} />
-                Buka Undangan
-              </button>
+                <button 
+                  className="cover-btn-open" 
+                  onClick={handleOpenInvitation} 
+                >
+                  <MailOpen size={19} />
+                  Buka Undangan
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
@@ -294,6 +444,24 @@ function InvitationContent() {
 
       {/* Hero Section */}
       <section className="hero">
+        {/* Floating Ambient Gold Dust */}
+        <div className="floating-particles-container">
+          {[...Array(12)].map((_, i) => (
+            <div 
+              key={i} 
+              className="gold-particle"
+              style={{
+                left: `${(i * 8.5 + 4) % 94}%`,
+                width: `${(i % 3) * 2 + 3}px`,
+                height: `${(i % 3) * 2 + 3}px`,
+                animationDuration: `${9 + (i % 4) * 2}s`,
+                animationDelay: `${(i * 0.8) % 5}s`,
+                opacity: 0.65
+              }}
+            />
+          ))}
+        </div>
+
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -383,14 +551,14 @@ function InvitationContent() {
         </motion.div>
 
         <div className="custom-shape-divider-bottom">
-          <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="shape-fill"></path>
+          <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="shape-fill" />
           </svg>
         </div>
       </section>
 
       {/* Sambutan Kepala Sekolah */}
-      <section className="section-padding text-center" style={{ backgroundColor: 'var(--color-background-soft)' }}>
+      <section className="section-padding sambutan-section text-center">
         <motion.div 
           initial="hidden"
           whileInView="visible"

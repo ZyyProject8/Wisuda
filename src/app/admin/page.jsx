@@ -85,7 +85,7 @@ export default function Admin() {
 
   const getWaMessage = () => {
     const link = getGeneratedUrl();
-    return `🎓 *UNDANGAN RESMI WISUDA & PELEPASAN SISWA SMK NEGERI 1* 🎓\n\nKepada Yth.\n*${genName || 'Siswa/i'}* ${genClass ? `(${genClass})` : ''}\nBeserta Kedua Orang Tua / Pendamping (Maks. 3 Kursi)\n\nDengan hormat, kami mengundang Bapak/Ibu serta ananda untuk menghadiri acara Wisuda & Pelepasan Siswa Angkatan 2026.\n\nDetail acara & formulir konfirmasi kehadiran dapat diakses melalui link undangan resmi berikut:\n👉 ${link}\n\n*Catatan: Setiap siswa mendapatkan alokasi maksimal 3 kursi (1 Siswa + 2 Orang Tua/Pendamping).\nMohon konfirmasi kehadiran demi kelancaran persiapan kursi & konsumsi.\nTerima kasih.`;
+    return `🎓 *UNDANGAN RESMI WISUDA & PELEPASAN SISWA SMK NEGERI 6 SURAKARTA* 🎓\n\nKepada Yth.\n*${genName || 'Siswa/i'}* ${genClass ? `(${genClass})` : ''}\nBeserta Kedua Orang Tua / Pendamping (Maks. 3 Kursi)\n\nDengan hormat, kami mengundang Bapak/Ibu serta ananda untuk menghadiri acara Wisuda & Pelepasan Siswa Angkatan Ke-24 Tahun Ajaran 2026/2027.\n\nDetail acara & formulir konfirmasi kehadiran dapat diakses melalui link undangan resmi berikut:\n👉 ${link}\n\n*Catatan: Setiap siswa mendapatkan alokasi maksimal 3 kursi (1 Siswa + 2 Orang Tua/Pendamping).\nMohon konfirmasi kehadiran demi kelancaran persiapan kursi & konsumsi.\nTerima kasih.`;
   };
 
   if (!isAuthenticated) {
@@ -141,7 +141,7 @@ export default function Admin() {
             <h1 style={{color: '#1a1a2e', fontSize: '2rem', margin: 0, fontWeight: 700}}>
               Dashboard Panitia Wisuda
             </h1>
-            <p style={{color: '#666', margin: '0.3rem 0 0', fontSize: '0.95rem'}}>SMK Negeri 1 — Angkatan 2026</p>
+            <p style={{color: '#666', margin: '0.3rem 0 0', fontSize: '0.95rem'}}>SMK Negeri 6 Surakarta — Angkatan Ke-24 (2026/2027)</p>
           </div>
           <div style={{display: 'flex', gap: '0.8rem'}}>
             <button 
