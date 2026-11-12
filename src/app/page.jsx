@@ -132,6 +132,22 @@ function InvitationContent() {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
 
+  // Kunci scroll halaman saat cover awal belum dibuka agar scrollbar tidak muncul
+  useEffect(() => {
+    if (!isCoverOpen) {
+      document.documentElement.classList.add('cover-locked');
+      document.body.classList.add('cover-locked');
+    } else {
+      document.documentElement.classList.remove('cover-locked');
+      document.body.classList.remove('cover-locked');
+    }
+
+    return () => {
+      document.documentElement.classList.remove('cover-locked');
+      document.body.classList.remove('cover-locked');
+    };
+  }, [isCoverOpen]);
+
   // Form RSVP state
   const [formData, setFormData] = useState({
     name: guestNameParam,
@@ -346,27 +362,6 @@ function InvitationContent() {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, y: -100, transition: { duration: 0.8, ease: "easeInOut" } }}
           >
-            {/* Ambient Glow Orbs */}
-            <div className="ambient-glow-orb orb-gold-cover" />
-            <div className="ambient-glow-orb orb-blue-cover" />
-
-            {/* Floating Golden Celebration Dust */}
-            <div className="floating-particles-container">
-              {[...Array(16)].map((_, i) => (
-                <div 
-                  key={i} 
-                  className="gold-particle"
-                  style={{
-                    left: `${(i * 6.2 + 3) % 94}%`,
-                    width: `${(i % 3) * 3 + 4}px`,
-                    height: `${(i % 3) * 3 + 4}px`,
-                    animationDuration: `${7 + (i % 5) * 2.5}s`,
-                    animationDelay: `${(i * 0.6) % 5}s`
-                  }}
-                />
-              ))}
-            </div>
-
             <motion.div 
               className="cover-card"
               initial={{ scale: 0.9, opacity: 0 }}
@@ -400,7 +395,7 @@ function InvitationContent() {
                   Undangan Resmi
                 </p>
                 
-                <h2 className="cover-title-main" style={{ fontSize: '2.15rem', color: '#0f2b5c', lineHeight: 1.15, marginBottom: '0.35rem', fontFamily: 'var(--font-heading)' }}>
+                <h2 className="cover-title-main">
                   Wisuda & Pelepasan Siswa
                 </h2>
 
@@ -416,7 +411,7 @@ function InvitationContent() {
                   <span style={{ display: 'block', fontSize: '0.78rem', color: '#92753a', textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: '0.35rem', fontWeight: 700 }}>
                     Kepada Yth. Siswa/i:
                   </span>
-                  <strong style={{ display: 'block', fontSize: '1.35rem', color: '#0f2b5c', fontWeight: 700, lineHeight: 1.3 }}>
+                  <strong style={{ display: 'block', fontSize: '1.35rem', color: '#0f2b5c', fontWeight: 700, lineHeight: 1.3, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                     {guestNameParam || 'Calon Wisudawan / Wisudawati'}
                   </strong>
                   {guestClassParam && (
@@ -424,7 +419,7 @@ function InvitationContent() {
                       Kelas {guestClassParam}
                     </span>
                   )}
-                  <span style={{ display: 'block', fontSize: '0.82rem', color: '#556274', marginTop: '0.4rem' }}>
+                  <span style={{ display: 'block', fontSize: '0.82rem', color: '#556274', marginTop: '0.4rem', lineHeight: 1.4 }}>
                     Beserta Kedua Orang Tua / Pendamping (Maks. 3 Kursi)
                   </span>
                 </div>
@@ -444,24 +439,6 @@ function InvitationContent() {
 
       {/* Hero Section */}
       <section className="hero">
-        {/* Floating Ambient Gold Dust */}
-        <div className="floating-particles-container">
-          {[...Array(12)].map((_, i) => (
-            <div 
-              key={i} 
-              className="gold-particle"
-              style={{
-                left: `${(i * 8.5 + 4) % 94}%`,
-                width: `${(i % 3) * 2 + 3}px`,
-                height: `${(i % 3) * 2 + 3}px`,
-                animationDuration: `${9 + (i % 4) * 2}s`,
-                animationDelay: `${(i * 0.8) % 5}s`,
-                opacity: 0.65
-              }}
-            />
-          ))}
-        </div>
-
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -574,11 +551,11 @@ function InvitationContent() {
             Pesan & Amanat Resmi
           </p>
 
-          <h3 style={{ fontSize: '2.4rem', marginBottom: '1.2rem', color: 'var(--color-primary-dark)' }}>
+          <h3 className="section-title">
             Sambutan Kepala Sekolah
           </h3>
 
-          <p style={{ fontSize: '1.15rem', fontStyle: 'italic', marginBottom: '2rem', color: 'var(--color-text-muted)', lineHeight: '1.85', maxWidth: '750px', margin: '0 auto 2rem' }}>
+          <p className="sambutan-text">
             "Selamat dan sukses kepada seluruh siswa-siswi kelas XII atas kelulusannya. Tiga tahun penuh perjuangan telah kalian lewati dengan gemilang. Jadikan ilmu, etika, dan keahlian vokasi yang didapat di SMK Negeri 6 Surakarta sebagai pondasi kokoh menapaki dunia kerja, industri, wirausaha, maupun jenjang perguruan tinggi. Teruslah berkarya dan harumkan nama almamater tercinta."
           </p>
 
@@ -605,11 +582,11 @@ function InvitationContent() {
             <div className="event-icon-wrapper">
               <School className="event-icon" size={32} />
             </div>
-            <h2 style={{ fontSize: '2.8rem', marginBottom: '0.8rem', color: 'var(--color-primary-dark)' }}>
+            <h2 className="section-title">
               Gedung Almamater Tercinta
             </h2>
             <div className="gold-line"></div>
-            <p style={{ color: 'var(--color-text-light)', marginBottom: '3rem', fontSize: '1.1rem', maxWidth: '680px', margin: '0 auto 3rem' }}>
+            <p className="section-subtitle">
               Saksi ribuan langkah perjuangan, kebersamaan, dan prestasi yang terukir di kampus SMK Negeri 6 Surakarta.
             </p>
           </motion.div>
@@ -660,11 +637,11 @@ function InvitationContent() {
             <div className="event-icon-wrapper">
               <GraduationCap className="event-icon" size={32} />
             </div>
-            <h2 style={{ fontSize: '2.8rem', marginBottom: '0.8rem', color: 'var(--color-primary-dark)' }}>
+            <h2 className="section-title">
               Rangkaian Acara Wisuda
             </h2>
             <div className="gold-line"></div>
-            <p style={{ marginBottom: '3.5rem', color: 'var(--color-text-light)', fontSize: '1.1rem' }}>
+            <p className="section-subtitle">
               Jadwal pelaksanaan Sidang Terbuka Wisuda & Pelepasan Siswa-Siswi Angkatan 2026/2027:
             </p>
           </motion.div>
@@ -785,11 +762,11 @@ function InvitationContent() {
             <div className="event-icon-wrapper">
               <Users className="event-icon" size={32} />
             </div>
-            <h2 style={{ fontSize: '2.8rem', marginBottom: '0.8rem', color: 'var(--color-primary-dark)' }}>
+            <h2 className="section-title">
               Konfirmasi Kehadiran Siswa (RSVP)
             </h2>
             <div className="gold-line"></div>
-            <p style={{ marginBottom: '3rem', color: 'var(--color-text-light)', fontSize: '1.1rem' }}>
+            <p className="section-subtitle">
               Mohon siswa-siswi dan wali murid mengisi konfirmasi kehadiran agar panitia dapat menyiapkan tempat duduk aula dan konsumsi secara optimal.
             </p>
           </motion.div>
@@ -913,17 +890,17 @@ function InvitationContent() {
             <div className="event-icon-wrapper">
               <MessageSquare className="event-icon" size={32} />
             </div>
-            <h2 style={{ fontSize: '2.8rem', marginBottom: '0.8rem', color: 'var(--color-primary-dark)' }}>
+            <h2 className="section-title">
               Dinding Kesan & Pesan Wisudawan
             </h2>
             <div className="gold-line"></div>
-            <p style={{ marginBottom: '2rem', color: 'var(--color-text-light)' }}>
+            <p className="section-subtitle">
               Untaian kata dan kenangan manis dari teman-teman angkatan 2026/2027:
             </p>
           </motion.div>
           
           <motion.div 
-            style={{ maxWidth: '780px', margin: '2rem auto 0', maxHeight: '520px', overflowY: 'auto', padding: '0.5rem' }}
+            className="guestbook-scroll"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -942,7 +919,7 @@ function InvitationContent() {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <div>
-                      <strong style={{ color: 'var(--color-primary-dark)', fontSize: '1.15rem', marginRight: '0.5rem', fontWeight: 700 }}>
+                      <strong style={{ color: 'var(--color-primary-dark)', fontSize: '1.15rem', marginRight: '0.5rem', fontWeight: 700, wordBreak: 'break-word' }}>
                         {msg.name}
                       </strong>
                       {msg.student_class && (
@@ -980,7 +957,7 @@ function InvitationContent() {
                       </span>
                     </div>
                   </div>
-                  <p style={{ color: 'var(--color-text-muted)', fontStyle: msg.message ? 'normal' : 'italic', opacity: msg.message ? 1 : 0.6, lineHeight: '1.65', fontSize: '0.98rem' }}>
+                  <p style={{ color: 'var(--color-text-muted)', fontStyle: msg.message ? 'normal' : 'italic', opacity: msg.message ? 1 : 0.6, lineHeight: '1.65', fontSize: '0.98rem', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                     {msg.message || "Tanpa pesan tertulis."}
                   </p>
                 </motion.div>
@@ -1003,7 +980,7 @@ function InvitationContent() {
             alt="Logo SMK Negeri 6 Surakarta" 
             className="footer-school-logo"
           />
-          <h3 style={{ fontSize: '1.7rem', marginBottom: '0.4rem', color: '#ffffff' }}>
+          <h3 className="footer-title">
             SMK NEGERI 6 SURAKARTA
           </h3>
           <p style={{ letterSpacing: '0.15em', textTransform: 'uppercase', fontSize: '0.82rem', marginBottom: '1.5rem', color: 'var(--color-secondary-bright)', fontWeight: 600 }}>
