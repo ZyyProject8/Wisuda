@@ -16,6 +16,7 @@ import {
   Info, 
   MessageSquare, 
   ChevronDown,
+  ChevronUp,
   Navigation,
   School,
   Sparkles
@@ -130,6 +131,7 @@ function InvitationContent() {
   // State Cover & Audio
   const [isCoverOpen, setIsCoverOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const audioRef = useRef(null);
 
   // Kunci scroll halaman saat cover awal belum dibuka agar scrollbar tidak muncul
@@ -268,6 +270,28 @@ function InvitationContent() {
     }
   };
 
+  // Deteksi scroll untuk memunculkan tombol cepat ke atas (Scroll to Top)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 350) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Fungsi scroll cepat & halus ke atas
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -340,18 +364,37 @@ function InvitationContent() {
         preload="auto"
       />
 
-      {/* Floating Audio Button */}
+      {/* Floating Action Buttons: Scroll to Top & Audio */}
       {isCoverOpen && (
-        <motion.button 
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className={`floating-music-btn ${isPlaying ? 'music-spinning' : ''}`}
-          onClick={toggleAudio}
-          title={isPlaying ? "Jeda Musik" : "Putar Musik"}
-          aria-label="Musik Latar"
-        >
-          {isPlaying ? <Volume2 size={22} /> : <VolumeX size={22} />}
-        </motion.button>
+        <>
+          <AnimatePresence>
+            {showScrollTop && (
+              <motion.button 
+                initial={{ opacity: 0, scale: 0.6, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.6, y: 15 }}
+                transition={{ duration: 0.25 }}
+                className="floating-scroll-top-btn"
+                onClick={scrollToTop}
+                title="Scroll Cepat ke Atas"
+                aria-label="Kembali ke Atas"
+              >
+                <ChevronUp size={24} />
+              </motion.button>
+            )}
+          </AnimatePresence>
+
+          <motion.button 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className={`floating-music-btn ${isPlaying ? 'music-spinning' : ''}`}
+            onClick={toggleAudio}
+            title={isPlaying ? "Jeda Musik" : "Putar Musik"}
+            aria-label="Musik Latar"
+          >
+            {isPlaying ? <Volume2 size={22} /> : <VolumeX size={22} />}
+          </motion.button>
+        </>
       )}
 
       {/* Gate Cover / Buka Undangan Modal */}
