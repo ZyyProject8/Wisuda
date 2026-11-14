@@ -14,7 +14,6 @@ import {
   CheckCircle, 
   Users, 
   Info, 
-  MessageSquare, 
   ChevronDown,
   ChevronUp,
   Navigation,
@@ -123,40 +122,6 @@ function SchoolSilhouette() {
   );
 }
 
-// Helper untuk mengurai data RSVP (mendukung format kolom terpisah maupun fallback)
-function parseRsvpItem(msg) {
-  let name = msg.name || 'Tamu Undangan';
-  let studentClass = msg.student_class || '';
-  let pax = msg.pax;
-  let message = msg.message || '';
-
-  // Ekstrak kelas jika tersimpan dalam format "Nama Siswa (Kelas)"
-  if (!studentClass && name.includes('(') && name.endsWith(')')) {
-    const match = name.match(/^(.*?)\s*\((.*?)\)$/);
-    if (match) {
-      name = match[1].trim();
-      studentClass = match[2].trim();
-    }
-  }
-
-  // Ekstrak jumlah kursi jika tersimpan dalam format pesan "[Jumlah: X Org] ..."
-  if ((pax === undefined || pax === null || pax === 0) && message && message.includes('[Jumlah:')) {
-    const paxMatch = message.match(/\[Jumlah:\s*(\d+)\s*Org\]/i);
-    if (paxMatch) {
-      pax = parseInt(paxMatch[1], 10);
-      message = message.replace(/\[Jumlah:\s*(\d+)\s*Org\]\s*/i, '').trim();
-    }
-  }
-
-  return {
-    ...msg,
-    displayName: name,
-    displayClass: studentClass,
-    displayPax: pax !== undefined && pax !== null ? pax : (msg.attendance === 'yes' ? 1 : 0),
-    displayMessage: message
-  };
-}
-
 function InvitationContent() {
   const searchParams = useSearchParams();
   const guestNameParam = useMemo(() => searchParams.get('to') || '', [searchParams]);
@@ -168,6 +133,13 @@ function InvitationContent() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [lastSubmitted, setLastSubmitted] = useState(null);
   const audioRef = useRef(null);
+
+  // Bersihkan sisa hash fragment (seperti #pesan-alumni) dari bilah URL browser jika ada
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+  }, []);
 
   // Kunci scroll halaman saat cover awal belum dibuka agar scrollbar tidak muncul
   useEffect(() => {
@@ -207,7 +179,6 @@ function InvitationContent() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
-  const [guestMessages, setGuestMessages] = useState([]);
 
   // Countdown timer state: Wisuda 20 Juni 2027 08:00 WIB
   const [timeLeft, setTimeLeft] = useState({
@@ -238,44 +209,6 @@ function InvitationContent() {
     const interval = setInterval(updateTimer, 1000);
 
     return () => clearInterval(interval);
-  }, []);
-
-  // Fetch messages from Supabase
-  const fetchMessages = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('rsvps')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
-      if (!error && data) {
-        setGuestMessages(data);
-      }
-    } catch {
-      console.log('Error fetching messages from Supabase');
-    }
-  };
-
-  useEffect(() => {
-    let ignore = false;
-    async function loadInitial() {
-      try {
-        const { data, error } = await supabase
-          .from('rsvps')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(20);
-        if (!ignore && !error && data) {
-          setGuestMessages(data);
-        }
-      } catch {
-        console.log('Could not load guest messages initially');
-      }
-    }
-    loadInitial();
-    return () => {
-      ignore = true;
-    };
   }, []);
 
   // Handle Cover Open
@@ -384,14 +317,8 @@ function InvitationContent() {
       setLastSubmitted(newSubmittedRecord);
       setSubmitStatus('success');
 
-      // Optimistic update pada daftar dinding pesan agar langsung muncul
-      setGuestMessages(prev => [newSubmittedRecord, ...prev]);
-
       // Reset input pesan pada form
       setFormData(prev => ({ ...prev, message: '' }));
-
-      // Sinkronisasi ulang dengan database Supabase
-      fetchMessages();
     } catch (error) {
       console.error('Error submitting RSVP:', error);
       setSubmitStatus('error');
@@ -403,14 +330,6 @@ function InvitationContent() {
   const fadeInUp = {
     hidden: { opacity: 0, y: 35 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
-  };
-
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.15 }
-    }
   };
 
   return (
@@ -943,25 +862,18 @@ function InvitationContent() {
                   )}
                 </div>
 
-                {/* Tombol Aksi Lanjutan */}
-                <div style={{ display: 'flex', gap: '0.8rem', marginTop: '1.8rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                {/* Tombol Aksi */}
+                <div style={{ marginTop: '1.8rem', display: 'flex', justifyContent: 'center' }}>
                   <button 
                     type="button"
                     onClick={() => {
                       setSubmitStatus(null);
                     }}
                     className="btn-outline"
-                    style={{ fontSize: '0.88rem', padding: '0.75rem 1.4rem' }}
+                    style={{ fontSize: '0.9rem', padding: '0.8rem 1.8rem' }}
                   >
                     Ubah / Kirim Konfirmasi Baru
                   </button>
-                  <a 
-                    href="#pesan-alumni"
-                    className="btn-primary"
-                    style={{ fontSize: '0.88rem', padding: '0.75rem 1.4rem', width: 'auto', margin: 0, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-                  >
-                    Lihat Ucapan di Dinding Pesan ↓
-                  </a>
                 </div>
               </motion.div>
             ) : (
@@ -1047,98 +959,6 @@ function InvitationContent() {
                   {isSubmitting ? 'Mengirim Konfirmasi...' : 'Kirim Konfirmasi Kehadiran'}
                 </button>
               </form>
-            )}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Guestbook Section / Dinding Pesan Alumni */}
-      <section id="pesan-alumni" className="section-padding guestbook-section">
-        <div className="container text-center">
-          <motion.div
-             initial="hidden"
-             whileInView="visible"
-             viewport={{ once: true }}
-             variants={fadeInUp}
-          >
-            <div className="event-icon-wrapper">
-              <MessageSquare className="event-icon" size={32} />
-            </div>
-            <h2 className="section-title">
-              Dinding Kesan & Pesan Wisudawan
-            </h2>
-            <div className="gold-line"></div>
-            <p className="section-subtitle">
-              Untaian kata dan kenangan manis dari teman-teman angkatan 2026/2027:
-            </p>
-          </motion.div>
-          
-          <motion.div 
-            className="guestbook-scroll"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-          >
-            {guestMessages.length === 0 ? (
-              <p style={{ color: 'var(--color-text-light)', fontStyle: 'italic', fontSize: '1.05rem', padding: '2rem' }}>
-                Belum ada pesan. Jadilah yang pertama mengisi konfirmasi dan kesan pesan!
-              </p>
-            ) : (
-              guestMessages.map((msg, index) => {
-                const parsed = parseRsvpItem(msg);
-                return (
-                  <motion.div 
-                    key={msg.id || index}
-                    variants={fadeInUp}
-                    className="message-card"
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                        <strong style={{ color: 'var(--color-primary-dark)', fontSize: '1.15rem', fontWeight: 700, wordBreak: 'break-word' }}>
-                          {parsed.displayName}
-                        </strong>
-                        {parsed.displayClass && parsed.displayClass !== '-' && (
-                          <span style={{
-                            fontSize: '0.78rem', 
-                            background: 'var(--color-primary-subtle)', 
-                            color: 'var(--color-primary)',
-                            padding: '0.2rem 0.65rem',
-                            borderRadius: '12px',
-                            border: '1px solid rgba(30, 58, 138, 0.18)',
-                            fontWeight: 600
-                          }}>
-                            {parsed.displayClass}
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        {parsed.attendance === 'yes' && parsed.displayPax > 0 && (
-                          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 600, background: '#f8fafc', padding: '0.2rem 0.6rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                            👥 {parsed.displayPax} Kursi
-                          </span>
-                        )}
-                        <span style={{
-                          fontSize: '0.75rem', 
-                          padding: '0.25rem 0.75rem', 
-                          borderRadius: '20px', 
-                          backgroundColor: parsed.attendance === 'yes' ? '#ecfdf5' : '#fef2f2',
-                          color: parsed.attendance === 'yes' ? '#047857' : '#b91c1c',
-                          border: parsed.attendance === 'yes' ? '1px solid #a7f3d0' : '1px solid #fecaca',
-                          letterSpacing: '0.05em',
-                          textTransform: 'uppercase',
-                          fontWeight: 600
-                        }}>
-                          {parsed.attendance === 'yes' ? 'Hadir' : 'Tidak Hadir'}
-                        </span>
-                      </div>
-                    </div>
-                    <p style={{ color: 'var(--color-text-muted)', fontStyle: parsed.displayMessage ? 'normal' : 'italic', opacity: parsed.displayMessage ? 1 : 0.6, lineHeight: '1.65', fontSize: '0.98rem', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
-                      {parsed.displayMessage || "Tanpa pesan tertulis."}
-                    </p>
-                  </motion.div>
-                );
-              })
             )}
           </motion.div>
         </div>
