@@ -189,11 +189,7 @@ body.cover-locked::-webkit-scrollbar {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: 
-    radial-gradient(ellipse at 50% 12%, rgba(245, 158, 11, 0.12) 0%, transparent 60%),
-    radial-gradient(ellipse at 90% 80%, rgba(30, 58, 138, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 10% 80%, rgba(30, 58, 138, 0.08) 0%, transparent 50%),
-    linear-gradient(180deg, #ffffff 0%, #f8fafc 50%, #ffffff 100%);
+  background-color: #ffffff;
   color: var(--color-text);
   text-align: center;
   position: relative;
@@ -201,12 +197,47 @@ body.cover-locked::-webkit-scrollbar {
   padding: clamp(5rem, 9vh, 7rem) clamp(1rem, 3.5vw, 1.5rem) clamp(5rem, 8vh, 7rem);
 }
 
-.hero::before {
-  content: '';
+/* Ambient School Building Backdrop Layer */
+.hero-bg-container {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, transparent 30%, rgba(30, 58, 138, 0.06) 100%);
+  z-index: 1;
+  overflow: hidden;
   pointer-events: none;
+}
+
+.hero-bg-image {
+  position: absolute;
+  inset: -15px;
+  background-image: url('/images/smk6-depan-web.jpg');
+  background-size: cover;
+  background-position: center 25%;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  filter: saturate(1.06) contrast(1.02);
+  transform: scale(1.02);
+}
+
+.hero-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: 
+    /* Gentle golden ambient highlight near top emblem */
+    radial-gradient(ellipse at 50% 10%, rgba(245, 158, 11, 0.12) 0%, transparent 55%),
+    /* Soft white backlight glow directly centered behind main typography */
+    radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.25) 50%, transparent 75%),
+    /* Subtle side fades */
+    radial-gradient(ellipse at 98% 50%, rgba(255, 255, 255, 0.35) 0%, transparent 45%),
+    radial-gradient(ellipse at 2% 50%, rgba(255, 255, 255, 0.35) 0%, transparent 45%),
+    /* Vertical linear fade: subtle at top, crystal clear in middle, smooth white fade at bottom */
+    linear-gradient(180deg, 
+      rgba(255, 255, 255, 0.65) 0%, 
+      rgba(255, 255, 255, 0.20) 18%, 
+      rgba(255, 255, 255, 0.08) 38%, 
+      rgba(255, 255, 255, 0.18) 60%, 
+      rgba(255, 255, 255, 0.75) 80%, 
+      #ffffff 100%
+    );
 }
 
 .hero-logo-wrapper {
@@ -219,7 +250,7 @@ body.cover-locked::-webkit-scrollbar {
   width: clamp(72px, 12vw, 90px);
   height: clamp(72px, 12vw, 90px);
   object-fit: contain;
-  filter: drop-shadow(0 8px 16px rgba(30, 58, 138, 0.18));
+  filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.95)) drop-shadow(0 8px 18px rgba(15, 43, 92, 0.22));
   transition: transform 0.4s ease;
 }
 
@@ -232,24 +263,32 @@ body.cover-locked::-webkit-scrollbar {
   letter-spacing: clamp(0.12em, 0.4vw, 0.3em);
   text-transform: uppercase;
   margin-bottom: 0.8rem;
-  color: var(--color-secondary);
+  color: #b45309;
   font-weight: 700;
+  text-shadow: 
+    0 0 16px #ffffff, 
+    0 0 8px #ffffff, 
+    0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .hero-title {
   font-size: clamp(2.2rem, 6.5vw, 4.8rem);
-  color: var(--color-primary-dark);
+  color: #0b2553;
   margin-bottom: 0.8rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.15;
-  text-shadow: 0 4px 18px rgba(30, 58, 138, 0.08);
+  text-shadow: 
+    0 0 24px #ffffff, 
+    0 0 12px #ffffff, 
+    0 2px 6px rgba(15, 43, 92, 0.25);
   word-break: break-word;
 }
 
 .hero-quote {
   font-size: clamp(0.95rem, 2.2vw, 1.2rem);
-  color: var(--color-accent);
+  color: #1e293b;
+  font-weight: 600;
   font-style: italic;
   margin-bottom: 1.8rem;
   max-width: 650px;
@@ -257,6 +296,10 @@ body.cover-locked::-webkit-scrollbar {
   margin-right: auto;
   line-height: 1.6;
   padding: 0 0.5rem;
+  text-shadow: 
+    0 0 16px #ffffff, 
+    0 0 8px #ffffff, 
+    0 1px 3px rgba(255, 255, 255, 0.9);
 }
 
 .hero-date {
@@ -264,12 +307,15 @@ body.cover-locked::-webkit-scrollbar {
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-primary);
+  color: #0f2b5c;
   display: inline-block;
   padding: 0.5rem clamp(1rem, 3vw, 1.6rem);
-  background: var(--color-primary-subtle);
-  border: 1px solid rgba(30, 58, 138, 0.15);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(212, 175, 55, 0.4);
   border-radius: 30px;
+  box-shadow: 0 6px 20px rgba(15, 43, 92, 0.14), 0 0 15px rgba(255, 255, 255, 0.9);
 }
 
 /* Glassmorphism Card (Light Luxury Edition) */
@@ -1040,13 +1086,15 @@ select.form-control option {
 }
 
 .countdown-box {
-  background: #ffffff;
-  border: 1.5px solid rgba(217, 119, 6, 0.25);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(217, 119, 6, 0.35);
   border-radius: clamp(12px, 3vw, 16px);
   padding: clamp(0.75rem, 2vw, 1.2rem) clamp(0.2rem, 1vw, 0.5rem);
   text-align: center;
-  box-shadow: var(--shadow-md);
-  transition: transform 0.3s ease;
+  box-shadow: 0 10px 25px rgba(15, 43, 92, 0.12), 0 2px 8px rgba(217, 119, 6, 0.1);
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   min-width: 0;
 }
 

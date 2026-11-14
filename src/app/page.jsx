@@ -425,7 +425,7 @@ function InvitationContent() {
                 </p>
 
                 <p style={{ fontSize: '0.86rem', color: '#64748b', marginBottom: '1.25rem', fontWeight: 500 }}>
-                  Tahun Ajaran 2026/2027
+                  Tahun Ajaran 2024/2027
                 </p>
 
                 <div className="recipient-badge-v2">
@@ -460,6 +460,12 @@ function InvitationContent() {
 
       {/* Hero Section */}
       <section className="hero">
+        {/* Ambient School Building Backdrop */}
+        <div className="hero-bg-container" aria-hidden="true">
+          <div className="hero-bg-image" />
+          <div className="hero-bg-overlay" />
+        </div>
+
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -604,7 +610,7 @@ function InvitationContent() {
               <School className="event-icon" size={32} />
             </div>
             <h2 className="section-title">
-              Gedung Almamater Tercinta
+              Gedung SMK Negeri 6 Surakarta
             </h2>
             <div className="gold-line"></div>
             <p className="section-subtitle">
@@ -621,13 +627,13 @@ function InvitationContent() {
           >
             <div className="showcase-img-container">
               <img 
-                src="/images/smk6-depan.jpg" 
+                src="/images/smk6-depan-web.jpg" 
                 alt="Halaman Depan dan Gedung SMK Negeri 6 Surakarta" 
                 className="showcase-img"
               />
               <div className="showcase-badge">
                 <MapPin size={16} style={{ color: 'var(--color-secondary-bright)' }} />
-                <span>Kampus SMK Negeri 6 Surakarta</span>
+                <span>SMK Negeri 6 Surakarta</span>
               </div>
             </div>
             <div className="showcase-body">
