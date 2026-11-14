@@ -123,6 +123,40 @@ function SchoolSilhouette() {
   );
 }
 
+// Helper untuk mengurai data RSVP (mendukung format kolom terpisah maupun fallback)
+function parseRsvpItem(msg) {
+  let name = msg.name || 'Tamu Undangan';
+  let studentClass = msg.student_class || '';
+  let pax = msg.pax;
+  let message = msg.message || '';
+
+  // Ekstrak kelas jika tersimpan dalam format "Nama Siswa (Kelas)"
+  if (!studentClass && name.includes('(') && name.endsWith(')')) {
+    const match = name.match(/^(.*?)\s*\((.*?)\)$/);
+    if (match) {
+      name = match[1].trim();
+      studentClass = match[2].trim();
+    }
+  }
+
+  // Ekstrak jumlah kursi jika tersimpan dalam format pesan "[Jumlah: X Org] ..."
+  if ((pax === undefined || pax === null || pax === 0) && message && message.includes('[Jumlah:')) {
+    const paxMatch = message.match(/\[Jumlah:\s*(\d+)\s*Org\]/i);
+    if (paxMatch) {
+      pax = parseInt(paxMatch[1], 10);
+      message = message.replace(/\[Jumlah:\s*(\d+)\s*Org\]\s*/i, '').trim();
+    }
+  }
+
+  return {
+    ...msg,
+    displayName: name,
+    displayClass: studentClass,
+    displayPax: pax !== undefined && pax !== null ? pax : (msg.attendance === 'yes' ? 1 : 0),
+    displayMessage: message
+  };
+}
+
 function InvitationContent() {
   const searchParams = useSearchParams();
   const guestNameParam = useMemo(() => searchParams.get('to') || '', [searchParams]);
@@ -132,6 +166,7 @@ function InvitationContent() {
   const [isCoverOpen, setIsCoverOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [lastSubmitted, setLastSubmitted] = useState(null);
   const audioRef = useRef(null);
 
   // Kunci scroll halaman saat cover awal belum dibuka agar scrollbar tidak muncul
@@ -302,12 +337,17 @@ function InvitationContent() {
     setIsSubmitting(true);
     setSubmitStatus(null);
 
+    const paxNum = formData.attendance === 'yes' ? parseInt(formData.pax, 10) : 0;
+    const nameVal = formData.name?.trim() || 'Tamu Undangan';
+    const classVal = formData.student_class?.trim() || '-';
+    const messageVal = formData.message?.trim() || '';
+
     const payload = {
-      name: formData.name,
-      student_class: formData.student_class || '-',
+      name: nameVal,
+      student_class: classVal,
       attendance: formData.attendance,
-      pax: formData.attendance === 'yes' ? parseInt(formData.pax, 10) : 0,
-      message: formData.message
+      pax: paxNum,
+      message: messageVal
     };
 
     try {
@@ -320,9 +360,9 @@ function InvitationContent() {
           const { error: fallbackError } = await supabase
             .from('rsvps')
             .insert([{
-              name: `${formData.name} (${formData.student_class})`,
+              name: `${nameVal} (${classVal})`,
               attendance: formData.attendance,
-              message: `[Jumlah: ${formData.attendance === 'yes' ? formData.pax : 0} Org] ${formData.message}`
+              message: `[Jumlah: ${paxNum} Org] ${messageVal}`
             }]);
           if (fallbackError) throw fallbackError;
         } else {
@@ -330,8 +370,27 @@ function InvitationContent() {
         }
       }
 
+      // Catat data konfirmasi yang baru saja berhasil dikirim
+      const newSubmittedRecord = {
+        id: Date.now(),
+        name: nameVal,
+        student_class: classVal,
+        attendance: formData.attendance,
+        pax: paxNum,
+        message: messageVal,
+        created_at: new Date().toISOString()
+      };
+
+      setLastSubmitted(newSubmittedRecord);
       setSubmitStatus('success');
+
+      // Optimistic update pada daftar dinding pesan agar langsung muncul
+      setGuestMessages(prev => [newSubmittedRecord, ...prev]);
+
+      // Reset input pesan pada form
       setFormData(prev => ({ ...prev, message: '' }));
+
+      // Sinkronisasi ulang dengan database Supabase
       fetchMessages();
     } catch (error) {
       console.error('Error submitting RSVP:', error);
@@ -822,107 +881,179 @@ function InvitationContent() {
             viewport={{ once: true }}
             variants={fadeInUp}
           >
-            {submitStatus === 'success' && (
-              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="success-message">
-                <CheckCircle size={28} style={{ margin: '0 auto 0.5rem', display: 'block' }} />
-                Terima kasih! Konfirmasi kehadiran Anda telah berhasil tersimpan di sistem sekolah.
-              </motion.div>
-            )}
-            
             {submitStatus === 'error' && (
               <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="error-message">
-                Maaf, terjadi kendala saat menyimpan data ke Supabase. Pastikan aturan izin RLS (Row Level Security) pada tabel rsvps sudah diaktifkan.
+                Maaf, terjadi kendala saat menyimpan data ke Supabase. Silakan periksa koneksi internet Anda atau coba lagi.
               </motion.div>
             )}
 
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label className="form-label" htmlFor="name">Nama Lengkap Siswa</label>
-                <input 
-                  type="text" 
-                  id="name" 
-                  name="name" 
-                  className="form-control" 
-                  placeholder="Contoh: Ahmad Fauzi"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required 
-                />
-              </div>
+            {submitStatus === 'success' && lastSubmitted ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                transition={{ duration: 0.35 }}
+                className="rsvp-confirmed-card"
+              >
+                <div className="confirmed-icon-wrapper">
+                  <CheckCircle size={40} style={{ color: '#059669' }} />
+                </div>
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="student_class">Kelas & Jurusan</label>
-                <input 
-                  type="text" 
-                  id="student_class" 
-                  name="student_class" 
-                  className="form-control" 
-                  placeholder="Contoh: XII RPL 1 / XII AKL 2 / XII OTKP 1"
-                  value={formData.student_class}
-                  onChange={handleInputChange}
-                  required 
-                />
-              </div>
+                <h3 style={{ fontSize: '1.6rem', color: 'var(--color-primary-dark)', marginBottom: '0.4rem', fontFamily: 'var(--font-heading)' }}>
+                  Konfirmasi Kehadiran Terkirim!
+                </h3>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.92rem', marginBottom: '1.4rem', lineHeight: '1.6' }}>
+                  Data konfirmasi Anda telah berhasil tercatat resmi di sistem panitia wisuda SMK Negeri 6 Surakarta.
+                </p>
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="attendance">Konfirmasi Kehadiran</label>
-                <select 
-                  id="attendance" 
-                  name="attendance" 
-                  className="form-control" 
-                  value={formData.attendance}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="yes">Ya, Saya & Orang Tua Hadir</option>
-                  <option value="no">Maaf, Tidak Dapat Hadir</option>
-                </select>
-              </div>
+                {/* Ringkasan Bukti Konfirmasi */}
+                <div className="confirmed-details-box">
+                  <div className="confirmed-detail-row">
+                    <span className="confirmed-detail-label">Nama Lengkap:</span>
+                    <strong className="confirmed-detail-value">{lastSubmitted.name}</strong>
+                  </div>
 
-              {formData.attendance === 'yes' && (
+                  <div className="confirmed-detail-row">
+                    <span className="confirmed-detail-label">Kelas & Jurusan:</span>
+                    <span className="confirmed-detail-badge">{lastSubmitted.student_class}</span>
+                  </div>
+
+                  <div className="confirmed-detail-row">
+                    <span className="confirmed-detail-label">Status Kehadiran:</span>
+                    <span className={`confirmed-status-pill ${lastSubmitted.attendance === 'yes' ? 'status-hadir' : 'status-absen'}`}>
+                      {lastSubmitted.attendance === 'yes' ? '✓ Hadir' : '✕ Tidak Dapat Hadir'}
+                    </span>
+                  </div>
+
+                  {lastSubmitted.attendance === 'yes' && (
+                    <div className="confirmed-detail-row">
+                      <span className="confirmed-detail-label">Total Kursi:</span>
+                      <strong className="confirmed-detail-value" style={{ color: 'var(--color-primary)' }}>
+                        🪑 {lastSubmitted.pax} Kursi (Siswa + Pendamping)
+                      </strong>
+                    </div>
+                  )}
+
+                  {lastSubmitted.message && (
+                    <div className="confirmed-detail-row" style={{ flexDirection: 'column', alignItems: 'flex-start', borderBottom: 'none' }}>
+                      <span className="confirmed-detail-label" style={{ marginBottom: '0.35rem' }}>Pesan / Kesan:</span>
+                      <p style={{ fontStyle: 'italic', color: 'var(--color-text-muted)', fontSize: '0.92rem', lineHeight: '1.6', margin: 0 }}>
+                        "{lastSubmitted.message}"
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Tombol Aksi Lanjutan */}
+                <div style={{ display: 'flex', gap: '0.8rem', marginTop: '1.8rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setSubmitStatus(null);
+                    }}
+                    className="btn-outline"
+                    style={{ fontSize: '0.88rem', padding: '0.75rem 1.4rem' }}
+                  >
+                    Ubah / Kirim Konfirmasi Baru
+                  </button>
+                  <a 
+                    href="#pesan-alumni"
+                    className="btn-primary"
+                    style={{ fontSize: '0.88rem', padding: '0.75rem 1.4rem', width: 'auto', margin: 0, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                  >
+                    Lihat Ucapan di Dinding Pesan ↓
+                  </a>
+                </div>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                  <label className="form-label" htmlFor="pax">Total Kursi yang Dibutuhkan</label>
-                  <select 
-                    id="pax" 
-                    name="pax" 
+                  <label className="form-label" htmlFor="name">Nama Lengkap Siswa</label>
+                  <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
                     className="form-control" 
-                    value={formData.pax}
+                    placeholder="Contoh: Ahmad Fauzi"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required 
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" htmlFor="student_class">Kelas & Jurusan</label>
+                  <input 
+                    type="text" 
+                    id="student_class" 
+                    name="student_class" 
+                    className="form-control" 
+                    placeholder="Contoh: XII RPL 1 / XII AKL 2 / XII OTKP 1"
+                    value={formData.student_class}
+                    onChange={handleInputChange}
+                    required 
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" htmlFor="attendance">Konfirmasi Kehadiran</label>
+                  <select 
+                    id="attendance" 
+                    name="attendance" 
+                    className="form-control" 
+                    value={formData.attendance}
                     onChange={handleInputChange}
                     required
                   >
-                    <option value="1">1 Kursi (Hanya Siswa)</option>
-                    <option value="2">2 Kursi (Siswa + 1 Orang Tua / Pendamping)</option>
-                    <option value="3">3 Kursi (Siswa + 2 Orang Tua / Pendamping)</option>
+                    <option value="yes">Ya, Saya & Orang Tua Hadir</option>
+                    <option value="no">Maaf, Tidak Dapat Hadir</option>
                   </select>
-                  <small style={{ display: 'block', marginTop: '0.4rem', color: 'var(--color-text-light)', fontSize: '0.82rem', textAlign: 'left' }}>
-                    *Alokasi kursi dibatasi maksimal 3 kursi per siswa (1 kursi siswa + 2 kursi orang tua/pendamping).
-                  </small>
                 </div>
-              )}
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="message">Pesan, Kesan, atau Ucapan Terima Kasih (Opsional)</label>
-                <textarea 
-                  id="message" 
-                  name="message" 
-                  className="form-control" 
-                  rows="4" 
-                  placeholder="Tuliskan ucapan terima kasih untuk bapak/ibu guru atau kenangan manis selama bersekolah..."
-                  value={formData.message}
-                  onChange={handleInputChange}
-                ></textarea>
-              </div>
+                {formData.attendance === 'yes' && (
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="pax">Total Kursi yang Dibutuhkan</label>
+                    <select 
+                      id="pax" 
+                      name="pax" 
+                      className="form-control" 
+                      value={formData.pax}
+                      onChange={handleInputChange}
+                      required
+                    >
+                      <option value="1">1 Kursi (Hanya Siswa)</option>
+                      <option value="2">2 Kursi (Siswa + 1 Orang Tua / Pendamping)</option>
+                      <option value="3">3 Kursi (Siswa + 2 Orang Tua / Pendamping)</option>
+                    </select>
+                    <small style={{ display: 'block', marginTop: '0.4rem', color: 'var(--color-text-light)', fontSize: '0.82rem', textAlign: 'left' }}>
+                      *Alokasi kursi dibatasi maksimal 3 kursi per siswa (1 kursi siswa + 2 kursi orang tua/pendamping).
+                    </small>
+                  </div>
+                )}
 
-              <button type="submit" className="btn-primary" disabled={isSubmitting}>
-                {isSubmitting ? 'Mengirim Konfirmasi...' : 'Kirim Konfirmasi Kehadiran'}
-              </button>
-            </form>
+                <div className="form-group">
+                  <label className="form-label" htmlFor="message">Pesan, Kesan, atau Ucapan Terima Kasih (Opsional)</label>
+                  <textarea 
+                    id="message" 
+                    name="message" 
+                    className="form-control" 
+                    rows="4" 
+                    placeholder="Tuliskan ucapan terima kasih untuk bapak/ibu guru atau kenangan manis selama bersekolah..."
+                    value={formData.message}
+                    onChange={handleInputChange}
+                  ></textarea>
+                </div>
+
+                <button type="submit" className="btn-primary" disabled={isSubmitting}>
+                  {isSubmitting ? 'Mengirim Konfirmasi...' : 'Kirim Konfirmasi Kehadiran'}
+                </button>
+              </form>
+            )}
           </motion.div>
         </div>
       </section>
 
       {/* Guestbook Section / Dinding Pesan Alumni */}
-      <section className="section-padding guestbook-section">
+      <section id="pesan-alumni" className="section-padding guestbook-section">
         <div className="container text-center">
           <motion.div
              initial="hidden"
@@ -954,57 +1085,60 @@ function InvitationContent() {
                 Belum ada pesan. Jadilah yang pertama mengisi konfirmasi dan kesan pesan!
               </p>
             ) : (
-              guestMessages.map((msg, index) => (
-                <motion.div 
-                  key={msg.id || index}
-                  variants={fadeInUp}
-                  className="message-card"
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <div>
-                      <strong style={{ color: 'var(--color-primary-dark)', fontSize: '1.15rem', marginRight: '0.5rem', fontWeight: 700, wordBreak: 'break-word' }}>
-                        {msg.name}
-                      </strong>
-                      {msg.student_class && (
+              guestMessages.map((msg, index) => {
+                const parsed = parseRsvpItem(msg);
+                return (
+                  <motion.div 
+                    key={msg.id || index}
+                    variants={fadeInUp}
+                    className="message-card"
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <strong style={{ color: 'var(--color-primary-dark)', fontSize: '1.15rem', fontWeight: 700, wordBreak: 'break-word' }}>
+                          {parsed.displayName}
+                        </strong>
+                        {parsed.displayClass && parsed.displayClass !== '-' && (
+                          <span style={{
+                            fontSize: '0.78rem', 
+                            background: 'var(--color-primary-subtle)', 
+                            color: 'var(--color-primary)',
+                            padding: '0.2rem 0.65rem',
+                            borderRadius: '12px',
+                            border: '1px solid rgba(30, 58, 138, 0.18)',
+                            fontWeight: 600
+                          }}>
+                            {parsed.displayClass}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        {parsed.attendance === 'yes' && parsed.displayPax > 0 && (
+                          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 600, background: '#f8fafc', padding: '0.2rem 0.6rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                            👥 {parsed.displayPax} Kursi
+                          </span>
+                        )}
                         <span style={{
-                          fontSize: '0.78rem', 
-                          background: 'var(--color-primary-subtle)', 
-                          color: 'var(--color-primary)',
-                          padding: '0.2rem 0.65rem',
-                          borderRadius: '12px',
-                          border: '1px solid rgba(30, 58, 138, 0.18)',
+                          fontSize: '0.75rem', 
+                          padding: '0.25rem 0.75rem', 
+                          borderRadius: '20px', 
+                          backgroundColor: parsed.attendance === 'yes' ? '#ecfdf5' : '#fef2f2',
+                          color: parsed.attendance === 'yes' ? '#047857' : '#b91c1c',
+                          border: parsed.attendance === 'yes' ? '1px solid #a7f3d0' : '1px solid #fecaca',
+                          letterSpacing: '0.05em',
+                          textTransform: 'uppercase',
                           fontWeight: 600
                         }}>
-                          {msg.student_class}
+                          {parsed.attendance === 'yes' ? 'Hadir' : 'Tidak Hadir'}
                         </span>
-                      )}
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                      {msg.attendance === 'yes' && msg.pax && (
-                        <span style={{ fontSize: '0.78rem', color: 'var(--color-text-light)', fontWeight: 500 }}>
-                          👥 {msg.pax} Orang
-                        </span>
-                      )}
-                      <span style={{
-                        fontSize: '0.75rem', 
-                        padding: '0.25rem 0.75rem', 
-                        borderRadius: '20px', 
-                        backgroundColor: msg.attendance === 'yes' ? '#ecfdf5' : '#fef2f2',
-                        color: msg.attendance === 'yes' ? '#047857' : '#b91c1c',
-                        border: msg.attendance === 'yes' ? '1px solid #a7f3d0' : '1px solid #fecaca',
-                        letterSpacing: '0.05em',
-                        textTransform: 'uppercase',
-                        fontWeight: 600
-                      }}>
-                        {msg.attendance === 'yes' ? 'Hadir' : 'Tidak Hadir'}
-                      </span>
-                    </div>
-                  </div>
-                  <p style={{ color: 'var(--color-text-muted)', fontStyle: msg.message ? 'normal' : 'italic', opacity: msg.message ? 1 : 0.6, lineHeight: '1.65', fontSize: '0.98rem', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
-                    {msg.message || "Tanpa pesan tertulis."}
-                  </p>
-                </motion.div>
-              ))
+                    <p style={{ color: 'var(--color-text-muted)', fontStyle: parsed.displayMessage ? 'normal' : 'italic', opacity: parsed.displayMessage ? 1 : 0.6, lineHeight: '1.65', fontSize: '0.98rem', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                      {parsed.displayMessage || "Tanpa pesan tertulis."}
+                    </p>
+                  </motion.div>
+                );
+              })
             )}
           </motion.div>
         </div>
