@@ -574,10 +574,6 @@ function InvitationContent() {
             <Award className="event-icon" size={36} />
           </div>
 
-          <p style={{ letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: '0.85rem', color: 'var(--color-secondary)', fontWeight: 700, marginBottom: '0.5rem' }}>
-            Pesan & Amanat Resmi
-          </p>
-
           <h3 className="section-title">
             Sambutan Kepala Sekolah
           </h3>
@@ -614,7 +610,7 @@ function InvitationContent() {
             </h2>
             <div className="gold-line"></div>
             <p className="section-subtitle">
-              Saksi ribuan langkah perjuangan, kebersamaan, dan prestasi yang terukir di kampus SMK Negeri 6 Surakarta.
+              Saksi ribuan langkah perjuangan, kebersamaan, dan prestasi yang terukir diSMK Negeri 6 Surakarta.
             </p>
           </motion.div>
 
@@ -669,7 +665,7 @@ function InvitationContent() {
             </h2>
             <div className="gold-line"></div>
             <p className="section-subtitle">
-              Jadwal pelaksanaan Sidang Terbuka Wisuda & Pelepasan Siswa-Siswi Angkatan 2026/2027:
+              Jadwal pelaksanaan Sidang Terbuka Wisuda & Pelepasan Siswa-Siswi Angkatan 2024/2027:
             </p>
           </motion.div>
           
