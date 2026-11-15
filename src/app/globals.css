@@ -152,9 +152,9 @@ body.cover-locked::-webkit-scrollbar {
 
 .section-subtitle {
   color: var(--color-text-light);
-  font-size: clamp(0.95rem, 2vw, 1.1rem);
-  max-width: 680px;
-  margin: 0 auto clamp(2rem, 4vw, 3rem);
+  font-size: clamp(0.92rem, 1.8vw, 1.05rem);
+  max-width: 640px;
+  margin: 0 auto clamp(1.8rem, 3.5vw, 2.5rem);
   line-height: 1.6;
 }
 
@@ -481,9 +481,10 @@ body.cover-locked::-webkit-scrollbar {
 
 .events-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
-  gap: clamp(1.4rem, 3vw, 2.5rem);
-  margin-top: 3rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: clamp(1.4rem, 3vw, 2.2rem);
+  margin-top: 0;
+  align-items: stretch;
 }
 
 .event-icon-wrapper {

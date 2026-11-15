@@ -3,11 +3,9 @@ import React, { useState, useEffect, useRef, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '../supabaseClient';
 import { 
-  GraduationCap, 
   Calendar, 
   Clock, 
   MapPin, 
-  Award, 
   MailOpen, 
   Volume2, 
   VolumeX, 
@@ -15,12 +13,10 @@ import {
   CheckCircle2,
   XCircle,
   Armchair,
-  Users, 
   Info, 
   ChevronDown,
   ChevronUp,
   Navigation,
-  School,
   Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -573,10 +569,6 @@ function InvitationContent() {
           variants={fadeInUp}
           className="container glass-card"
         >
-          <div className="event-icon-wrapper" style={{ margin: '0 auto 1.5rem' }}>
-            <Award className="event-icon" size={36} />
-          </div>
-
           <h3 className="section-title">
             Sambutan Kepala Sekolah
           </h3>
@@ -605,15 +597,12 @@ function InvitationContent() {
             viewport={{ once: true }}
             variants={fadeInUp}
           >
-            <div className="event-icon-wrapper">
-              <School className="event-icon" size={32} />
-            </div>
             <h2 className="section-title">
               Gedung SMK Negeri 6 Surakarta
             </h2>
             <div className="gold-line"></div>
             <p className="section-subtitle">
-              Saksi ribuan langkah perjuangan, kebersamaan, dan prestasi yang terukir diSMK Negeri 6 Surakarta.
+              Saksi ribuan langkah perjuangan, kebersamaan, dan prestasi yang terukir di SMK Negeri 6 Surakarta.
             </p>
           </motion.div>
 
@@ -660,9 +649,6 @@ function InvitationContent() {
             viewport={{ once: true }}
             variants={fadeInUp}
           >
-            <div className="event-icon-wrapper">
-              <GraduationCap className="event-icon" size={32} />
-            </div>
             <h2 className="section-title">
               Rangkaian Acara Wisuda
             </h2>
@@ -682,9 +668,6 @@ function InvitationContent() {
               viewport={{ once: true }}
               variants={fadeInUp}
             >
-              <div className="event-icon-wrapper">
-                <MapPin className="event-icon" size={32} />
-              </div>
               <h3 className="event-title">Waktu & Tempat Pelaksanaan</h3>
               <div className="event-time">
                 <Calendar size={18} style={{ display: 'inline', marginRight: '8px', verticalAlign: '-3px', color: 'var(--color-secondary)' }}/>
@@ -785,9 +768,6 @@ function InvitationContent() {
              viewport={{ once: true }}
              variants={fadeInUp}
           >
-            <div className="event-icon-wrapper">
-              <Users className="event-icon" size={32} />
-            </div>
             <h2 className="section-title">
               Konfirmasi Kehadiran Siswa (RSVP)
             </h2>
