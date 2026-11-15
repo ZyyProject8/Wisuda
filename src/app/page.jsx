@@ -424,7 +424,7 @@ function InvitationContent() {
                 </p>
 
                 <p style={{ fontSize: '0.86rem', color: '#64748b', marginBottom: '1.25rem', fontWeight: 500 }}>
-                  Tahun Ajaran 2024/2027
+                  Angkatan 2024/2027
                 </p>
 
                 <div className="recipient-badge-v2">
@@ -492,7 +492,7 @@ function InvitationContent() {
             transition={{ delay: 0.4, duration: 0.8 }}
             className="hero-subtitle"
           >
-            Wisuda & Pelepasan Siswa-Siswi Angkatan Ke-24
+            Wisuda & Pelepasan Siswa-Siswi Angkatan 2024/2027
           </motion.div>
 
           <motion.h1 
@@ -679,8 +679,8 @@ function InvitationContent() {
               </div>
               <div className="gold-line" style={{ width: '40px', margin: '1.5rem auto' }}></div>
               <p className="event-location">
-                <strong style={{ color: 'var(--color-primary-dark)', fontSize: '1.1rem' }}>Grand Ballroom Graha Bhakti Husada</strong><br/>
-                Jl. Pendidikan Utama No. 12, Kota Wisata, Surakarta
+                <strong style={{ color: 'var(--color-primary-dark)', fontSize: '1.1rem' }}>Gedung SMK Negeri 6 Surakarta</strong><br/>
+                Jl. Adi Sucipto No. 38, Kelurahan Kerten, Kecamatan Laweyan, Kota Surakarta, Jawa Tengah
               </p>
               <div style={{ marginTop: '2rem' }}>
                 <a 
@@ -750,7 +750,7 @@ function InvitationContent() {
               <h4 style={{ fontSize: '1.25rem', margin: 0 }}>Tata Tertib & Ketentuan Kehadiran</h4>
             </div>
             <ul style={{ paddingLeft: '1.5rem', color: 'var(--color-text-muted)', lineHeight: '1.85', fontSize: '0.96rem' }}>
-              <li><strong>Pakaian Siswa:</strong> Mengenakan setelan Toga lengkap dengan Gordon/Medali yang telah dibagikan.</li>
+              <li><strong>Pakaian Siswa:</strong> Mengenakan seragam putih dan almamater SMK Negeri 6 Surakarta.</li>
               <li><strong>Pakaian Orang Tua / Wali:</strong> Pakaian Batik Formal / Kebaya Rapi & Sopan.</li>
               <li><strong>Alokasi Kursi:</strong> Setiap siswa mendapatkan alokasi maksimal <strong>3 kursi</strong> (1 kursi siswa + 2 kursi orang tua/pendamping).</li>
               <li>Harap hadir paling lambat 30 menit sebelum acara dimulai demi kelancaran prosesi registrasi.</li>
@@ -769,7 +769,7 @@ function InvitationContent() {
              variants={fadeInUp}
           >
             <h2 className="section-title">
-              Konfirmasi Kehadiran Siswa (RSVP)
+              Konfirmasi Kehadiran Siswa
             </h2>
             <div className="gold-line"></div>
             <p className="section-subtitle">
@@ -988,7 +988,7 @@ function InvitationContent() {
             SMK NEGERI 6 SURAKARTA
           </h3>
           <p style={{ letterSpacing: '0.15em', textTransform: 'uppercase', fontSize: '0.82rem', marginBottom: '1.5rem', color: 'var(--color-secondary-bright)', fontWeight: 600 }}>
-            Panitia Wisuda & Pelepasan Siswa-Siswi Angkatan Ke-24
+            Panitia Wisuda & Pelepasan Siswa-Siswi Angkatan 2024/2027
           </p>
           <p style={{ opacity: 0.85, fontSize: '0.9rem' }}>
             &copy; 2027 SMK Negeri 6 Surakarta. All Rights Reserved.

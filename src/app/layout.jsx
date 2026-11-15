@@ -2,7 +2,7 @@ import './globals.css'
 
 export const metadata = {
   title: 'Undangan Wisuda SMK Negeri 6 Surakarta',
-  description: 'Undangan Resmi Wisuda & Pelepasan Siswa-Siswi Angkatan Ke-24 Tahun Ajaran 2026/2027',
+  description: 'Undangan Resmi Wisuda & Pelepasan Siswa-Siswi Angkatan 2024/2027 SMK Negeri 6 Surakarta',
 }
 
 export const viewport = {
