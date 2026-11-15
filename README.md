@@ -1,4 +1,4 @@
-# 🎓 Website Undangan Digital Wisuda & Pelepasan Siswa - SMK Negeri 1
+# 🎓 Website Undangan Digital Wisuda & Pelepasan Siswa - SMK Negeri 6 Surakarta
 
 Projek Tugas / Portofolio **Rekayasa Perangkat Lunak (RPL)** berupa aplikasi web undangan digital interaktif dan responsif untuk acara Wisuda & Pelepasan Siswa Angkatan 2026. Dilengkapi sistem personalisasi tamu, background music, integrasi database Supabase (RSVP & Buku Tamu real-time), serta Panel Admin lengkap dengan Link Generator WhatsApp otomatis.
 
