@@ -588,7 +588,7 @@ function InvitationContent() {
           <div className="gold-line"></div>
 
           <p style={{ fontWeight: '700', color: 'var(--color-primary-dark)', fontSize: '1.2rem', marginTop: '1.2rem' }}>
-            Drs. Titik, M.Pd.
+            Dr. Dwi Titik Irdiyanti, S.Si., M.Pd.
           </p>
           <p style={{ color: 'var(--color-secondary)', fontSize: '0.9rem', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 600 }}>
             Kepala SMK Negeri 6 Surakarta

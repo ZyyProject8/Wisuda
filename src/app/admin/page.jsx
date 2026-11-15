@@ -181,33 +181,24 @@ export default function Admin() {
             letterSpacing: '0.15em',
             color: '#c59b27',
             fontWeight: 700,
-            marginBottom: '0.4rem',
-            padding: '0.2rem 0.75rem',
+            marginBottom: '0.6rem',
+            padding: '0.25rem 0.85rem',
             background: '#fcfaf2',
             border: '1px solid rgba(197, 155, 39, 0.25)',
             borderRadius: '20px'
           }}>
-            Portal Resmi Panitia
+            Panel Administrator
           </div>
 
           <h2 style={{
-            fontSize: '1.7rem',
+            fontSize: '1.75rem',
             color: '#0f2b5c',
             fontFamily: 'var(--font-heading)',
-            marginBottom: '0.3rem',
+            marginBottom: '1.5rem',
             fontWeight: 700
           }}>
             Wisuda SMK Negeri 6
           </h2>
-
-          <p style={{
-            color: '#64748b',
-            fontSize: '0.88rem',
-            marginBottom: '1.6rem',
-            lineHeight: 1.5
-          }}>
-            Masukkan kata sandi panitia untuk melihat dan mengelola data konfirmasi kehadiran wisudawan.
-          </p>
 
           {/* Notifikasi Jika Kata Sandi Salah */}
           {loginError && (
@@ -278,21 +269,19 @@ export default function Admin() {
               style={{
                 width: '100%',
                 padding: '0.95rem',
-                fontSize: '0.95rem',
+                fontSize: '0.98rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '0.5rem'
+                gap: '0.5rem',
+                fontWeight: 600,
+                letterSpacing: '0.05em'
               }}
             >
               <Lock size={18} />
-              Buka Dashboard Panitia
+              Login
             </button>
           </form>
-
-          <p style={{ fontSize: '0.78rem', marginTop: '1.2rem', color: '#94a3b8' }}>
-            *Kata sandi bawaan sistem: <code style={{ background: '#f1f5f9', padding: '0.15rem 0.4rem', borderRadius: '4px', color: '#0f2b5c' }}>admin</code>
-          </p>
 
           <div style={{ marginTop: '1.4rem', borderTop: '1px solid #f1f5f9', paddingTop: '1.2rem' }}>
             <a 
