@@ -909,20 +909,6 @@ function InvitationContent() {
                     onChange={handleInputChange}
                     required 
                   />
-                  {/* Pilihan Cepat Kelas */}
-                  <div className="class-quick-tags">
-                    <span style={{ fontSize: '0.74rem', color: 'var(--color-text-light)', alignSelf: 'center', marginRight: '0.2rem' }}>Pilih cepat:</span>
-                    {['XII RPL 1', 'XII RPL 2', 'XII AKL 1', 'XII AKL 2', 'XII OTKP 1', 'XII OTKP 2', 'XII BDP 1', 'XII TB 1'].map(cls => (
-                      <button
-                        key={cls}
-                        type="button"
-                        className={`class-tag-pill ${formData.student_class === cls ? 'active' : ''}`}
-                        onClick={() => setFormData(prev => ({ ...prev, student_class: cls }))}
-                      >
-                        {cls}
-                      </button>
-                    ))}
-                  </div>
                 </div>
 
                 {/* Pilihan Status Kehadiran Interaktif */}
