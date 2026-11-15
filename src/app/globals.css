@@ -13,15 +13,15 @@
   --color-primary-subtle: #eff6ff;
   --color-primary-glow: rgba(30, 58, 138, 0.15);
 
-  /* Secondary Vibrant Yellow & Warm Gold (from SMK 6 Identity) */
-  --color-secondary: #d97706;
-  --color-secondary-bright: #f59e0b;
-  --color-secondary-light: #fbbf24;
-  --color-secondary-subtle: #fefce8;
-  --color-secondary-glow: rgba(245, 158, 11, 0.2);
+  /* Secondary Refined Champagne & Warm Metallic Gold */
+  --color-secondary: #c59b27;
+  --color-secondary-bright: #d4af37;
+  --color-secondary-light: #e6ca65;
+  --color-secondary-subtle: #fcfaf2;
+  --color-secondary-glow: rgba(197, 155, 39, 0.18);
 
   /* Deep Accent for Readability */
-  --color-accent: #b45309;
+  --color-accent: #927218;
   
   /* Crisp Text Colors for Light Background */
   --color-text: #0f172a;
@@ -89,12 +89,12 @@ h4 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--color-primary-light), var(--color-secondary-bright));
+  background: #cbd5e1;
   border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, var(--color-primary), var(--color-secondary));
+  background: #94a3b8;
 }
 
 /* Sembunyikan scrollbar sepenuhnya dan kunci scroll saat cover awal aktif */
@@ -336,9 +336,9 @@ body.cover-locked::-webkit-scrollbar {
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary-bright), var(--color-primary));
-  opacity: 0.9;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #c59b27 30%, #e6ca65 50%, #c59b27 70%, transparent);
+  opacity: 0.95;
 }
 
 .glass-card:hover {
@@ -347,13 +347,13 @@ body.cover-locked::-webkit-scrollbar {
   border-color: var(--color-border-gold);
 }
 
-/* Decorative Gold & Blue Lines */
+/* Decorative Gold Lines */
 .gold-line {
-  height: 3px;
-  width: 70px;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary-bright));
-  margin: 1.5rem auto;
-  border-radius: 3px;
+  height: 2px;
+  width: 60px;
+  background: linear-gradient(90deg, transparent, #c59b27, transparent);
+  margin: 1.4rem auto;
+  border-radius: 2px;
 }
 
 /* Sambutan Section */
@@ -844,8 +844,8 @@ select.form-control option {
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--color-secondary-bright), var(--color-primary-light), var(--color-secondary-bright));
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #c59b27 30%, #e6ca65 50%, #c59b27 70%, transparent);
 }
 
 .footer-school-logo {
@@ -1009,7 +1009,7 @@ select.form-control option {
   box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(30, 58, 138, 0.04);
 }
 
-/* Floating Scroll to Top Button */
+/* Floating Scroll to Top Button (Executive White & Royal Navy) */
 .floating-scroll-top-btn {
   position: fixed;
   bottom: clamp(74px, 12vw, 88px);
@@ -1019,9 +1019,9 @@ select.form-control option {
   height: clamp(45px, 8vw, 52px);
   border-radius: 50%;
   background: #ffffff;
-  color: var(--color-primary);
-  border: 2px solid var(--color-secondary-bright);
-  box-shadow: 0 6px 20px rgba(30, 58, 138, 0.22), 0 0 12px rgba(245, 158, 11, 0.2);
+  color: var(--color-primary-dark);
+  border: 1.5px solid rgba(15, 43, 92, 0.18);
+  box-shadow: 0 8px 22px rgba(15, 43, 92, 0.14);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1031,17 +1031,17 @@ select.form-control option {
 
 .floating-scroll-top-btn:hover {
   transform: translateY(-3px) scale(1.08);
-  background: var(--color-primary);
+  background: var(--color-primary-dark);
   color: #ffffff;
-  border-color: #ffffff;
-  box-shadow: 0 10px 25px rgba(30, 58, 138, 0.35);
+  border-color: var(--color-primary-dark);
+  box-shadow: 0 12px 28px rgba(15, 43, 92, 0.3);
 }
 
 .floating-scroll-top-btn:active {
   transform: translateY(0) scale(0.96);
 }
 
-/* Floating Music Player */
+/* Floating Music Player (Professional Dual-State Design) */
 .floating-music-btn {
   position: fixed;
   bottom: clamp(16px, 3.5vw, 25px);
@@ -1050,23 +1050,245 @@ select.form-control option {
   width: clamp(45px, 8vw, 52px);
   height: clamp(45px, 8vw, 52px);
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary-bright) 100%);
-  color: #ffffff;
-  border: 2px solid #ffffff;
-  box-shadow: 0 8px 24px rgba(30, 58, 138, 0.35), 0 0 15px rgba(245, 158, 11, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.floating-music-btn:hover {
-  transform: scale(1.12);
+/* Keadaan Musik Aktif (Playing): Elegan Putih + Lis Emas Mewah + Soft Glow */
+.floating-music-btn.music-playing {
+  background: #ffffff;
+  color: var(--color-primary-dark);
+  border: 2px solid #c59b27;
+  box-shadow: 
+    0 8px 24px rgba(15, 43, 92, 0.18),
+    0 0 0 3px rgba(197, 155, 39, 0.18);
+}
+
+.floating-music-btn.music-playing:hover {
+  transform: scale(1.1);
+  background: var(--color-primary-dark);
+  color: #c59b27;
+  border-color: #e6ca65;
+  box-shadow: 0 12px 28px rgba(15, 43, 92, 0.3);
+}
+
+/* Keadaan Musik Mati/Jeda (Paused): Tenang & Bersih (Slate & Neutral) */
+.floating-music-btn.music-paused {
+  background: #f8fafc;
+  color: #94a3b8;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+}
+
+.floating-music-btn.music-paused:hover {
+  transform: scale(1.08);
+  background: #ffffff;
+  color: var(--color-primary-dark);
+  border-color: var(--color-primary);
+  box-shadow: 0 8px 20px rgba(15, 43, 92, 0.16);
 }
 
 .music-spinning {
-  animation: spin 5s linear infinite;
+  animation: spinSmooth 6s linear infinite;
+}
+
+@keyframes spinSmooth {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Modern RSVP Interactive Controls */
+.attendance-toggle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+  margin-top: 0.4rem;
+}
+
+.attendance-option-btn {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1rem 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.25s ease;
+  font-family: var(--font-body);
+}
+
+.attendance-option-btn:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.attendance-option-btn.selected-yes {
+  background: #f0fdf4;
+  border-color: #10b981;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.15);
+}
+
+.attendance-option-btn.selected-yes .attendance-title {
+  color: #065f46;
+  font-weight: 700;
+}
+
+.attendance-option-btn.selected-yes .attendance-icon {
+  color: #10b981;
+}
+
+.attendance-option-btn.selected-no {
+  background: #fef2f2;
+  border-color: #ef4444;
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.12);
+}
+
+.attendance-option-btn.selected-no .attendance-title {
+  color: #991b1b;
+  font-weight: 700;
+}
+
+.attendance-option-btn.selected-no .attendance-icon {
+  color: #ef4444;
+}
+
+.attendance-title {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+
+.attendance-desc {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--color-text-light);
+  margin-top: 0.15rem;
+}
+
+/* Pax / Seat Selector Grid */
+.pax-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  margin-top: 0.4rem;
+}
+
+.pax-card-btn {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.9rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: var(--font-body);
+  text-align: center;
+}
+
+.pax-card-btn:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.05);
+}
+
+.pax-card-btn.active {
+  background: var(--color-primary-subtle);
+  border-color: var(--color-primary);
+  box-shadow: 0 6px 18px rgba(30, 58, 138, 0.15);
+}
+
+.pax-card-btn.active .pax-num {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
+.pax-card-btn.active .pax-icon {
+  color: var(--color-primary);
+}
+
+.pax-icon {
+  color: #94a3b8;
+  margin-bottom: 0.35rem;
+  transition: color 0.25s ease;
+}
+
+.pax-num {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.pax-desc {
+  font-size: 0.74rem;
+  color: var(--color-text-light);
+  margin-top: 0.25rem;
+}
+
+/* Quick Class Suggestion Tags */
+.class-quick-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.55rem;
+}
+
+.class-tag-pill {
+  font-size: 0.76rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 20px;
+  background: #f1f5f9;
+  color: var(--color-text-muted);
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
+}
+
+.class-tag-pill:hover {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+  border-color: rgba(30, 58, 138, 0.25);
+  transform: translateY(-1px);
+}
+
+.class-tag-pill.active {
+  background: var(--color-primary-dark);
+  color: #ffffff;
+  border-color: var(--color-primary-dark);
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .attendance-toggle-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+  .pax-selector-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .pax-card-btn {
+    flex-direction: row;
+    gap: 0.8rem;
+    padding: 0.75rem 1rem;
+    justify-content: flex-start;
+    text-align: left;
+  }
+  .pax-icon {
+    margin-bottom: 0;
+  }
 }
 
 @keyframes spin {

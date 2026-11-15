@@ -1,11 +1,27 @@
 "use client";
 import React, { useState } from 'react';
 import { supabase } from '../../supabaseClient';
-import { Users, CheckCircle, XCircle, Lock, Copy, Check, Search, Trash2, Link as LinkIcon, Armchair } from 'lucide-react';
+import { 
+  Users, 
+  CheckCircle, 
+  XCircle, 
+  Lock, 
+  Copy, 
+  Check, 
+  Search, 
+  Trash2, 
+  Link as LinkIcon, 
+  Armchair,
+  Eye,
+  EyeOff,
+  ArrowLeft
+} from 'lucide-react';
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState(false);
   const [rsvps, setRsvps] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -22,10 +38,11 @@ export default function Admin() {
   const handleLogin = (e) => {
     e.preventDefault();
     if (password === ADMIN_PASSWORD) {
+      setLoginError(false);
       setIsAuthenticated(true);
       fetchData();
     } else {
-      alert('Password salah! (Default: admin)');
+      setLoginError(true);
     }
   };
 
@@ -90,24 +107,210 @@ export default function Admin() {
 
   if (!isAuthenticated) {
     return (
-      <div style={{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f0f1a'}}>
-        <div className="glass-card" style={{maxWidth: '400px', width: '100%', textAlign: 'center', background: '#ffffff', border: '1px solid #eaeaea', padding: '2.5rem', borderRadius: '16px'}}>
-          <Lock size={44} style={{color: '#1a1a2e', margin: '0 auto 1rem'}} />
-          <h2 style={{marginBottom: '0.5rem', color: '#1a1a2e', fontSize: '1.8rem'}}>Portal Panitia Wisuda</h2>
-          <p style={{color: '#666', fontSize: '0.9rem', marginBottom: '1.5rem'}}>Masukkan kata sandi panitia untuk melihat data</p>
-          <form onSubmit={handleLogin}>
-            <input 
-              type="password" 
-              className="form-control" 
-              placeholder="Masukkan Kata Sandi..." 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{marginBottom: '1rem', color: '#000', borderColor: '#ccc', backgroundColor: '#fafafa', padding: '0.8rem 1rem'}}
-              required
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        padding: '1.5rem',
+        backgroundColor: '#ffffff'
+      }}>
+        {/* Latar Belakang Gedung Sekolah */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: `url('/images/smk6-depan-web.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center 25%',
+          opacity: 0.35,
+          filter: 'saturate(1.08) contrast(1.02)'
+        }} />
+        
+        {/* Lapisan Gradien Mewah */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: `
+            radial-gradient(ellipse at 50% 15%, rgba(197, 155, 39, 0.15) 0%, transparent 55%),
+            radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.85) 0%, transparent 75%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(248, 250, 252, 0.88) 50%, #ffffff 100%)
+          `
+        }} />
+
+        {/* Kartu Login Eksekutif */}
+        <div style={{
+          position: 'relative',
+          zIndex: 2,
+          maxWidth: '420px',
+          width: '100%',
+          background: 'rgba(255, 255, 255, 0.96)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1.5px solid rgba(197, 155, 39, 0.35)',
+          borderRadius: '24px',
+          padding: '2.5rem 2rem',
+          boxShadow: '0 20px 50px rgba(15, 43, 92, 0.14), 0 0 25px rgba(197, 155, 39, 0.12)',
+          textAlign: 'center'
+        }}>
+          {/* Logo SMK 6 */}
+          <div style={{
+            width: '76px',
+            height: '76px',
+            borderRadius: '50%',
+            background: '#ffffff',
+            border: '2px solid rgba(197, 155, 39, 0.4)',
+            boxShadow: '0 8px 20px rgba(15, 43, 92, 0.12)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1.2rem'
+          }}>
+            <img 
+              src="/images/smk6.png" 
+              alt="Logo Resmi SMK Negeri 6 Surakarta" 
+              style={{ width: '48px', height: '48px', objectFit: 'contain' }}
             />
-            <button type="submit" className="btn-primary" style={{width: '100%', padding: '0.9rem'}}>Masuk</button>
+          </div>
+
+          <div style={{
+            display: 'inline-block',
+            fontSize: '0.74rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.15em',
+            color: '#c59b27',
+            fontWeight: 700,
+            marginBottom: '0.4rem',
+            padding: '0.2rem 0.75rem',
+            background: '#fcfaf2',
+            border: '1px solid rgba(197, 155, 39, 0.25)',
+            borderRadius: '20px'
+          }}>
+            Portal Resmi Panitia
+          </div>
+
+          <h2 style={{
+            fontSize: '1.7rem',
+            color: '#0f2b5c',
+            fontFamily: 'var(--font-heading)',
+            marginBottom: '0.3rem',
+            fontWeight: 700
+          }}>
+            Wisuda SMK Negeri 6
+          </h2>
+
+          <p style={{
+            color: '#64748b',
+            fontSize: '0.88rem',
+            marginBottom: '1.6rem',
+            lineHeight: 1.5
+          }}>
+            Masukkan kata sandi panitia untuk melihat dan mengelola data konfirmasi kehadiran wisudawan.
+          </p>
+
+          {/* Notifikasi Jika Kata Sandi Salah */}
+          {loginError && (
+            <div style={{
+              background: '#fef2f2',
+              border: '1px solid #fecaca',
+              color: '#b91c1c',
+              padding: '0.75rem 1rem',
+              borderRadius: '10px',
+              fontSize: '0.86rem',
+              marginBottom: '1.2rem',
+              textAlign: 'left',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <XCircle size={18} />
+              <span>Kata sandi tidak sesuai. Silakan coba lagi.</span>
+            </div>
+          )}
+
+          <form onSubmit={handleLogin}>
+            <div style={{ position: 'relative', marginBottom: '1.2rem' }}>
+              <input 
+                type={showPassword ? 'text' : 'password'}
+                className="form-control" 
+                placeholder="Masukkan Kata Sandi Panitia..." 
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (loginError) setLoginError(false);
+                }}
+                style={{
+                  padding: '0.95rem 2.8rem 0.95rem 1rem',
+                  fontSize: '0.95rem',
+                  borderRadius: '12px',
+                  border: loginError ? '1.5px solid #ef4444' : '1.5px solid #cbd5e1',
+                  background: '#ffffff',
+                  boxShadow: 'none'
+                }}
+                required
+                autoFocus
+              />
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  padding: '4px'
+                }}
+                title={showPassword ? "Sembunyikan sandi" : "Tampilkan sandi"}
+                aria-label="Toggle password visibility"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+
+            <button 
+              type="submit" 
+              className="btn-primary" 
+              style={{
+                width: '100%',
+                padding: '0.95rem',
+                fontSize: '0.95rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <Lock size={18} />
+              Buka Dashboard Panitia
+            </button>
           </form>
-          <p style={{fontSize: '0.8rem', marginTop: '1.2rem', color: '#888'}}>*Kata sandi bawaan: <code>admin</code></p>
+
+          <p style={{ fontSize: '0.78rem', marginTop: '1.2rem', color: '#94a3b8' }}>
+            *Kata sandi bawaan sistem: <code style={{ background: '#f1f5f9', padding: '0.15rem 0.4rem', borderRadius: '4px', color: '#0f2b5c' }}>admin</code>
+          </p>
+
+          <div style={{ marginTop: '1.4rem', borderTop: '1px solid #f1f5f9', paddingTop: '1.2rem' }}>
+            <a 
+              href="/" 
+              style={{
+                color: '#0f2b5c',
+                textDecoration: 'none',
+                fontSize: '0.86rem',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem'
+              }}
+            >
+              <ArrowLeft size={16} />
+              Kembali ke Halaman Undangan
+            </a>
+          </div>
         </div>
       </div>
     );

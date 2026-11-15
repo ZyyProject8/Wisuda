@@ -12,6 +12,9 @@ import {
   Volume2, 
   VolumeX, 
   CheckCircle, 
+  CheckCircle2,
+  XCircle,
+  Armchair,
   Users, 
   Info, 
   ChevronDown,
@@ -365,7 +368,7 @@ function InvitationContent() {
           <motion.button 
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className={`floating-music-btn ${isPlaying ? 'music-spinning' : ''}`}
+            className={`floating-music-btn ${isPlaying ? 'music-playing music-spinning' : 'music-paused'}`}
             onClick={toggleAudio}
             title={isPlaying ? "Jeda Musik" : "Putar Musik"}
             aria-label="Musik Latar"
@@ -906,58 +909,94 @@ function InvitationContent() {
                     onChange={handleInputChange}
                     required 
                   />
+                  {/* Pilihan Cepat Kelas */}
+                  <div className="class-quick-tags">
+                    <span style={{ fontSize: '0.74rem', color: 'var(--color-text-light)', alignSelf: 'center', marginRight: '0.2rem' }}>Pilih cepat:</span>
+                    {['XII RPL 1', 'XII RPL 2', 'XII AKL 1', 'XII AKL 2', 'XII OTKP 1', 'XII OTKP 2', 'XII BDP 1', 'XII TB 1'].map(cls => (
+                      <button
+                        key={cls}
+                        type="button"
+                        className={`class-tag-pill ${formData.student_class === cls ? 'active' : ''}`}
+                        onClick={() => setFormData(prev => ({ ...prev, student_class: cls }))}
+                      >
+                        {cls}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
+                {/* Pilihan Status Kehadiran Interaktif */}
                 <div className="form-group">
-                  <label className="form-label" htmlFor="attendance">Konfirmasi Kehadiran</label>
-                  <select 
-                    id="attendance" 
-                    name="attendance" 
-                    className="form-control" 
-                    value={formData.attendance}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="yes">Ya, Saya & Orang Tua Hadir</option>
-                    <option value="no">Maaf, Tidak Dapat Hadir</option>
-                  </select>
+                  <label className="form-label">Konfirmasi Kehadiran</label>
+                  <div className="attendance-toggle-grid">
+                    <button
+                      type="button"
+                      className={`attendance-option-btn ${formData.attendance === 'yes' ? 'selected-yes' : ''}`}
+                      onClick={() => setFormData(prev => ({ ...prev, attendance: 'yes', pax: prev.pax === '0' ? '3' : prev.pax }))}
+                    >
+                      <CheckCircle2 size={24} className="attendance-icon" />
+                      <div>
+                        <span className="attendance-title">Ya, Saya Hadir</span>
+                        <span className="attendance-desc">Akan hadir memenuhi undangan</span>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`attendance-option-btn ${formData.attendance === 'no' ? 'selected-no' : ''}`}
+                      onClick={() => setFormData(prev => ({ ...prev, attendance: 'no' }))}
+                    >
+                      <XCircle size={24} className="attendance-icon" />
+                      <div>
+                        <span className="attendance-title">Tidak Dapat Hadir</span>
+                        <span className="attendance-desc">Mohon maaf berhalangan</span>
+                      </div>
+                    </button>
+                  </div>
                 </div>
 
+                {/* Pemilih Kursi Interaktif (Hanya tampil jika hadir) */}
                 {formData.attendance === 'yes' && (
                   <div className="form-group">
-                    <label className="form-label" htmlFor="pax">Total Kursi yang Dibutuhkan</label>
-                    <select 
-                      id="pax" 
-                      name="pax" 
-                      className="form-control" 
-                      value={formData.pax}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      <option value="1">1 Kursi (Hanya Siswa)</option>
-                      <option value="2">2 Kursi (Siswa + 1 Orang Tua / Pendamping)</option>
-                      <option value="3">3 Kursi (Siswa + 2 Orang Tua / Pendamping)</option>
-                    </select>
-                    <small style={{ display: 'block', marginTop: '0.4rem', color: 'var(--color-text-light)', fontSize: '0.82rem', textAlign: 'left' }}>
-                      *Alokasi kursi dibatasi maksimal 3 kursi per siswa (1 kursi siswa + 2 kursi orang tua/pendamping).
+                    <label className="form-label">Alokasi Kursi yang Dibutuhkan</label>
+                    <div className="pax-selector-grid">
+                      {[
+                        { count: '1', title: '1 Kursi', desc: 'Hanya Siswa' },
+                        { count: '2', title: '2 Kursi', desc: 'Siswa + 1 Orang Tua' },
+                        { count: '3', title: '3 Kursi', desc: 'Siswa + 2 Orang Tua' },
+                      ].map(item => (
+                        <button
+                          key={item.count}
+                          type="button"
+                          className={`pax-card-btn ${formData.pax === item.count ? 'active' : ''}`}
+                          onClick={() => setFormData(prev => ({ ...prev, pax: item.count }))}
+                        >
+                          <Armchair size={22} className="pax-icon" />
+                          <span className="pax-num">{item.title}</span>
+                          <span className="pax-desc">{item.desc}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <small style={{ display: 'block', marginTop: '0.45rem', color: 'var(--color-text-light)', fontSize: '0.8rem', textAlign: 'left' }}>
+                      *Kapasitas maksimal 3 kursi per wisudawan (1 wisudawan + 2 orang tua / wali pendamping).
                     </small>
                   </div>
                 )}
 
                 <div className="form-group">
-                  <label className="form-label" htmlFor="message">Pesan, Kesan, atau Ucapan Terima Kasih (Opsional)</label>
+                  <label className="form-label" htmlFor="message">Pesan / Kesan untuk Sekolah (Opsional)</label>
                   <textarea 
                     id="message" 
                     name="message" 
                     className="form-control" 
-                    rows="4" 
+                    rows="3" 
                     placeholder="Tuliskan ucapan terima kasih untuk bapak/ibu guru atau kenangan manis selama bersekolah..."
                     value={formData.message}
                     onChange={handleInputChange}
                   ></textarea>
                 </div>
 
-                <button type="submit" className="btn-primary" disabled={isSubmitting}>
+                <button type="submit" className="btn-primary" disabled={isSubmitting} style={{ marginTop: '0.4rem' }}>
                   {isSubmitting ? 'Mengirim Konfirmasi...' : 'Kirim Konfirmasi Kehadiran'}
                 </button>
               </form>
