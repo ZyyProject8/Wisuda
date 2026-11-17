@@ -16,7 +16,7 @@ Projek Tugas / Portofolio **Rekayasa Perangkat Lunak (RPL)** berupa aplikasi web
 
 ### 2. Panel Admin & Pengelola (`/admin`)
 - **Proteksi Akses (Autentikasi)**: Akses dilindungi kata sandi khusus panitia / admin.
-- **Statistik & Ringkasan Kehadiran**: Kartu metrik total konfirmasi, jumlah hadir, ragu-ragu, tidak hadir, serta estimasi total porsi/kursi (pax) yang terisi.
+- **Statistik & Ringkasan Kehadiran**: Kartu metrik total konfirmasi, jumlah hadir, tidak hadir, serta estimasi total porsi/kursi (pax) yang terisi.
 - **Tabel Data RSVP & Pencarian**: Filter pencarian real-time berdasarkan nama tamu atau kelas, serta aksi hapus data.
 - **Generator Tautan Undangan & Pesan WhatsApp**: Otomatis menghasilkan URL khusus (`?to=Nama&kelas=Kelas`) dan template pesan undangan resmi WhatsApp yang siap dibagikan hanya dengan satu klik *Salin*.
 
