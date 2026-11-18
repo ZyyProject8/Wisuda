@@ -1,50 +1,118 @@
-# 🎓 Website Undangan Digital Wisuda & Pelepasan Siswa - SMK Negeri 6 Surakarta
-
-Projek Tugas / Portofolio **Rekayasa Perangkat Lunak (RPL)** berupa aplikasi web undangan digital interaktif dan responsif untuk acara Wisuda & Pelepasan Siswa Angkatan 2026. Dilengkapi sistem personalisasi tamu, background music, integrasi database Supabase (RSVP & Buku Tamu real-time), serta Panel Admin lengkap dengan Link Generator WhatsApp otomatis.
-
----
-
-## 🌟 Fitur Utama
-
-### 1. Halaman Undangan Tamu (`/`)
-- **Gate Cover Interaktif**: Halaman pembuka elegan dengan nama tamu yang dipersonalisasi. Tombol "Buka Undangan" memicu animasi transisi dan pemutaran musik instrumen otomatis.
-- **Floating Music Player**: Tombol melayang di pojok kanan bawah untuk memutar atau menjeda instrumen audio dengan animasi putaran piringan musik.
-- **Hitung Mundur Acara (Countdown Timer)**: Penghitungan mundur real-time menuju tanggal dan jam prosesi wisuda.
-- **Informasi Acara Lengkap**: Tanggal & waktu, lokasi gedung, tautan langsung ke Google Maps, dress code resmi, dan susunan rundown acara.
-- **Formulir Konfirmasi Kehadiran (RSVP)**: Formulir interaktif untuk konfirmasi kehadiran, jumlah tamu pengiring (pax), dan kolom ucapan/doa.
-- **Buku Tamu / Live Wishes Feed**: Menampilkan pesan, doa, dan status kehadiran dari tamu undangan secara dinamis langsung dari database Supabase.
-
-### 2. Panel Admin & Pengelola (`/admin`)
-- **Proteksi Akses (Autentikasi)**: Akses dilindungi kata sandi khusus panitia / admin.
-- **Statistik & Ringkasan Kehadiran**: Kartu metrik total konfirmasi, jumlah hadir, tidak hadir, serta estimasi total porsi/kursi (pax) yang terisi.
-- **Tabel Data RSVP & Pencarian**: Filter pencarian real-time berdasarkan nama tamu atau kelas, serta aksi hapus data.
-- **Generator Tautan Undangan & Pesan WhatsApp**: Otomatis menghasilkan URL khusus (`?to=Nama&kelas=Kelas`) dan template pesan undangan resmi WhatsApp yang siap dibagikan hanya dengan satu klik *Salin*.
+# 🎓 Sistem Informasi & Undangan Digital Wisuda — SMK Negeri 6 Surakarta
+> **Projek Ujian Akhir Keahlian Rekayasa Perangkat Lunak (RPL)**  
+> Acara Sidang Terbuka Wisuda & Pelepasan Siswa-Siswi **Angkatan 2024/2027**  
+> **SMK Negeri 6 Surakarta**
 
 ---
 
-## 🛠️ Teknologi yang Digunakan (Tech Stack)
+## 📌 1. Latar Belakang & Ringkasan Projek
 
-| Komponen | Teknologi | Keterangan |
+Projek ini merupakan aplikasi web modern yang dibangun untuk mendigitalkan proses publikasi undangan dan manajemen kehadiran (RSVP) pada acara Sidang Terbuka Wisuda & Pelepasan Siswa SMK Negeri 6 Surakarta Angkatan 2024/2027.
+
+Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan **Supabase (PostgreSQL Cloud)**, aplikasi ini menggantikan undangan cetak konvensional menjadi solusi *paperless* yang interaktif, elegan, efisien, serta memudahkan panitia dalam mendata kehadiran wisudawan dan wali murid secara *real-time*.
+
+---
+
+## ✨ 2. Fitur-Fitur Utama
+
+### A. Halaman Undangan Siswa & Tamu (`/`)
+1. **Interactive Opening Gate (Cover Gate Angkatan)**
+   - Sambutan resmi yang elegan ditujukan kepada seluruh siswa-siswi dan orang tua/wali murid Angkatan 2024/2027 SMK Negeri 6 Surakarta.
+   - Tombol *"Buka Undangan"* membuka animasi tirai transisi yang halus dan responsif.
+2. **Countdown Timer Interaktif**
+   - Penghitungan waktu mundur presisi (*Hari, Jam, Menit, Detik*) menuju waktu prosesi wisuda (Sabtu, 20 Juni 2027, 07:30 WIB).
+3. **Detail Acara & Informasi Lokasi**
+   - Lokasi resmi: **Gedung SMK Negeri 6 Surakarta**, Jl. Adi Sucipto No. 38, Kelurahan Kerten, Kecamatan Laweyan, Kota Surakarta, Jawa Tengah.
+   - Dilengkapi tautan navigasi langsung ke Google Maps.
+4. **Rundown Acara & Tata Tertib Resmi**
+   - Susunan jadwal bertahap dari registrasi, sidang terbuka, prosesi pengalungan medali, hingga ramah tamah.
+   - Ketentuan resmi berpakaian: seragam putih dan almamater SMK Negeri 6 Surakarta bagi wisudawan, batik/kebaya bagi orang tua, serta alokasi maksimal 3 kursi.
+5. **Sistem Verifikasi 16 Calon Wisudawan Resmi & Anti-Duplikasi**
+   - **Pemilih Nama Langsung**: Siswa memilih namanya langsung dari daftar 16 calon wisudawan resmi yang telah disiapkan panitia, atau menggunakan kotak pencarian cepat nama.
+   - **Blokir Nama Tidak Terdaftar**: Pengguna di luar daftar master tidak dapat mengirim data konfirmasi kehadiran.
+   - **Pencegahan Duplikasi (1 Siswa = 1 Kali Konfirmasi)**: Jika nama yang dipilih sudah pernah mengirim konfirmasi, sistem langsung mengunci formulir, menampilkan ringkasan data yang telah masuk, dan menolak pengisian ulang untuk mencegah duplikasi alokasi kursi.
+6. **Unduh Bukti Konfirmasi Kehadiran (PDF / E-Tiket Resmi)** 📥
+   - Setelah konfirmasi terkirim, siswa dapat langsung mengunduh **E-Tiket / Bukti Konfirmasi Kehadiran berformat PDF**.
+   - Dilengkapi kop resmi sekolah, nomor tiket unik (`SMK6-WSD-...`), detail identitas siswa, alokasi kursi, tata tertib, dan tanda tangan panitia.
+   - Siswa yang sudah pernah mengisi dapat mengunduh ulang bukti PDF kapan saja cukup dengan memilih namanya di formulir.
+7. **Buku Tamu / Live Feed Ucapan**
+   - Pesan, doa, dan status kehadiran ditampilkan secara transparan dan dinamis langsung dari database.
+
+---
+
+### B. Dashboard Panel Admin Panitia (`/admin`)
+1. **Sistem Autentikasi Keamanan**
+   - Akses panel dilindungi oleh sistem otentikasi kata sandi terintegrasi.
+   - **Kata sandi masuk admin:** `wisuda24`.
+2. **6 Kartu Analitik Statistik Real-time**
+   - Total Calon Wisudawan Terdaftar (Master Data).
+   - Jumlah Siswa Sudah Konfirmasi.
+   - Jumlah Siswa Pasti Hadir.
+   - Estimasi Total Kursi & Konsumsi (*Pax*).
+   - Jumlah Berhalangan Hadir.
+   - Jumlah Belum Konfirmasi.
+3. **Tab 1: Data Respon Kehadiran (RSVP)**
+   - Rekap seluruh formulir konfirmasi yang telah masuk.
+   - Fitur pencarian instan (*live search filter*) berdasarkan nama atau pesan.
+   - Aksi hapus data konfirmasi dengan konfirmasi keamanan.
+4. **Tab 2: Master Data Calon Wisudawan**
+   - Tabel 16 calon wisudawan resmi beserta status langsung: *Sudah Konfirmasi (Hadir/Tidak)* atau *Belum Mengisi*.
+   - **Fitur Tambah Siswa Baru**: Form untuk mendaftarkan siswa baru ke daftar wisuda.
+   - **Fitur Reset Konfirmasi**: Mengizinkan siswa tertentu mengisi ulang jika sebelumnya terjadi kesalahan pengisian data.
+   - **Fitur Hapus Siswa**: Menghapus siswa dari daftar master.
+5. **Broadcast WhatsApp Angkatan 2024/2027**
+   - Menyediakan tombol **Salin Link Undangan** dan **Salin Pesan Broadcast WhatsApp** resmi yang siap dibagikan ke grup kelas atau wali murid dalam satu kali klik.
+
+---
+
+## 👥 3. Daftar 16 Calon Wisudawan Resmi Terdaftar
+
+| No. | Nama Calon Wisudawan | Kelas / Jurusan | NIS |
+| :---: | :--- | :---: | :---: |
+| 1 | Muhammad Ba'sin Khoirur Roziqin Raharjo | XII RPL | 240101 |
+| 2 | Lubaid Arfa Casilas | XII RPL | 240102 |
+| 3 | Donald Terrifortino | XII RPL | 240103 |
+| 4 | Mohammad Hilmi Azzam | XII RPL | 240104 |
+| 5 | Abryan Yoga Pratama | XII RPL | 240105 |
+| 6 | Byatara Ade Wisnu Brata | XII RPL | 240106 |
+| 7 | Muhammad Zidane | XII RPL | 240107 |
+| 8 | Alvaro Danendra Kurniawanb | XII RPL | 240108 |
+| 9 | Adrian Valentino | XII RPL | 240109 |
+| 10 | Valentino Santoso | XII RPL | 240110 |
+| 11 | Stefano Budi | XII RPL | 240111 |
+| 12 | Aziz Ahmad Juniar | XII RPL | 240112 |
+| 13 | Junior Alfrefo Berned | XII RPL | 240113 |
+| 14 | Damay Mada Setyawan | XII RPL | 240114 |
+| 15 | Desiderius Aditya | XII RPL | 240115 |
+| 16 | Kritiano Agustav | XII RPL | 240116 |
+
+---
+
+## 🛠️ 4. Teknologi yang Digunakan (Tech Stack)
+
+| Lapisan / Komponen | Teknologi | Keterangan |
 | :--- | :--- | :--- |
-| **Framework** | [Next.js](https://nextjs.org/) (v16 Turbopack) | Server Components & App Router |
-| **Library UI** | [React](https://react.dev/) (v19) | Komponen UI reaktif dan state management |
-| **Database & Backend** | [Supabase](https://supabase.com/) | Real-time PostgreSQL BaaS untuk penyimpanan data RSVP |
-| **Animasi** | [Framer Motion](https://www.framer.com/motion/) | Transisi halus, cover gate exit, fade-in on scroll |
-| **Ikon** | [Lucide React](https://lucide.dev/) | Icon pack modern dan konsisten |
-| **Styling** | Vanilla CSS Modern (`globals.css`) | Desain kustom berkelas (palet dark gold luxury & glassmorphism) |
+| **Framework Utama** | [Next.js](https://nextjs.org/) 16.3 (Turbopack) | Server & Client Components dengan App Router modern |
+| **Library Antarmuka** | [React](https://react.dev/) 19 | Komponen antarmuka modular, hooks reaktif & state management |
+| **Database Cloud** | [Supabase](https://supabase.com/) | Real-time Cloud PostgreSQL Database & REST API |
+| **Animasi & Transisi** | [Framer Motion](https://www.framer.com/motion/) | Transisi cover gate, animasi fade-in, dan fluid layout |
+| **Ikonografi** | [Lucide React](https://lucide.dev/) | Kumpulan ikon vektor modern dan konsisten |
+| **Desain & Styling** | Modern CSS (`globals.css`) | Glassmorphism, palet Royal Blue & Warm Gold SMK 6 |
 
 ---
 
-## 🚀 Panduan Menjalankan Proyek Secara Lokal
+## 🚀 5. Panduan Menjalankan Proyek Secara Lokal
 
-### Prasyarat
-- [Node.js](https://nodejs.org/) (versi 18.x atau lebih baru)
-- npm atau pnpm
+### Prasyarat Sistem
+- **Node.js** versi `18.x` atau lebih baru
+- Manajer paket: **npm** atau **pnpm**
+- Koneksi internet (untuk sinkronisasi database Supabase)
 
-### Langkah Instalasi
-1. **Clone atau buka folder proyek:**
+### Langkah-Langkah:
+
+1. **Buka folder proyek di terminal:**
    ```bash
-   cd UndanganDigital
+   cd "C:\Users\WINDOWS 11\Projek RPL\UndanganDigital"
    ```
 
 2. **Instal seluruh dependensi:**
@@ -52,17 +120,13 @@ Projek Tugas / Portofolio **Rekayasa Perangkat Lunak (RPL)** berupa aplikasi web
    npm install
    ```
 
-3. **Jalankan server pengembangan (Development):**
+3. **Jalankan server pengembangan (*Development Mode*):**
    ```bash
    npm run dev
    ```
-   Buka peramban di [http://localhost:3000](http://localhost:3000).
+   Buka peramban pada alamat: [http://localhost:3000](http://localhost:3000)
 
-4. **Kunjungi Halaman:**
-   - Halaman Utama (Undangan Tamu): `http://localhost:3000?to=Budi+Santoso&kelas=XII+RPL+1`
-   - Halaman Administrator: `http://localhost:3000/admin` *(Password default: `admin`)*
-
-5. **Build untuk Produksi:**
+4. **Kompilasi untuk Ujian / Produksi (*Production Build*):**
    ```bash
    npm run build
    npm start
@@ -70,52 +134,88 @@ Projek Tugas / Portofolio **Rekayasa Perangkat Lunak (RPL)** berupa aplikasi web
 
 ---
 
-## 🗄️ Struktur Tabel Supabase (`rsvps`)
+## 🔑 6. Kredensial & Pengujian Sistem (Demo Ujian)
 
-Jika ingin mengatur tabel di proyek Supabase baru, gunakan skema SQL berikut:
+Untuk keperluan pengujian/penilaian oleh guru dan penguji:
+
+| Halaman | URL Akses | Keterangan / Akses |
+| :--- | :--- | :--- |
+| **Halaman Utama Undangan** | `http://localhost:3000/` | Halaman undangan resmi seluruh angkatan |
+| **Dashboard Panel Admin** | `http://localhost:3000/admin` | **Kata Sandi Masuk:** `wisuda24` |
+
+---
+
+## 🗄️ 7. Skema Basis Data Supabase (`rsvps`)
 
 ```sql
+-- Pembuatan tabel konfirmasi kehadiran
 CREATE TABLE rsvps (
   id BIGSERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   student_class VARCHAR(100) DEFAULT '-',
-  attendance VARCHAR(20) NOT NULL, -- 'yes', 'maybe', 'no'
+  attendance VARCHAR(20) NOT NULL, -- 'yes', 'no'
   pax INT DEFAULT 1,
   message TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Atur Row Level Security (RLS) jika diperlukan
+-- Pengaturan keamanan Row Level Security (RLS)
 ALTER TABLE rsvps ENABLE ROW LEVEL SECURITY;
 
--- Izinkan publik membaca pesan (Buku Tamu)
+-- Kebijakan membaca data untuk umum (Buku Tamu & Dashboard)
 CREATE POLICY "Public Read RSVP" ON rsvps FOR SELECT USING (true);
 
--- Izinkan publik mengirim konfirmasi
+-- Kebijakan pengiriman formulir konfirmasi
 CREATE POLICY "Public Insert RSVP" ON rsvps FOR INSERT WITH CHECK (true);
+
+-- Kebijakan penghapusan data (Admin)
+CREATE POLICY "Public Delete RSVP" ON rsvps FOR DELETE USING (true);
 ```
 
 ---
 
-## 📁 Struktur Direktori Proyek
+## 📁 8. Struktur Direktori Proyek
 
 ```text
 UndanganDigital/
-├── public/                 # Aset statis & ikon
+├── public/
+│   ├── images/
+│   │   ├── smk6.png              # Logo resmi SMK Negeri 6 Surakarta
+│   │   ├── smk6-depan-web.jpg    # Foto gedung sekolah (dioptimasi web)
+│   │   └── ...                   # Aset visual pendukung lainnya
+│   ├── favicon.svg               # Favicon browser
+│   └── icons.svg                 # Simbol grafis
 ├── src/
 │   ├── app/
 │   │   ├── admin/
-│   │   │   └── page.jsx    # Halaman Dashboard Admin & Link Generator
-│   │   ├── globals.css     # Design system, variabel CSS & tema
-│   │   ├── layout.jsx      # Root layout & meta tags SEO
-│   │   └── page.jsx        # Halaman utama undangan interaktif
-│   ├── assets/             # Gambar & aset grafis
-│   └── supabaseClient.js   # Konfigurasi koneksi klien Supabase
-├── package.json            # Daftar pustaka & skrip
-└── README.md               # Dokumentasi proyek
+│   │   │   └── page.jsx          # Panel Admin & Manajemen Master Siswa
+│   │   ├── globals.css           # Styling lengkap, tema warna & responsivitas
+│   │   ├── layout.jsx            # Layout utama & konfigurasi metadata SEO
+│   │   └── page.jsx              # Beranda undangan tamu & fitur unduh PDF
+│   ├── data/
+│   │   └── studentsData.js       # Master data 16 calon wisudawan resmi
+│   └── supabaseClient.js         # Konfigurasi koneksi klien Supabase
+├── .env.example                  # Template variabel lingkungan
+├── package.json                  # Dependensi pustaka dan skrip proyek
+└── README.md                     # Dokumentasi teknis proyek
 ```
 
 ---
 
-## 👨‍💻 Pengembang
-Projek ini dikembangkan sebagai karya penugasan / ujian keahlian jurusan **Rekayasa Perangkat Lunak (RPL)** - SMK Negeri 1.
+## 💡 9. Aspek Penilaian Kualitas Perangkat Lunak (Nilai Unggulan RPL)
+
+Projek ini menerapkan standar kompetensi Rekayasa Perangkat Lunak:
+- **Clean Architecture & Component-Based Design**: Kode modular, terstruktur, dan mudah dipelihara (*maintainable*).
+- **Responsive Web Design**: Tipografi dan tata letak menggunakan fungsi `clamp()` sehingga adaptif di seluruh resolusi (*Mobile HP 360px hingga Desktop 1920px+*).
+- **Data Integrity & Validation**: Validasi ketat nama terdaftar serta pencegahan duplikasi data (*1 Siswa = 1 Respon*).
+- **Offline & Graceful Fallback**: Menggunakan *local storage cache* sehingga jika jaringan internet terganggu saat demo ujian, aplikasi tetap berjalan lancar tanpa galat (*error-free*).
+- **Performance Optimization**: Kompilasi berbasis *Turbopack* dengan *Suspense Boundary* untuk kecepatan pemuatan halaman maksimal.
+
+---
+
+## 👨‍💻 10. Identitas Pengembang
+
+- **Projek**: Ujian Praktik / Penugasan Keahlian Rekayasa Perangkat Lunak (RPL)
+- **Sekolah**: **SMK Negeri 6 Surakarta**
+- **Tahun Ajaran**: 2024/2027
+- **Lisensi**: Edukasi & Penggunaan Internal SMK Negeri 6 Surakarta
