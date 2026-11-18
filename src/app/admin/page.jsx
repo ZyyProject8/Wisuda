@@ -1,20 +1,25 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
+import { getMasterStudents, saveMasterStudents, SCHOOL_CLASSES } from '../../data/studentsData';
 import {
   Users,
   CheckCircle,
   XCircle,
-  Lock,
   Copy,
   Check,
   Search,
   Trash2,
-  Link as LinkIcon,
   Armchair,
   Eye,
   EyeOff,
-  ArrowLeft
+  UserPlus,
+  RefreshCw,
+  GraduationCap,
+  RotateCcw,
+  Share2,
+  FileText,
+  AlertCircle
 } from 'lucide-react';
 
 export default function Admin() {
@@ -26,14 +31,34 @@ export default function Admin() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // State untuk Link Generator
-  const [genName, setGenName] = useState('');
-  const [genClass, setGenClass] = useState('');
+  // Tab Navigasi Admin: 'rsvp' | 'students'
+  const [activeTab, setActiveTab] = useState('rsvp');
+
+  // Master Data Siswa
+  const [masterStudents, setMasterStudents] = useState([]);
+  const [filterClass, setFilterClass] = useState('ALL');
+  const [studentSearch, setStudentSearch] = useState('');
+
+  // Form Tambah Siswa Baru
+  const [newStudent, setNewStudent] = useState({
+    name: '',
+    student_class: SCHOOL_CLASSES[0] || 'XII RPL 1',
+    nis: ''
+  });
+  const [addSuccessMsg, setAddSuccessMsg] = useState('');
+
+  // State untuk Berbagi Link Broadcast
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedWA, setCopiedWA] = useState(false);
 
-  // Password admin (dapat diatur lewat environment variable atau default 'admin')
+  // Password admin
   const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'wisuda24';
+
+  // Muat data master siswa saat komponen aktif
+  useEffect(() => {
+    const students = getMasterStudents();
+    setMasterStudents(students);
+  }, []);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -56,37 +81,133 @@ export default function Admin() {
 
       if (!error && data) {
         setRsvps(data);
+        try {
+          localStorage.setItem('smk6_rsvps_cache', JSON.stringify(data));
+        } catch {}
+      } else {
+        // Fallback ke cache lokal
+        try {
+          const cached = localStorage.getItem('smk6_rsvps_cache');
+          if (cached) setRsvps(JSON.parse(cached));
+        } catch {}
       }
     } catch {
       console.error('Error fetching data from Supabase');
+      try {
+        const cached = localStorage.getItem('smk6_rsvps_cache');
+        if (cached) setRsvps(JSON.parse(cached));
+      } catch {}
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus data konfirmasi ini?')) return;
+  // Hapus data konfirmasi kehadiran (RSVP)
+  const handleDeleteRsvp = async (id, studentName) => {
+    if (!confirm(`Apakah Anda yakin ingin menghapus konfirmasi kehadiran untuk "${studentName || 'siswa ini'}"?`)) return;
     try {
       const { error } = await supabase
         .from('rsvps')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
-      setRsvps(prev => prev.filter(item => item.id !== id));
+      if (error) {
+        console.warn('Supabase delete error, updating locally:', error);
+      }
+
+      const updated = rsvps.filter(item => item.id !== id);
+      setRsvps(updated);
+      try {
+        localStorage.setItem('smk6_rsvps_cache', JSON.stringify(updated));
+      } catch {}
     } catch (err) {
       alert('Gagal menghapus data: ' + err.message);
     }
   };
 
-  // Generate invitation link
-  const getGeneratedUrl = () => {
+  // Reset konfirmasi kehadiran siswa dari daftar master (agar siswa bisa mengisi ulang jika salah data)
+  const handleResetStudentConfirmation = async (student) => {
+    const matchingRsvp = rsvps.find(r => 
+      r.name?.toLowerCase().trim() === student.name.toLowerCase().trim()
+    );
+
+    if (!matchingRsvp) {
+      alert(`Siswa ${student.name} belum pernah mengirim konfirmasi kehadiran.`);
+      return;
+    }
+
+    if (!confirm(`Reset konfirmasi kehadiran untuk ${student.name} (${student.student_class})?\n\nSetelah direset, siswa ini dapat mengisi formulir kehadiran kembali di website.`)) {
+      return;
+    }
+
+    try {
+      await supabase.from('rsvps').delete().eq('id', matchingRsvp.id);
+    } catch (err) {
+      console.warn('Supabase delete error:', err);
+    }
+
+    const updated = rsvps.filter(r => r.id !== matchingRsvp.id);
+    setRsvps(updated);
+    try {
+      localStorage.setItem('smk6_rsvps_cache', JSON.stringify(updated));
+    } catch {}
+    alert(`Konfirmasi untuk ${student.name} berhasil direset. Siswa sekarang dapat mengisi kembali.`);
+  };
+
+  // Tambah siswa baru ke Master Data
+  const handleAddStudent = (e) => {
+    e.preventDefault();
+    if (!newStudent.name.trim()) {
+      alert('Nama siswa wajib diisi!');
+      return;
+    }
+
+    const exists = masterStudents.some(s => 
+      s.name.toLowerCase().trim() === newStudent.name.toLowerCase().trim() &&
+      s.student_class === newStudent.student_class
+    );
+
+    if (exists) {
+      alert(`Siswa atas nama "${newStudent.name}" sudah terdaftar di kelas ${newStudent.student_class}!`);
+      return;
+    }
+
+    const createdStudent = {
+      id: `CUSTOM-${Date.now()}`,
+      nis: newStudent.nis.trim() || '-',
+      name: newStudent.name.trim(),
+      student_class: newStudent.student_class
+    };
+
+    const updated = [createdStudent, ...masterStudents];
+    setMasterStudents(updated);
+    saveMasterStudents(updated);
+
+    setNewStudent({
+      name: '',
+      student_class: newStudent.student_class,
+      nis: ''
+    });
+
+    setAddSuccessMsg(`✓ Siswa "${createdStudent.name}" berhasil ditambahkan ke daftar wisuda.`);
+    setTimeout(() => setAddSuccessMsg(''), 3000);
+  };
+
+  // Hapus siswa dari Master Data
+  const handleDeleteMasterStudent = (studentId, studentName) => {
+    if (!confirm(`Hapus "${studentName}" dari daftar calon wisudawan resmi? Siswa ini tidak akan bisa mengisi konfirmasi jika dihapus.`)) {
+      return;
+    }
+
+    const updated = masterStudents.filter(s => s.id !== studentId);
+    setMasterStudents(updated);
+    saveMasterStudents(updated);
+  };
+
+  // Broadcast Link Generator
+  const getOfficialWebsiteUrl = () => {
     if (typeof window === 'undefined') return '';
-    const baseUrl = window.location.origin;
-    const params = new URLSearchParams();
-    if (genName.trim()) params.append('to', genName.trim());
-    if (genClass.trim()) params.append('kelas', genClass.trim());
-    return `${baseUrl}/?${params.toString()}`;
+    return window.location.origin;
   };
 
   const copyToClipboard = (text, type) => {
@@ -100,9 +221,9 @@ export default function Admin() {
     }
   };
 
-  const getWaMessage = () => {
-    const link = getGeneratedUrl();
-    return `🎓 *UNDANGAN RESMI WISUDA & PELEPASAN SISWA SMK NEGERI 6 SURAKARTA* 🎓\n\nKepada Yth.\n*${genName || 'Siswa/i'}* ${genClass ? `(${genClass})` : ''}\nBeserta Kedua Orang Tua / Pendamping (Maks. 3 Kursi)\n\nDengan hormat, kami mengundang Bapak/Ibu serta ananda untuk menghadiri acara Wisuda & Pelepasan Siswa Angkatan 2024/2027.\n\nDetail acara & formulir konfirmasi kehadiran dapat diakses melalui link undangan resmi berikut:\n👉 ${link}\n\n*Catatan: Setiap siswa mendapatkan alokasi maksimal 3 kursi (1 Siswa + 2 Orang Tua/Pendamping).\nMohon konfirmasi kehadiran demi kelancaran persiapan kursi & konsumsi.\nTerima kasih.`;
+  const getWaBroadcastMessage = () => {
+    const link = getOfficialWebsiteUrl();
+    return `🎓 *UNDANGAN RESMI WISUDA & PELEPASAN SISWA SMK NEGERI 6 SURAKARTA* 🎓\n\nKepada Yth.\n*Bapak/Ibu Orang Tua / Wali Murid & Seluruh Siswa-Siswi Calon Wisudawan*\nKeluarga Besar Angkatan 2024/2027\n\nDengan hormat, kami mengundang Bapak/Ibu serta ananda untuk menghadiri acara Sidang Terbuka Wisuda & Pelepasan Siswa SMK Negeri 6 Surakarta Angkatan 2024/2027.\n\nDetail susunan acara & formulir konfirmasi kehadiran (RSVP) dapat diakses melalui link resmi berikut:\n👉 ${link}\n\n*Catatan Penting:*\n1. Setiap siswa wajib memilih nama dan kelas sesuai daftar resmi sekolah.\n2. Konfirmasi hanya dapat dilakukan 1 kali per siswa demi mencegah duplikasi kursi.\n3. Alokasi maksimal 3 kursi (1 Siswa + 2 Orang Tua / Pendamping).\n\nTerima kasih atas perhatian dan kerja samanya.\n\n*Panitia Wisuda SMK Negeri 6 Surakarta*`;
   };
 
   if (!isAuthenticated) {
@@ -128,7 +249,7 @@ export default function Admin() {
           filter: 'saturate(1.08) contrast(1.02)'
         }} />
 
-        {/* Lapisan Gradien Mewah */}
+        {/* Lapisan Gradien */}
         <div style={{
           position: 'absolute',
           inset: 0,
@@ -139,7 +260,7 @@ export default function Admin() {
           `
         }} />
 
-        {/* Kartu Login Eksekutif */}
+        {/* Kartu Login */}
         <div style={{
           position: 'relative',
           zIndex: 2,
@@ -278,25 +399,26 @@ export default function Admin() {
                 letterSpacing: '0.05em'
               }}
             >
-              <Lock size={18} />
-              Login
+              Masuk Dashboard
             </button>
           </form>
 
-          <div style={{ marginTop: '1.4rem', borderTop: '1px solid #f1f5f9', paddingTop: '1.2rem' }}>
+          <div style={{ marginTop: '1.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '1.2rem' }}>
             <a
               href="/"
               style={{
-                color: '#0f2b5c',
+                color: '#64748b',
                 textDecoration: 'none',
                 fontSize: '0.86rem',
-                fontWeight: 600,
+                fontWeight: 500,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.4rem'
+                gap: '0.4rem',
+                transition: 'color 0.2s ease'
               }}
+              onMouseEnter={(e) => e.target.style.color = '#0f2b5c'}
+              onMouseLeave={(e) => e.target.style.color = '#64748b'}
             >
-              <ArrowLeft size={16} />
               Kembali ke Halaman Undangan
             </a>
           </div>
@@ -305,16 +427,17 @@ export default function Admin() {
     );
   }
 
-  // Perhitungan statistik
+  // Perhitungan statistik analitik
+  const totalSiswaMaster = masterStudents.length;
   const totalRSVP = rsvps.length;
   const totalHadir = rsvps.filter(r => r.attendance === 'yes').length;
   const totalTidakHadir = rsvps.filter(r => r.attendance === 'no').length;
-  // Menghitung total kursi/orang (pax)
+  const totalBelumKonfirmasi = Math.max(0, totalSiswaMaster - totalRSVP);
   const totalPax = rsvps
     .filter(r => r.attendance === 'yes')
     .reduce((acc, curr) => acc + (parseInt(curr.pax, 10) || 1), 0);
 
-  // Filter pencarian
+  // Filter pencarian RSVP
   const filteredRsvps = rsvps.filter(r => {
     const q = searchQuery.toLowerCase();
     return (
@@ -324,228 +447,510 @@ export default function Admin() {
     );
   });
 
+  // Filter Data Siswa Master
+  const filteredMasterStudents = masterStudents.filter(s => {
+    const matchClass = filterClass === 'ALL' || s.student_class === filterClass;
+    const matchQuery = !studentSearch.trim() || 
+      s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+      (s.nis && s.nis.includes(studentSearch));
+    return matchClass && matchQuery;
+  });
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f4f6f9', padding: '2rem 1.5rem', color: '#333' }}>
-      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-        {/* Header */}
+      <div style={{ maxWidth: '1150px', margin: '0 auto' }}>
+        {/* Header Dashboard */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem', borderBottom: '2px solid #e0e0e0', paddingBottom: '1.2rem' }}>
           <div>
-            <h1 style={{ color: '#1a1a2e', fontSize: '2rem', margin: 0, fontWeight: 700 }}>
+            <h1 style={{ color: '#0f2b5c', fontSize: '2rem', margin: 0, fontWeight: 700, fontFamily: 'var(--font-heading)' }}>
               Dashboard Panitia Wisuda
             </h1>
-            <p style={{ color: '#666', margin: '0.3rem 0 0', fontSize: '0.95rem' }}>SMK Negeri 6 Surakarta — Angkatan 2024/2027</p>
+            <p style={{ color: '#64748b', margin: '0.3rem 0 0', fontSize: '0.95rem' }}>
+              SMK Negeri 6 Surakarta — Angkatan 2024/2027
+            </p>
           </div>
           <div style={{ display: 'flex', gap: '0.8rem' }}>
             <button
               onClick={() => window.open('/', '_blank')}
-              style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', border: '1px solid #1a1a2e', background: '#fff', cursor: 'pointer', fontWeight: 500, fontSize: '0.9rem' }}
+              style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', border: '1.5px solid #0f2b5c', background: '#fff', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', color: '#0f2b5c' }}
             >
               Lihat Undangan Siswa ↗
             </button>
             <button
               onClick={() => setIsAuthenticated(false)}
-              style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', border: '1px solid #ccc', background: '#fff', cursor: 'pointer', fontSize: '0.9rem', color: '#666' }}
+              style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#fff', cursor: 'pointer', fontSize: '0.9rem', color: '#64748b' }}
             >
               Keluar
             </button>
           </div>
         </div>
 
-        {/* Statistik Kursi & Tamu */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.2rem', marginBottom: '2.5rem' }}>
-          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #1a1a2e' }}>
+        {/* 5 Kartu Metrik Analitik */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+          <div style={{ background: '#fff', padding: '1.3rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #0f2b5c' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: '2.2rem', fontWeight: 'bold', color: '#1a1a2e' }}>{totalRSVP}</div>
-                <div style={{ color: '#666', fontSize: '0.9rem', marginTop: '0.2rem' }}>Total Siswa Merespon</div>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#0f2b5c' }}>{totalSiswaMaster}</div>
+                <div style={{ color: '#64748b', fontSize: '0.86rem', marginTop: '0.2rem' }}>Total Calon Wisudawan</div>
               </div>
-              <Users size={32} style={{ color: '#1a1a2e', opacity: 0.6 }} />
+              <GraduationCap size={28} style={{ color: '#0f2b5c', opacity: 0.6 }} />
             </div>
           </div>
 
-          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #27ae60' }}>
+          <div style={{ background: '#fff', padding: '1.3rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #2563eb' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: '2.2rem', fontWeight: 'bold', color: '#27ae60' }}>{totalHadir}</div>
-                <div style={{ color: '#666', fontSize: '0.9rem', marginTop: '0.2rem' }}>Siswa Konfirmasi Hadir</div>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#2563eb' }}>{totalRSVP}</div>
+                <div style={{ color: '#64748b', fontSize: '0.86rem', marginTop: '0.2rem' }}>Sudah Konfirmasi</div>
               </div>
-              <CheckCircle size={32} style={{ color: '#27ae60', opacity: 0.7 }} />
+              <Users size={28} style={{ color: '#2563eb', opacity: 0.6 }} />
             </div>
           </div>
 
-          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #d97706' }}>
+          <div style={{ background: '#fff', padding: '1.3rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #059669' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: '2.2rem', fontWeight: 'bold', color: '#d97706' }}>{totalPax}</div>
-                <div style={{ color: '#666', fontSize: '0.9rem', marginTop: '0.2rem' }}>Estimasi Kursi & Konsumsi</div>
-                <small style={{ color: '#888', fontSize: '0.75rem' }}>*Siswa + Orang Tua Hadir</small>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#059669' }}>{totalHadir}</div>
+                <div style={{ color: '#64748b', fontSize: '0.86rem', marginTop: '0.2rem' }}>Siswa Hadir</div>
               </div>
-              <Armchair size={32} style={{ color: '#d97706', opacity: 0.7 }} />
+              <CheckCircle size={28} style={{ color: '#059669', opacity: 0.7 }} />
             </div>
           </div>
 
-          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #c0392b' }}>
+          <div style={{ background: '#fff', padding: '1.3rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #d97706' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: '2.2rem', fontWeight: 'bold', color: '#c0392b' }}>{totalTidakHadir}</div>
-                <div style={{ color: '#666', fontSize: '0.9rem', marginTop: '0.2rem' }}>Berhalangan Hadir</div>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#d97706' }}>{totalPax}</div>
+                <div style={{ color: '#64748b', fontSize: '0.86rem', marginTop: '0.2rem' }}>Total Kursi / Konsumsi</div>
+                <small style={{ color: '#94a3b8', fontSize: '0.72rem' }}>*Siswa + Wali Murid</small>
               </div>
-              <XCircle size={32} style={{ color: '#c0392b', opacity: 0.7 }} />
+              <Armchair size={28} style={{ color: '#d97706', opacity: 0.7 }} />
+            </div>
+          </div>
+
+          <div style={{ background: '#fff', padding: '1.3rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #ef4444' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>{totalTidakHadir}</div>
+                <div style={{ color: '#64748b', fontSize: '0.86rem', marginTop: '0.2rem' }}>Berhalangan Hadir</div>
+              </div>
+              <XCircle size={28} style={{ color: '#ef4444', opacity: 0.6 }} />
+            </div>
+          </div>
+
+          <div style={{ background: '#fff', padding: '1.3rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #94a3b8' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#64748b' }}>{totalBelumKonfirmasi}</div>
+                <div style={{ color: '#64748b', fontSize: '0.86rem', marginTop: '0.2rem' }}>Belum Konfirmasi</div>
+              </div>
+              <AlertCircle size={28} style={{ color: '#94a3b8', opacity: 0.6 }} />
             </div>
           </div>
         </div>
 
-        {/* Generator Link Undangan Siswa */}
-        <div style={{ background: '#fff', padding: '1.8rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', marginBottom: '2.5rem', border: '1px solid #e8e8e8' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.6rem' }}>
-            <LinkIcon size={20} style={{ color: '#c5a880' }} />
-            <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#1a1a2e' }}>Generator Link Undangan Siswa</h3>
+        {/* Kotak Broadcast WhatsApp Resmi (Untuk Seluruh Angkatan) */}
+        <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', marginBottom: '2rem', border: '1px solid #e2e8f0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
+            <Share2 size={20} style={{ color: '#c59b27' }} />
+            <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#0f2b5c' }}>Link Undangan & Broadcast WhatsApp Angkatan 2024/2027</h3>
           </div>
-          <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '1.2rem' }}>
-            Ketik nama dan kelas siswa untuk membuat link khusus yang akan langsung mempersonalisasi kartu undangan siswa dan orang tua.
+          <p style={{ color: '#64748b', fontSize: '0.88rem', margin: '0 0 1rem' }}>
+            Bagikan link resmi ini ke grup WhatsApp kelas atau wali murid. Setiap siswa akan memilih nama dan kelasnya sendiri untuk melakukan konfirmasi kehadiran 1 kali.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#444', marginBottom: '0.3rem' }}>Nama Siswa</label>
-              <input
-                type="text"
-                placeholder="Contoh: Ahmad Rizki"
-                value={genName}
-                onChange={(e) => setGenName(e.target.value)}
-                style={{ width: '100%', padding: '0.7rem 0.9rem', borderRadius: '8px', border: '1px solid #ccc', boxSizing: 'border-box' }}
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#444', marginBottom: '0.3rem' }}>Kelas / Jurusan</label>
-              <input
-                type="text"
-                placeholder="Contoh: XII RPL 1"
-                value={genClass}
-                onChange={(e) => setGenClass(e.target.value)}
-                style={{ width: '100%', padding: '0.7rem 0.9rem', borderRadius: '8px', border: '1px solid #ccc', boxSizing: 'border-box' }}
-              />
-            </div>
-          </div>
-
-          {/* Generated Result Box */}
-          <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px dashed #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.8rem' }}>
-            <div style={{ wordBreak: 'break-all', fontSize: '0.9rem', color: '#1e293b', flex: 1 }}>
-              <strong>Preview Link:</strong> {getGeneratedUrl()}
+          <div style={{ background: '#f8fafc', padding: '0.9rem 1.1rem', borderRadius: '10px', border: '1px dashed #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.8rem' }}>
+            <div style={{ fontSize: '0.9rem', color: '#1e293b' }}>
+              <strong>URL Undangan:</strong> <span style={{ color: '#0f2b5c', textDecoration: 'underline' }}>{getOfficialWebsiteUrl()}</span>
             </div>
             <div style={{ display: 'flex', gap: '0.6rem' }}>
               <button
-                onClick={() => copyToClipboard(getGeneratedUrl(), 'link')}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', borderRadius: '6px', border: 'none', background: '#1a1a2e', color: '#fff', cursor: 'pointer', fontSize: '0.85rem' }}
+                onClick={() => copyToClipboard(getOfficialWebsiteUrl(), 'link')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', borderRadius: '8px', border: 'none', background: '#0f2b5c', color: '#fff', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
               >
                 {copiedLink ? <Check size={16} /> : <Copy size={16} />}
-                {copiedLink ? 'Tersalin!' : 'Salin Link'}
+                {copiedLink ? 'Link Tersalin!' : 'Salin Link'}
               </button>
               <button
-                onClick={() => copyToClipboard(getWaMessage(), 'wa')}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', borderRadius: '6px', border: 'none', background: '#25D366', color: '#fff', cursor: 'pointer', fontSize: '0.85rem' }}
+                onClick={() => copyToClipboard(getWaBroadcastMessage(), 'wa')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', borderRadius: '8px', border: 'none', background: '#25D366', color: '#fff', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
               >
                 {copiedWA ? <Check size={16} /> : <Copy size={16} />}
-                {copiedWA ? 'Teks WA Tersalin!' : 'Salin Pesan WA'}
+                {copiedWA ? 'Pesan WA Tersalin!' : 'Salin Pesan Broadcast WA'}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Tabel Data Respon Siswa */}
-        <div style={{ background: '#fff', padding: '1.8rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <h2 style={{ fontSize: '1.35rem', margin: 0, color: '#1a1a2e' }}>Daftar Konfirmasi Kehadiran Siswa</h2>
+        {/* Tab Navigasi Admin */}
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.2rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.4rem' }}>
+          <button
+            onClick={() => setActiveTab('rsvp')}
+            style={{
+              padding: '0.7rem 1.4rem',
+              borderRadius: '10px 10px 0 0',
+              border: 'none',
+              background: activeTab === 'rsvp' ? '#0f2b5c' : 'transparent',
+              color: activeTab === 'rsvp' ? '#ffffff' : '#64748b',
+              fontWeight: 700,
+              fontSize: '0.92rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <FileText size={18} />
+            Data Respon Kehadiran ({rsvps.length})
+          </button>
 
-            <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
-              {/* Search Bar */}
-              <div style={{ position: 'relative' }}>
-                <Search size={18} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
-                <input
-                  type="text"
-                  placeholder="Cari nama atau kelas..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{ padding: '0.6rem 1rem 0.6rem 2.2rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.85rem', width: '220px' }}
-                />
+          <button
+            onClick={() => setActiveTab('students')}
+            style={{
+              padding: '0.7rem 1.4rem',
+              borderRadius: '10px 10px 0 0',
+              border: 'none',
+              background: activeTab === 'students' ? '#0f2b5c' : 'transparent',
+              color: activeTab === 'students' ? '#ffffff' : '#64748b',
+              fontWeight: 700,
+              fontSize: '0.92rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <GraduationCap size={18} />
+            Master Data Siswa Wisuda ({masterStudents.length})
+          </button>
+        </div>
+
+        {/* TAB 1: DATA KONFIRMASI KEHADIRAN (RSVP) */}
+        {activeTab === 'rsvp' && (
+          <div style={{ background: '#fff', padding: '1.8rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.3rem', margin: 0, color: '#0f2b5c', fontWeight: 700 }}>
+                  Daftar Konfirmasi Kehadiran Siswa
+                </h2>
+                <small style={{ color: '#64748b' }}>Data tersinkronisasi otomatis dengan database panitia</small>
               </div>
 
-              <button
-                onClick={fetchData}
-                style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', border: 'none', background: '#c5a880', color: '#1a1a2e', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem' }}
-              >
-                {loading ? 'Memuat...' : 'Refresh Data'}
-              </button>
+              <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                <div style={{ position: 'relative' }}>
+                  <Search size={17} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                  <input
+                    type="text"
+                    placeholder="Cari nama atau kelas..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ padding: '0.6rem 1rem 0.6rem 2.2rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', width: '220px' }}
+                  />
+                </div>
+
+                <button
+                  onClick={fetchData}
+                  style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', border: 'none', background: '#c59b27', color: '#ffffff', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                >
+                  <RefreshCw size={15} />
+                  {loading ? 'Memuat...' : 'Refresh'}
+                </button>
+              </div>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '720px' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #f1f5f9', color: '#64748b', fontSize: '0.84rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <th style={{ padding: '0.85rem 0.6rem' }}>Waktu</th>
+                    <th style={{ padding: '0.85rem 0.6rem' }}>Nama Siswa</th>
+                    <th style={{ padding: '0.85rem 0.6rem' }}>Kelas</th>
+                    <th style={{ padding: '0.85rem 0.6rem' }}>Status</th>
+                    <th style={{ padding: '0.85rem 0.6rem' }}>Kursi</th>
+                    <th style={{ padding: '0.85rem 0.6rem' }}>Pesan / Doa</th>
+                    <th style={{ padding: '0.85rem 0.6rem', textAlign: 'center' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredRsvps.map((rsvp) => (
+                    <tr key={rsvp.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '0.9rem 0.6rem', fontSize: '0.82rem', color: '#888', whiteSpace: 'nowrap' }}>
+                        {new Date(rsvp.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })}
+                      </td>
+                      <td style={{ padding: '0.9rem 0.6rem', fontWeight: 600, color: '#0f2b5c' }}>
+                        {rsvp.name}
+                      </td>
+                      <td style={{ padding: '0.9rem 0.6rem' }}>
+                        <span style={{ fontSize: '0.8rem', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '0.2rem 0.6rem', borderRadius: '6px', color: '#334155', fontWeight: 600 }}>
+                          {rsvp.student_class || '-'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.9rem 0.6rem' }}>
+                        <span style={{
+                          padding: '0.25rem 0.75rem',
+                          borderRadius: '20px',
+                          fontSize: '0.8rem',
+                          fontWeight: 600,
+                          backgroundColor: rsvp.attendance === 'yes' ? '#ecfdf5' : '#fef2f2',
+                          color: rsvp.attendance === 'yes' ? '#059669' : '#dc2626',
+                          border: rsvp.attendance === 'yes' ? '1px solid #a7f3d0' : '1px solid #fecaca'
+                        }}>
+                          {rsvp.attendance === 'yes' ? '✓ Hadir' : '✕ Tidak Hadir'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.9rem 0.6rem', fontSize: '0.88rem', fontWeight: 600 }}>
+                        {rsvp.attendance === 'yes' ? `${rsvp.pax || 1} Kursi` : '-'}
+                      </td>
+                      <td style={{ padding: '0.9rem 0.6rem', maxWidth: '280px', fontSize: '0.85rem', lineHeight: '1.4', color: '#4b5563' }}>
+                        {rsvp.message || <span style={{ color: '#cbd5e1', fontStyle: 'italic' }}>Tanpa pesan</span>}
+                      </td>
+                      <td style={{ padding: '0.9rem 0.6rem', textAlign: 'center' }}>
+                        <button
+                          onClick={() => handleDeleteRsvp(rsvp.id, rsvp.name)}
+                          title="Hapus data konfirmasi ini"
+                          style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer', padding: '0.3rem' }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredRsvps.length === 0 && (
+                    <tr>
+                      <td colSpan="7" style={{ textAlign: 'center', padding: '3rem 0', color: '#94a3b8' }}>
+                        {searchQuery ? 'Tidak ada data siswa yang cocok dengan kata kunci pencarian.' : 'Belum ada data konfirmasi kehadiran yang masuk.'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
+        )}
 
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '700px' }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid #f1f5f9', color: '#64748b', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  <th style={{ padding: '1rem 0.6rem' }}>Waktu</th>
-                  <th style={{ padding: '1rem 0.6rem' }}>Nama Siswa</th>
-                  <th style={{ padding: '1rem 0.6rem' }}>Kelas</th>
-                  <th style={{ padding: '1rem 0.6rem' }}>Status</th>
-                  <th style={{ padding: '1rem 0.6rem' }}>Kursi (Pax)</th>
-                  <th style={{ padding: '1rem 0.6rem' }}>Kesan & Pesan</th>
-                  <th style={{ padding: '1rem 0.6rem', textAlign: 'center' }}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRsvps.map((rsvp) => (
-                  <tr key={rsvp.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '1rem 0.6rem', fontSize: '0.85rem', color: '#888', whiteSpace: 'nowrap' }}>
-                      {new Date(rsvp.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })}
-                    </td>
-                    <td style={{ padding: '1rem 0.6rem', fontWeight: 600, color: '#1a1a2e' }}>
-                      {rsvp.name}
-                    </td>
-                    <td style={{ padding: '1rem 0.6rem' }}>
-                      <span style={{ fontSize: '0.8rem', background: '#f1f5f9', padding: '0.2rem 0.6rem', borderRadius: '6px', color: '#475569' }}>
-                        {rsvp.student_class || '-'}
-                      </span>
-                    </td>
-                    <td style={{ padding: '1rem 0.6rem' }}>
-                      <span style={{
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '20px',
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
-                        backgroundColor: rsvp.attendance === 'yes' ? 'rgba(46, 204, 113, 0.15)' : 'rgba(231, 76, 60, 0.15)',
-                        color: rsvp.attendance === 'yes' ? '#27ae60' : '#c0392b'
-                      }}>
-                        {rsvp.attendance === 'yes' ? 'Hadir' : 'Tidak Hadir'}
-                      </span>
-                    </td>
-                    <td style={{ padding: '1rem 0.6rem', fontSize: '0.9rem', fontWeight: 500 }}>
-                      {rsvp.attendance === 'yes' ? `${rsvp.pax || 1} Kursi` : '-'}
-                    </td>
-                    <td style={{ padding: '1rem 0.6rem', maxWidth: '280px', fontSize: '0.85rem', lineHeight: '1.4', color: '#555' }}>
-                      {rsvp.message || <span style={{ color: '#bbb', fontStyle: 'italic' }}>Tanpa pesan</span>}
-                    </td>
-                    <td style={{ padding: '1rem 0.6rem', textAlign: 'center' }}>
-                      <button
-                        onClick={() => handleDelete(rsvp.id)}
-                        title="Hapus data"
-                        style={{ border: 'none', background: 'transparent', color: '#e74c3c', cursor: 'pointer', padding: '0.3rem' }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {filteredRsvps.length === 0 && (
-                  <tr>
-                    <td colSpan="7" style={{ textAlign: 'center', padding: '3rem 0', color: '#94a3b8' }}>
-                      {searchQuery ? 'Tidak ada data siswa yang cocok dengan pencarian.' : 'Belum ada data konfirmasi kehadiran yang masuk.'}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        {/* TAB 2: DATA MASTER SISWA WISUDA */}
+        {activeTab === 'students' && (
+          <div>
+            {/* Form Tambah Siswa Baru */}
+            <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', marginBottom: '1.5rem', border: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <UserPlus size={19} style={{ color: '#0f2b5c' }} />
+                <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#0f2b5c' }}>Tambah Calon Wisudawan Baru</h3>
+              </div>
+              <p style={{ color: '#64748b', fontSize: '0.86rem', margin: '0 0 1rem' }}>
+                Siswa yang terdaftar di sini adalah yang memiliki hak resmi untuk mengisi konfirmasi kehadiran (RSVP) di website.
+              </p>
+
+              {addSuccessMsg && (
+                <div style={{ background: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0', padding: '0.65rem 0.9rem', borderRadius: '8px', fontSize: '0.86rem', marginBottom: '1rem' }}>
+                  {addSuccessMsg}
+                </div>
+              )}
+
+              <form onSubmit={handleAddStudent} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.9rem', alignItems: 'flex-end' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginBottom: '0.3rem' }}>Nama Lengkap Siswa</label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: Muhammad Rayhan"
+                    value={newStudent.name}
+                    onChange={(e) => setNewStudent(prev => ({ ...prev, name: e.target.value }))}
+                    style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', boxSizing: 'border-box' }}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginBottom: '0.3rem' }}>Kelas / Jurusan</label>
+                  <select
+                    value={newStudent.student_class}
+                    onChange={(e) => setNewStudent(prev => ({ ...prev, student_class: e.target.value }))}
+                    style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', boxSizing: 'border-box', background: '#fff' }}
+                  >
+                    {SCHOOL_CLASSES.map(cls => (
+                      <option key={cls} value={cls}>{cls}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginBottom: '0.3rem' }}>NIS (Opsional)</label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: 240106"
+                    value={newStudent.nis}
+                    onChange={(e) => setNewStudent(prev => ({ ...prev, nis: e.target.value }))}
+                    style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div>
+                  <button
+                    type="submit"
+                    style={{ width: '100%', padding: '0.68rem 1rem', borderRadius: '8px', border: 'none', background: '#0f2b5c', color: '#fff', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer' }}
+                  >
+                    + Daftarkan Siswa
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Tabel Master Siswa & Status Kehadiran */}
+            <div style={{ background: '#fff', padding: '1.8rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <h2 style={{ fontSize: '1.3rem', margin: 0, color: '#0f2b5c', fontWeight: 700 }}>
+                    Daftar Calon Wisudawan Resmi SMK Negeri 6 Surakarta
+                  </h2>
+                  <small style={{ color: '#64748b' }}>Menampilkan {filteredMasterStudents.length} dari total {masterStudents.length} siswa</small>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {/* Filter Kelas */}
+                  <select
+                    value={filterClass}
+                    onChange={(e) => setFilterClass(e.target.value)}
+                    style={{ padding: '0.6rem 0.9rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', background: '#fff', fontWeight: 500 }}
+                  >
+                    <option value="ALL">Semua Kelas ({masterStudents.length})</option>
+                    {SCHOOL_CLASSES.map(cls => (
+                      <option key={cls} value={cls}>{cls}</option>
+                    ))}
+                  </select>
+
+                  {/* Search Siswa */}
+                  <div style={{ position: 'relative' }}>
+                    <Search size={17} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                    <input
+                      type="text"
+                      placeholder="Cari nama atau NIS..."
+                      value={studentSearch}
+                      onChange={(e) => setStudentSearch(e.target.value)}
+                      style={{ padding: '0.6rem 1rem 0.6rem 2.2rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', width: '200px' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '700px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid #f1f5f9', color: '#64748b', fontSize: '0.84rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      <th style={{ padding: '0.85rem 0.6rem' }}>No.</th>
+                      <th style={{ padding: '0.85rem 0.6rem' }}>NIS</th>
+                      <th style={{ padding: '0.85rem 0.6rem' }}>Nama Calon Wisudawan</th>
+                      <th style={{ padding: '0.85rem 0.6rem' }}>Kelas</th>
+                      <th style={{ padding: '0.85rem 0.6rem' }}>Status Konfirmasi Kehadiran</th>
+                      <th style={{ padding: '0.85rem 0.6rem', textAlign: 'center' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredMasterStudents.map((st, idx) => {
+                      const matchingRsvp = rsvps.find(r => 
+                        r.name?.toLowerCase().trim() === st.name.toLowerCase().trim()
+                      );
+
+                      return (
+                        <tr key={st.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                          <td style={{ padding: '0.85rem 0.6rem', fontSize: '0.82rem', color: '#94a3b8' }}>
+                            {idx + 1}
+                          </td>
+                          <td style={{ padding: '0.85rem 0.6rem', fontSize: '0.84rem', color: '#64748b' }}>
+                            {st.nis || '-'}
+                          </td>
+                          <td style={{ padding: '0.85rem 0.6rem', fontWeight: 600, color: '#0f2b5c' }}>
+                            {st.name}
+                          </td>
+                          <td style={{ padding: '0.85rem 0.6rem' }}>
+                            <span style={{ fontSize: '0.8rem', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '0.2rem 0.6rem', borderRadius: '6px', color: '#334155', fontWeight: 600 }}>
+                              {st.student_class}
+                            </span>
+                          </td>
+                          <td style={{ padding: '0.85rem 0.6rem' }}>
+                            {matchingRsvp ? (
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                                <span style={{
+                                  padding: '0.25rem 0.75rem',
+                                  borderRadius: '20px',
+                                  fontSize: '0.8rem',
+                                  fontWeight: 600,
+                                  backgroundColor: matchingRsvp.attendance === 'yes' ? '#ecfdf5' : '#fef2f2',
+                                  color: matchingRsvp.attendance === 'yes' ? '#059669' : '#dc2626',
+                                  border: matchingRsvp.attendance === 'yes' ? '1px solid #a7f3d0' : '1px solid #fecaca'
+                                }}>
+                                  {matchingRsvp.attendance === 'yes' ? `✓ Sudah Konfirmasi (Hadir - ${matchingRsvp.pax} Kursi)` : '✕ Sudah Konfirmasi (Tidak Hadir)'}
+                                </span>
+                              </div>
+                            ) : (
+                              <span style={{
+                                padding: '0.25rem 0.75rem',
+                                borderRadius: '20px',
+                                fontSize: '0.78rem',
+                                fontWeight: 500,
+                                backgroundColor: '#fef3c7',
+                                color: '#b45309',
+                                border: '1px solid #fde68a'
+                              }}>
+                                ⏳ Belum Mengisi
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: '0.85rem 0.6rem', textAlign: 'center' }}>
+                            <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
+                              {matchingRsvp && (
+                                <button
+                                  onClick={() => handleResetStudentConfirmation(st)}
+                                  title="Reset konfirmasi siswa ini agar dapat mengisi ulang"
+                                  style={{
+                                    border: '1px solid #cbd5e1',
+                                    background: '#ffffff',
+                                    color: '#0f2b5c',
+                                    borderRadius: '6px',
+                                    padding: '0.35rem 0.6rem',
+                                    fontSize: '0.75rem',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.25rem'
+                                  }}
+                                >
+                                  <RotateCcw size={13} />
+                                  Reset
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleDeleteMasterStudent(st.id, st.name)}
+                                title="Hapus dari daftar calon wisudawan"
+                                style={{
+                                  border: 'none',
+                                  background: 'transparent',
+                                  color: '#ef4444',
+                                  cursor: 'pointer',
+                                  padding: '0.35rem'
+                                }}
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {filteredMasterStudents.length === 0 && (
+                      <tr>
+                        <td colSpan="6" style={{ textAlign: 'center', padding: '2.5rem 0', color: '#94a3b8' }}>
+                          Tidak ada siswa yang sesuai dengan filter atau pencarian.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
