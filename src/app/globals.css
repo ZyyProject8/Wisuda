@@ -1013,7 +1013,7 @@ select.form-control option {
 /* Floating Scroll to Top Button (Executive White & Royal Navy) */
 .floating-scroll-top-btn {
   position: fixed;
-  bottom: clamp(74px, 12vw, 88px);
+  bottom: clamp(18px, 4vw, 28px);
   right: clamp(16px, 3.5vw, 25px);
   z-index: 1000;
   width: clamp(45px, 8vw, 52px);
@@ -1413,38 +1413,58 @@ select.form-control option {
 
 @media (max-width: 480px) {
   .cover-overlay {
-    padding: 2.2rem 0.8rem 1.5rem;
+    padding: 2rem 0.75rem 1.25rem;
   }
 
   .cover-card {
-    padding: 2.4rem 1rem 1.4rem;
-    margin-top: 32px;
+    padding: 2.2rem 0.9rem 1.4rem;
+    margin-top: 28px;
   }
 
   .cover-badge-top {
-    width: 74px;
-    height: 74px;
-    top: -37px;
+    width: 72px;
+    height: 72px;
+    top: -36px;
   }
 
   .cover-badge-logo {
-    width: 48px;
-    height: 48px;
+    width: 46px;
+    height: 46px;
   }
 
   .cover-card-inner-frame {
-    inset: 7px;
+    inset: 6px;
     border-radius: 16px;
   }
 
   .recipient-badge-v2 {
-    padding: 1rem 0.9rem;
-    margin: 1.1rem 0 1.2rem;
+    padding: 0.95rem 0.85rem;
+    margin: 1rem 0 1.15rem;
+  }
+
+  .recipient-badge-v2 strong {
+    font-size: 1.18rem !important;
+    line-height: 1.35 !important;
   }
 
   .cover-btn-open {
     padding: 0.85rem 1.2rem;
     font-size: 0.88rem;
+  }
+
+  .section-title {
+    font-size: 1.85rem;
+    line-height: 1.25;
+  }
+
+  .hero-title {
+    font-size: 2.15rem;
+    line-height: 1.2;
+  }
+
+  .hero-quote {
+    font-size: 0.95rem;
+    line-height: 1.55;
   }
 
   .btn-outline {
@@ -1464,17 +1484,22 @@ select.form-control option {
   }
 
   .info-card {
-    padding: 1.4rem 1.1rem;
+    padding: 1.3rem 1rem;
   }
 
   .form-control {
-    padding: 0.85rem 1rem;
-    font-size: 0.95rem;
+    padding: 0.85rem 0.95rem;
+    font-size: 0.92rem;
+  }
+
+  select.form-control {
+    font-size: 0.9rem;
   }
 
   .btn-primary {
-    padding: 0.95rem 1.5rem;
+    padding: 0.95rem 1.4rem;
     font-size: 0.92rem;
+    letter-spacing: 0.08em;
   }
 
   .message-card {
@@ -1482,30 +1507,38 @@ select.form-control option {
   }
 
   .footer {
-    padding: 3.5rem 1.2rem 2.5rem;
+    padding: 3.2rem 1.2rem 2.2rem;
   }
 }
 
 @media (max-width: 360px) {
   .cover-card {
-    padding: 2.2rem 0.75rem 1.2rem;
+    padding: 2rem 0.7rem 1.2rem;
   }
 
   .recipient-badge-v2 strong {
-    font-size: 1.15rem !important;
+    font-size: 1.1rem !important;
+  }
+
+  .section-title {
+    font-size: 1.65rem;
+  }
+
+  .hero-title {
+    font-size: 1.95rem;
   }
 
   .countdown-box {
-    padding: 0.6rem 0.15rem;
+    padding: 0.55rem 0.15rem;
   }
 
   .countdown-lbl {
-    font-size: 0.62rem;
+    font-size: 0.6rem;
   }
 
   .hero-date {
-    font-size: 0.85rem;
-    padding: 0.4rem 0.8rem;
+    font-size: 0.82rem;
+    padding: 0.35rem 0.75rem;
   }
 }
 

@@ -1,13 +1,12 @@
 "use client";
-import React, { useState, useEffect, useRef, Suspense, useMemo } from 'react';
+import React, { useState, useEffect, Suspense, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 import { 
   Calendar, 
   Clock, 
   MapPin, 
   MailOpen, 
-  Volume2, 
-  VolumeX, 
+  Download,
   CheckCircle, 
   CheckCircle2,
   XCircle,
@@ -124,12 +123,10 @@ function SchoolSilhouette() {
 }
 
 function InvitationContent() {
-  // State Cover & Audio
+  // State Cover & Navigasi
   const [isCoverOpen, setIsCoverOpen] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [lastSubmitted, setLastSubmitted] = useState(null);
-  const audioRef = useRef(null);
 
   // Bersihkan sisa hash fragment (seperti #pesan-alumni) dari bilah URL browser jika ada
   useEffect(() => {
@@ -277,28 +274,320 @@ function InvitationContent() {
   // Handle Cover Open
   const handleOpenInvitation = () => {
     setIsCoverOpen(true);
-    if (audioRef.current) {
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch(() => {
-        setIsPlaying(false);
-      });
-    }
   };
 
-  // Toggle Music Play/Pause
-  const toggleAudio = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch(err => {
-        console.error('Audio play failed:', err);
-      });
+  // Download Bukti Konfirmasi Kehadiran sebagai PDF / Cetak Resmi
+  const handleDownloadPdf = (record) => {
+    if (!record) return;
+    const ticketId = `SMK6-WSD-${record.id ? String(record.id).slice(-4) : '2027'}`;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Izinkan pop-up peramban Anda untuk mengunduh PDF bukti konfirmasi kehadiran.');
+      return;
     }
+
+    const htmlContent = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bukti Konfirmasi Kehadiran - ${record.name}</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 1.2cm;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #0f172a;
+      background: #ffffff;
+      margin: 0;
+      padding: 16px;
+    }
+    .ticket-container {
+      max-width: 680px;
+      margin: 0 auto;
+      border: 2px solid #c59b27;
+      border-radius: 18px;
+      padding: 28px;
+      background: #ffffff;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(15, 43, 92, 0.08);
+    }
+    .ticket-container::before {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border: 1px dashed rgba(197, 155, 39, 0.45);
+      border-radius: 12px;
+      pointer-events: none;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 2px solid #0f2b5c;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+    .header-logo {
+      width: 65px;
+      height: 65px;
+      object-fit: contain;
+    }
+    .header-text h1 {
+      font-size: 18px;
+      color: #0f2b5c;
+      margin: 0 0 3px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 800;
+    }
+    .header-text h2 {
+      font-size: 13px;
+      color: #c59b27;
+      margin: 0 0 4px 0;
+      font-weight: 700;
+    }
+    .header-text p {
+      font-size: 11px;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.4;
+    }
+    .badge-bar {
+      text-align: center;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 22px;
+    }
+    .badge-bar h3 {
+      margin: 0 0 4px;
+      color: #0f2b5c;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .badge-bar span {
+      font-size: 11px;
+      color: #64748b;
+    }
+    .ticket-num {
+      display: inline-block;
+      background: #0f2b5c;
+      color: #ffffff;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-top: 6px;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    .data-table td {
+      padding: 8px 6px;
+      font-size: 13px;
+      vertical-align: top;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .data-table td.col-label {
+      width: 150px;
+      color: #64748b;
+      font-weight: 600;
+    }
+    .data-table td.col-val {
+      color: #0f2b5c;
+      font-weight: 700;
+    }
+    .status-alert {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      background: ${record.attendance === 'yes' ? '#ecfdf5' : '#fef2f2'};
+      border: 1.5px solid ${record.attendance === 'yes' ? '#a7f3d0' : '#fecaca'};
+    }
+    .status-alert-text {
+      font-size: 14px;
+      font-weight: 700;
+      color: ${record.attendance === 'yes' ? '#065f46' : '#991b1b'};
+    }
+    .status-alert-pax {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f2b5c;
+    }
+    .rules-section {
+      background: #fcfaf2;
+      border: 1px solid rgba(197, 155, 39, 0.35);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 22px;
+    }
+    .rules-section h4 {
+      margin: 0 0 6px;
+      font-size: 12px;
+      color: #0f2b5c;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .rules-section ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 11.5px;
+      color: #475569;
+      line-height: 1.6;
+    }
+    .footer-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 14px;
+    }
+    .footer-desc {
+      font-size: 10px;
+      color: #94a3b8;
+      max-width: 340px;
+      line-height: 1.45;
+    }
+    .footer-sign {
+      text-align: center;
+      font-size: 11px;
+      color: #334155;
+    }
+    .footer-sign .space {
+      height: 48px;
+    }
+    .no-print-bar {
+      margin-top: 16px;
+      text-align: center;
+    }
+    .print-btn {
+      padding: 10px 24px;
+      background: #0f2b5c;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(15, 43, 92, 0.2);
+    }
+    @media print {
+      body { padding: 0; }
+      .no-print-bar { display: none !important; }
+      .ticket-container { box-shadow: none; border-color: #0f2b5c; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ticket-container">
+    <div class="header">
+      <img class="header-logo" src="/images/smk6.png" alt="Logo SMK 6" onerror="this.style.display='none'">
+      <div class="header-text">
+        <h1>SMK NEGERI 6 SURAKARTA</h1>
+        <h2>Panitia Sidang Terbuka Wisuda & Pelepasan Siswa 2024/2027</h2>
+        <p>Jl. Adi Sucipto No. 38, Kelurahan Kerten, Kecamatan Laweyan, Kota Surakarta, Jawa Tengah</p>
+      </div>
+    </div>
+
+    <div class="badge-bar">
+      <h3>Bukti Resmi Konfirmasi Kehadiran (E-Tiket)</h3>
+      <span>Tunjukkan dokumen/tiket ini saat registrasi di lokasi acara</span><br>
+      <span class="ticket-num">${ticketId}</span>
+    </div>
+
+    <table class="data-table">
+      <tr>
+        <td class="col-label">Nama Siswa / Wisudawan</td>
+        <td class="col-val">: ${record.name}</td>
+      </tr>
+      <tr>
+        <td class="col-label">Kelas & Jurusan</td>
+        <td class="col-val">: ${record.student_class || 'XII RPL'}</td>
+      </tr>
+      <tr>
+        <td class="col-label">Hari, Tanggal Acara</td>
+        <td class="col-val">: Sabtu, 20 Juni 2027</td>
+      </tr>
+      <tr>
+        <td class="col-label">Waktu Pelaksanaan</td>
+        <td class="col-val">: 07:30 - 12:30 WIB (Pintu registrasi dibuka 07:00 WIB)</td>
+      </tr>
+      <tr>
+        <td class="col-label">Tempat Pelaksanaan</td>
+        <td class="col-val">: Gedung SMK Negeri 6 Surakarta</td>
+      </tr>
+      <tr>
+        <td class="col-label">Waktu Konfirmasi Masuk</td>
+        <td class="col-val">: ${record.created_at ? new Date(record.created_at).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' }) : new Date().toLocaleString('id-ID', { dateStyle: 'full' })}</td>
+      </tr>
+    </table>
+
+    <div class="status-alert">
+      <span class="status-alert-text">
+        ${record.attendance === 'yes' ? '✓ STATUS: PASTI HADIR' : '✕ STATUS: TIDAK DAPAT HADIR'}
+      </span>
+      ${record.attendance === 'yes' ? `<span class="status-alert-pax">🪑 Alokasi: ${record.pax || 3} Kursi (Siswa + Orang Tua)</span>` : ''}
+    </div>
+
+    <div class="rules-section">
+      <h4>Ketentuan Resmi Kehadiran:</h4>
+      <ul>
+        <li><strong>Pakaian Siswa:</strong> Mengenakan seragam putih dan almamater SMK Negeri 6 Surakarta.</li>
+        <li><strong>Pakaian Orang Tua / Wali:</strong> Mengenakan batik formal / kebaya rapi dan sopan.</li>
+        <li>Setiap wisudawan berhak atas maksimal <strong>3 kursi</strong> (1 kursi siswa + 2 kursi orang tua/wali pendamping).</li>
+        <li>Harap hadir paling lambat <strong>30 menit</strong> sebelum prosesi sidang dimulai demi kelancaran registrasi.</li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <div class="footer-desc">
+        *E-Tiket ini diterbitkan secara otomatis oleh sistem resmi panitia wisuda SMK Negeri 6 Surakarta sebagai bukti verifikasi kehadiran.
+      </div>
+      <div class="footer-sign">
+        <span>Surakarta, 20 Juni 2027</span><br>
+        <span>Ketua Panitia Wisuda,</span>
+        <div class="space"></div>
+        <strong>SMK Negeri 6 Surakarta</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="no-print-bar">
+    <button class="print-btn" onclick="window.print()">
+      🖨️ Simpan sebagai PDF / Cetak Tiket
+    </button>
+  </div>
+
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 400);
+    };
+  </script>
+</body>
+</html>`;
+
+    printWindow.document.open();
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
   };
 
   // Deteksi scroll untuk memunculkan tombol cepat ke atas (Scroll to Top)
@@ -448,45 +737,24 @@ function InvitationContent() {
 
   return (
     <div className="app-container">
-      {/* Background Audio */}
-      <audio 
-        ref={audioRef} 
-        src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=cinematic-time-lapse-115672.mp3" 
-        loop 
-        preload="auto"
-      />
-
-      {/* Floating Action Buttons: Scroll to Top & Audio */}
+      {/* Floating Action Button: Scroll to Top */}
       {isCoverOpen && (
-        <>
-          <AnimatePresence>
-            {showScrollTop && (
-              <motion.button 
-                initial={{ opacity: 0, scale: 0.6, y: 15 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.6, y: 15 }}
-                transition={{ duration: 0.25 }}
-                className="floating-scroll-top-btn"
-                onClick={scrollToTop}
-                title="Scroll Cepat ke Atas"
-                aria-label="Kembali ke Atas"
-              >
-                <ChevronUp size={24} />
-              </motion.button>
-            )}
-          </AnimatePresence>
-
-          <motion.button 
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className={`floating-music-btn ${isPlaying ? 'music-playing music-spinning' : 'music-paused'}`}
-            onClick={toggleAudio}
-            title={isPlaying ? "Jeda Musik" : "Putar Musik"}
-            aria-label="Musik Latar"
-          >
-            {isPlaying ? <Volume2 size={22} /> : <VolumeX size={22} />}
-          </motion.button>
-        </>
+        <AnimatePresence>
+          {showScrollTop && (
+            <motion.button 
+              initial={{ opacity: 0, scale: 0.6, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.6, y: 15 }}
+              transition={{ duration: 0.25 }}
+              className="floating-scroll-top-btn"
+              onClick={scrollToTop}
+              title="Scroll Cepat ke Atas"
+              aria-label="Kembali ke Atas"
+            >
+              <ChevronUp size={24} />
+            </motion.button>
+          )}
+        </AnimatePresence>
       )}
 
       {/* Gate Cover / Buka Undangan Modal */}
@@ -960,15 +1228,40 @@ function InvitationContent() {
                   )}
                 </div>
 
-                {/* Tombol Aksi */}
-                <div style={{ marginTop: '1.8rem', display: 'flex', justifyContent: 'center' }}>
+                {/* Tombol Aksi & Download PDF */}
+                <div style={{ marginTop: '1.8rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center' }}>
+                  <button 
+                    type="button"
+                    onClick={() => handleDownloadPdf(lastSubmitted)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.6rem',
+                      padding: '0.85rem 1.8rem',
+                      background: 'linear-gradient(135deg, #0f2b5c 0%, #1e3a8a 100%)',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '12px',
+                      fontSize: '0.95rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      boxShadow: '0 8px 20px rgba(15, 43, 92, 0.22)',
+                      width: '100%',
+                      maxWidth: '360px'
+                    }}
+                  >
+                    <Download size={19} />
+                    Download Bukti Konfirmasi (PDF)
+                  </button>
+
                   <button 
                     type="button"
                     onClick={() => {
                       setSubmitStatus(null);
                     }}
                     className="btn-outline"
-                    style={{ fontSize: '0.9rem', padding: '0.8rem 1.8rem' }}
+                    style={{ fontSize: '0.88rem', padding: '0.75rem 1.8rem', width: '100%', maxWidth: '360px' }}
                   >
                     Ubah / Kirim Konfirmasi Baru
                   </button>
@@ -1075,6 +1368,30 @@ function InvitationContent() {
                     <p style={{ margin: '0.8rem 0 0', fontSize: '0.82rem', color: '#92400e', lineHeight: '1.4' }}>
                       *Satu siswa hanya dapat mengisi konfirmasi 1 kali untuk mencegah duplikasi data kursi. Jika ada perubahan data, silakan hubungi panitia wisuda.
                     </p>
+
+                    <div style={{ marginTop: '1rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadPdf(alreadySubmittedData)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          padding: '0.65rem 1.15rem',
+                          background: '#0f2b5c',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '0.86rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          boxShadow: '0 4px 12px rgba(15, 43, 92, 0.15)'
+                        }}
+                      >
+                        <Download size={16} />
+                        Download Bukti Konfirmasi (PDF)
+                      </button>
+                    </div>
                   </div>
                 ) : selectedStudent ? (
                   <div className="verified-student-banner">
