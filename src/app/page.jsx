@@ -29,16 +29,15 @@ function FiligreeCorner({ position }) {
   
   return (
     <svg 
+      className={`filigree-corner filigree-${position}`}
       viewBox="0 0 70 70" 
       fill="none" 
       style={{
         position: 'absolute',
-        top: isBottom ? 'auto' : '10px',
-        bottom: isBottom ? '10px' : 'auto',
-        left: isRight ? 'auto' : '10px',
-        right: isRight ? '10px' : 'auto',
-        width: '44px',
-        height: '44px',
+        top: isBottom ? 'auto' : '8px',
+        bottom: isBottom ? '8px' : 'auto',
+        left: isRight ? 'auto' : '8px',
+        right: isRight ? '8px' : 'auto',
         transform: `${isRight ? 'scaleX(-1)' : ''} ${isBottom ? 'scaleY(-1)' : ''}`.trim() || undefined,
         pointerEvents: 'none',
         zIndex: 4
@@ -154,9 +153,7 @@ function InvitationContent() {
   // State Master Data Siswa & Verifikasi Kehadiran
   const [masterStudents, setMasterStudents] = useState([]);
   const [existingRsvps, setExistingRsvps] = useState([]);
-  const [selectedClass, setSelectedClass] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [searchStudentQuery, setSearchStudentQuery] = useState('');
   const [alreadySubmittedData, setAlreadySubmittedData] = useState(null);
 
   // Form RSVP state
@@ -197,43 +194,115 @@ function InvitationContent() {
     fetchExistingRsvps();
   }, []);
 
-  // Pencarian cepat siswa berdasarkan nama atau NIS
-  const filteredSearchStudents = useMemo(() => {
-    if (!searchStudentQuery.trim()) return [];
-    const q = searchStudentQuery.toLowerCase().trim();
-    return masterStudents.filter(s => 
-      s.name.toLowerCase().includes(q) || 
-      (s.nis && s.nis.includes(q))
-    ).slice(0, 6);
-  }, [searchStudentQuery, masterStudents]);
+  // Helper normalisasi nama agar pencocokan nama siswa fleksibel & tidak sensitif tanda petik/spasi
+  const cleanName = (str) => {
+    if (!str) return '';
+    return str
+      .toLowerCase()
+      .replace(/['’`.]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
 
-  // Handler memilih siswa
-  const handleSelectStudent = (student) => {
-    if (!student) {
+  // Tab RSVP: 'form' (Isi Formulir) | 'ticket' (Cek & Unduh E-Tiket Tamu)
+  const [rsvpActiveTab, setRsvpActiveTab] = useState('form');
+  const [guestTicketSearch, setGuestTicketSearch] = useState('');
+  const [searchedGuestTicket, setSearchedGuestTicket] = useState(null);
+  const [ticketSearchError, setTicketSearchError] = useState('');
+
+  // Handler saat siswa mengetikkan nama di kolom input teks
+  const handleNameInputChange = (e) => {
+    const rawVal = e.target.value;
+    setFormData(prev => ({ ...prev, name: rawVal }));
+
+    const trimmed = rawVal.trim();
+    if (!trimmed) {
       setSelectedStudent(null);
       setAlreadySubmittedData(null);
-      setFormData(prev => ({ ...prev, name: '', student_class: selectedClass }));
       return;
     }
 
-    setSelectedStudent(student);
-    setSelectedClass(student.student_class);
-    setSearchStudentQuery('');
+    const cleaned = cleanName(trimmed);
+    const matched = masterStudents.find(s => cleanName(s.name) === cleaned);
+
+    if (matched) {
+      setSelectedStudent(matched);
+      // Auto-isi kelas jika belum diisi oleh siswa
+      setFormData(prev => ({
+        ...prev,
+        student_class: prev.student_class || matched.student_class || 'XII RPL'
+      }));
+
+      // Cek apakah siswa sudah pernah mengirim konfirmasi kehadiran
+      const foundRsvp = existingRsvps.find(r => 
+        cleanName(r.name) === cleanName(matched.name) ||
+        cleanName(r.name) === cleaned
+      );
+
+      if (foundRsvp) {
+        setAlreadySubmittedData(foundRsvp);
+      } else {
+        setAlreadySubmittedData(null);
+      }
+    } else {
+      setSelectedStudent(null);
+      // Cek apakah nama yang diketik langsung cocok dengan RSVP yang ada
+      const foundRsvp = existingRsvps.find(r => cleanName(r.name) === cleaned);
+      if (foundRsvp) {
+        setAlreadySubmittedData(foundRsvp);
+      } else {
+        setAlreadySubmittedData(null);
+      }
+    }
+  };
+
+  // Saran nama otomatis saat siswa mulai mengetik (minimal 2 huruf)
+  const nameSuggestions = useMemo(() => {
+    const trimmed = formData.name.trim();
+    if (trimmed.length < 2 || selectedStudent) return [];
+    const cleaned = cleanName(trimmed);
+    return masterStudents
+      .filter(s => cleanName(s.name).includes(cleaned))
+      .slice(0, 4);
+  }, [formData.name, selectedStudent, masterStudents]);
+
+  // Handler memilih saran nama
+  const handleSelectSuggestion = (student) => {
+    if (!student) return;
     setFormData(prev => ({
       ...prev,
       name: student.name,
-      student_class: student.student_class
+      student_class: student.student_class || prev.student_class || 'XII RPL'
     }));
+    setSelectedStudent(student);
 
-    // Periksa apakah siswa sudah pernah mengirim konfirmasi kehadiran (berdasarkan kecocokan nama)
     const foundRsvp = existingRsvps.find(r => 
-      r.name?.trim().toLowerCase() === student.name.trim().toLowerCase()
+      cleanName(r.name) === cleanName(student.name)
     );
-
     if (foundRsvp) {
       setAlreadySubmittedData(foundRsvp);
     } else {
       setAlreadySubmittedData(null);
+    }
+  };
+
+  // Handler cari E-Tiket Tamu untuk diunduh langsung
+  const handleSearchGuestTicket = (e) => {
+    if (e) e.preventDefault();
+    const q = cleanName(guestTicketSearch);
+    if (!q) {
+      setTicketSearchError('Silakan masukkan nama siswa / tamu terlebih dahulu.');
+      setSearchedGuestTicket(null);
+      return;
+    }
+
+    const found = existingRsvps.find(r => cleanName(r.name).includes(q));
+    if (found) {
+      setSearchedGuestTicket(found);
+      setTicketSearchError('');
+    } else {
+      setSearchedGuestTicket(null);
+      setTicketSearchError('Data konfirmasi kehadiran untuk nama tersebut tidak ditemukan. Pastikan nama sudah mengisi kehadiran.');
     }
   };
 
@@ -619,8 +688,23 @@ function InvitationContent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedStudent) {
-      alert('Silakan pilih nama siswa dari daftar calon wisudawan terlebih dahulu.');
+
+    const trimmedName = formData.name?.trim();
+    if (!trimmedName) {
+      alert('Silakan ketik nama lengkap siswa terlebih dahulu.');
+      return;
+    }
+
+    if (!formData.student_class?.trim()) {
+      alert('Silakan masukkan kelas & jurusan terlebih dahulu.');
+      return;
+    }
+
+    const cleaned = cleanName(trimmedName);
+    const matched = masterStudents.find(s => cleanName(s.name) === cleaned);
+
+    if (!matched) {
+      alert('Nama tidak ditemukan dalam 16 calon wisudawan resmi SMK Negeri 6 Surakarta. Mohon pastikan ejaan nama lengkap sudah sesuai.');
       return;
     }
 
@@ -629,19 +713,10 @@ function InvitationContent() {
       return;
     }
 
-    // Validasi apakah nama terdaftar dalam master data siswa
-    const isRegistered = masterStudents.some(s => 
-      s.name.trim().toLowerCase() === formData.name.trim().toLowerCase()
-    );
-
-    if (!isRegistered) {
-      alert('Nama tidak ditemukan dalam daftar calon wisudawan resmi SMK Negeri 6 Surakarta.');
-      return;
-    }
-
     // Validasi duplikat agar tidak ada siswa mengisi lebih dari 1 kali (fokus nama)
     const isDuplicate = existingRsvps.some(r =>
-      r.name?.trim().toLowerCase() === formData.name.trim().toLowerCase()
+      cleanName(r.name) === cleanName(matched.name) ||
+      cleanName(r.name) === cleaned
     );
 
     if (isDuplicate) {
@@ -653,8 +728,8 @@ function InvitationContent() {
     setSubmitStatus(null);
 
     const paxNum = formData.attendance === 'yes' ? parseInt(formData.pax, 10) : 0;
-    const nameVal = formData.name?.trim() || selectedStudent.name;
-    const classVal = formData.student_class?.trim() || selectedStudent.student_class;
+    const nameVal = matched.name || trimmedName;
+    const classVal = formData.student_class?.trim() || matched.student_class || 'XII RPL';
     const messageVal = formData.message?.trim() || '';
 
     const payload = {
@@ -1166,353 +1241,462 @@ function InvitationContent() {
             viewport={{ once: true }}
             variants={fadeInUp}
           >
+            {/* Segment Switcher: Formulir RSVP vs Cek & Unduh E-Tiket Tamu */}
+            <div className="rsvp-tab-switcher">
+              <button
+                type="button"
+                className={`rsvp-tab-btn ${rsvpActiveTab === 'form' ? 'active' : ''}`}
+                onClick={() => setRsvpActiveTab('form')}
+              >
+                <CheckCircle2 size={16} />
+                Isi Konfirmasi Kehadiran
+              </button>
+              <button
+                type="button"
+                className={`rsvp-tab-btn ${rsvpActiveTab === 'ticket' ? 'active' : ''}`}
+                onClick={() => setRsvpActiveTab('ticket')}
+              >
+                <Download size={16} />
+                Cek & Download E-Tiket Tamu (PDF)
+              </button>
+            </div>
+
             {submitStatus === 'error' && (
               <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="error-message">
                 Maaf, terjadi kendala saat menyimpan data ke Supabase. Silakan periksa koneksi internet Anda atau coba lagi.
               </motion.div>
             )}
 
-            {submitStatus === 'success' && lastSubmitted ? (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                transition={{ duration: 0.35 }}
-                className="rsvp-confirmed-card"
-              >
-                <div className="confirmed-icon-wrapper">
-                  <CheckCircle size={40} style={{ color: '#059669' }} />
-                </div>
-
-                <h3 style={{ fontSize: '1.6rem', color: 'var(--color-primary-dark)', marginBottom: '0.4rem', fontFamily: 'var(--font-heading)' }}>
-                  Konfirmasi Kehadiran Terkirim!
-                </h3>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.92rem', marginBottom: '1.4rem', lineHeight: '1.6' }}>
-                  Data konfirmasi Anda telah berhasil tercatat resmi di sistem panitia wisuda SMK Negeri 6 Surakarta.
-                </p>
-
-                {/* Ringkasan Bukti Konfirmasi */}
-                <div className="confirmed-details-box">
-                  <div className="confirmed-detail-row">
-                    <span className="confirmed-detail-label">Nama Lengkap:</span>
-                    <strong className="confirmed-detail-value">{lastSubmitted.name}</strong>
-                  </div>
-
-                  <div className="confirmed-detail-row">
-                    <span className="confirmed-detail-label">Kelas & Jurusan:</span>
-                    <span className="confirmed-detail-badge">{lastSubmitted.student_class}</span>
-                  </div>
-
-                  <div className="confirmed-detail-row">
-                    <span className="confirmed-detail-label">Status Kehadiran:</span>
-                    <span className={`confirmed-status-pill ${lastSubmitted.attendance === 'yes' ? 'status-hadir' : 'status-absen'}`}>
-                      {lastSubmitted.attendance === 'yes' ? '✓ Hadir' : '✕ Tidak Dapat Hadir'}
-                    </span>
-                  </div>
-
-                  {lastSubmitted.attendance === 'yes' && (
-                    <div className="confirmed-detail-row">
-                      <span className="confirmed-detail-label">Total Kursi:</span>
-                      <strong className="confirmed-detail-value" style={{ color: 'var(--color-primary)' }}>
-                        🪑 {lastSubmitted.pax} Kursi (Siswa + Pendamping)
-                      </strong>
-                    </div>
-                  )}
-
-                  {lastSubmitted.message && (
-                    <div className="confirmed-detail-row" style={{ flexDirection: 'column', alignItems: 'flex-start', borderBottom: 'none' }}>
-                      <span className="confirmed-detail-label" style={{ marginBottom: '0.35rem' }}>Pesan / Kesan:</span>
-                      <p style={{ fontStyle: 'italic', color: 'var(--color-text-muted)', fontSize: '0.92rem', lineHeight: '1.6', margin: 0 }}>
-                        "{lastSubmitted.message}"
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Tombol Aksi & Download PDF */}
-                <div style={{ marginTop: '1.8rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center' }}>
-                  <button 
-                    type="button"
-                    onClick={() => handleDownloadPdf(lastSubmitted)}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.6rem',
-                      padding: '0.85rem 1.8rem',
-                      background: 'linear-gradient(135deg, #0f2b5c 0%, #1e3a8a 100%)',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '12px',
-                      fontSize: '0.95rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      boxShadow: '0 8px 20px rgba(15, 43, 92, 0.22)',
-                      width: '100%',
-                      maxWidth: '360px'
-                    }}
+            {/* TAB 1: FORMULIR RSVP KEHADIRAN */}
+            {rsvpActiveTab === 'form' && (
+              <>
+                {submitStatus === 'success' && lastSubmitted ? (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }} 
+                    animate={{ opacity: 1, scale: 1 }} 
+                    transition={{ duration: 0.35 }}
+                    className="rsvp-confirmed-card"
                   >
-                    <Download size={19} />
-                    Download Bukti Konfirmasi (PDF)
-                  </button>
-
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      setSubmitStatus(null);
-                    }}
-                    className="btn-outline"
-                    style={{ fontSize: '0.88rem', padding: '0.75rem 1.8rem', width: '100%', maxWidth: '360px' }}
-                  >
-                    Ubah / Kirim Konfirmasi Baru
-                  </button>
-                </div>
-              </motion.div>
-            ) : (
-              <form onSubmit={handleSubmit}>
-                {/* 1. Pemilih Nama Calon Wisudawan Langsung */}
-                <div className="form-group">
-                  <label className="form-label" htmlFor="select_student">
-                    Pilih Nama Calon Wisudawan
-                  </label>
-                  <select 
-                    id="select_student" 
-                    className="form-control"
-                    value={selectedStudent ? selectedStudent.id : ''} 
-                    onChange={(e) => {
-                      const sId = e.target.value;
-                      const sObj = masterStudents.find(s => s.id === sId) || null;
-                      handleSelectStudent(sObj);
-                    }}
-                    required
-                  >
-                    <option value="">-- Pilih Nama Anda (16 Calon Wisudawan) --</option>
-                    {masterStudents.map((s, idx) => (
-                      <option key={s.id} value={s.id}>
-                        {idx + 1}. {s.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* 2. Pencarian Cepat Nama Siswa (Alternatif) */}
-                <div className="student-search-box">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
-                    <Search size={15} style={{ color: 'var(--color-secondary)' }} />
-                    <span style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
-                      Atau Cari Cepat Nama:
-                    </span>
-                  </div>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Ketik nama Anda untuk mencari..."
-                    value={searchStudentQuery}
-                    onChange={(e) => setSearchStudentQuery(e.target.value)}
-                    style={{ fontSize: '0.88rem', padding: '0.65rem 0.9rem' }}
-                  />
-                  {filteredSearchStudents.length > 0 && (
-                    <div className="student-suggestions-dropdown">
-                      {filteredSearchStudents.map(st => (
-                        <div
-                          key={st.id}
-                          className="student-suggestion-item"
-                          onClick={() => handleSelectStudent(st)}
-                        >
-                          <div>
-                            <div className="student-suggestion-name">{st.name}</div>
-                          </div>
-                          <span className="student-suggestion-class">{st.student_class}</span>
-                        </div>
-                      ))}
+                    <div className="confirmed-icon-wrapper">
+                      <CheckCircle size={40} style={{ color: '#059669' }} />
                     </div>
-                  )}
-                </div>
 
-                {/* Notifikasi Status Verifikasi & Duplikasi */}
-                {alreadySubmittedData ? (
-                  <div className="already-submitted-notice">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#b45309', fontWeight: 700, fontSize: '0.98rem', marginBottom: '0.4rem' }}>
-                      <AlertCircle size={22} style={{ flexShrink: 0, color: '#d97706' }} />
-                      <span>Konfirmasi Kehadiran Sudah Pernah Dikirim</span>
-                    </div>
-                    <p style={{ margin: '0.3rem 0 0.8rem', color: '#4b5563', fontSize: '0.9rem', lineHeight: '1.55' }}>
-                      Siswa atas nama <strong>{selectedStudent?.name}</strong> sudah tercatat mengirim konfirmasi kehadiran sebelumnya.
+                    <h3 style={{ fontSize: '1.6rem', color: 'var(--color-primary-dark)', marginBottom: '0.4rem', fontFamily: 'var(--font-heading)' }}>
+                      Konfirmasi Kehadiran Terkirim!
+                    </h3>
+                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.92rem', marginBottom: '1.4rem', lineHeight: '1.6' }}>
+                      Data konfirmasi Anda telah berhasil tercatat resmi di sistem panitia wisuda SMK Negeri 6 Surakarta.
                     </p>
-                    <div style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: '0.6rem',
-                      background: '#ffffff',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '10px',
-                      border: '1px solid #fde68a',
-                      fontSize: '0.86rem'
-                    }}>
-                      <span>Status: <strong style={{ color: alreadySubmittedData.attendance === 'yes' ? '#059669' : '#dc2626' }}>
-                        {alreadySubmittedData.attendance === 'yes' ? '✓ Pasti Hadir' : '✕ Tidak Hadir'}
-                      </strong></span>
-                      {alreadySubmittedData.attendance === 'yes' && (
-                        <span>| Kursi: <strong>{alreadySubmittedData.pax} Kursi</strong></span>
-                      )}
-                      {alreadySubmittedData.created_at && (
-                        <span style={{ color: '#6b7280' }}>
-                          | Waktu: {new Date(alreadySubmittedData.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+
+                    {/* Ringkasan Bukti Konfirmasi */}
+                    <div className="confirmed-details-box">
+                      <div className="confirmed-detail-row">
+                        <span className="confirmed-detail-label">Nama Lengkap:</span>
+                        <strong className="confirmed-detail-value">{lastSubmitted.name}</strong>
+                      </div>
+
+                      <div className="confirmed-detail-row">
+                        <span className="confirmed-detail-label">Kelas & Jurusan:</span>
+                        <span className="confirmed-detail-badge">{lastSubmitted.student_class}</span>
+                      </div>
+
+                      <div className="confirmed-detail-row">
+                        <span className="confirmed-detail-label">Status Kehadiran:</span>
+                        <span className={`confirmed-status-pill ${lastSubmitted.attendance === 'yes' ? 'status-hadir' : 'status-absen'}`}>
+                          {lastSubmitted.attendance === 'yes' ? '✓ Hadir' : '✕ Tidak Dapat Hadir'}
                         </span>
+                      </div>
+
+                      {lastSubmitted.attendance === 'yes' && (
+                        <div className="confirmed-detail-row">
+                          <span className="confirmed-detail-label">Total Kursi:</span>
+                          <strong className="confirmed-detail-value" style={{ color: 'var(--color-primary)' }}>
+                            🪑 {lastSubmitted.pax} Kursi (Siswa + Pendamping)
+                          </strong>
+                        </div>
+                      )}
+
+                      {lastSubmitted.message && (
+                        <div className="confirmed-detail-row" style={{ flexDirection: 'column', alignItems: 'flex-start', borderBottom: 'none' }}>
+                          <span className="confirmed-detail-label" style={{ marginBottom: '0.35rem' }}>Pesan / Kesan:</span>
+                          <p style={{ fontStyle: 'italic', color: 'var(--color-text-muted)', fontSize: '0.92rem', lineHeight: '1.6', margin: 0 }}>
+                            "{lastSubmitted.message}"
+                          </p>
+                        </div>
                       )}
                     </div>
-                    {alreadySubmittedData.message && (
-                      <p style={{ margin: '0.6rem 0 0', fontStyle: 'italic', fontSize: '0.88rem', color: '#6b7280' }}>
-                        Pesan: "{alreadySubmittedData.message}"
-                      </p>
-                    )}
-                    <p style={{ margin: '0.8rem 0 0', fontSize: '0.82rem', color: '#92400e', lineHeight: '1.4' }}>
-                      *Satu siswa hanya dapat mengisi konfirmasi 1 kali untuk mencegah duplikasi data kursi. Jika ada perubahan data, silakan hubungi panitia wisuda.
-                    </p>
 
-                    <div style={{ marginTop: '1rem' }}>
-                      <button
+                    {/* Tombol Aksi & Download PDF */}
+                    <div style={{ marginTop: '1.8rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center' }}>
+                      <button 
                         type="button"
-                        onClick={() => handleDownloadPdf(alreadySubmittedData)}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          padding: '0.65rem 1.15rem',
-                          background: '#0f2b5c',
-                          color: '#ffffff',
-                          border: 'none',
-                          borderRadius: '8px',
-                          fontSize: '0.86rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          boxShadow: '0 4px 12px rgba(15, 43, 92, 0.15)'
-                        }}
+                        onClick={() => handleDownloadPdf(lastSubmitted)}
+                        className="btn-download-pdf-prominent"
                       >
-                        <Download size={16} />
+                        <Download size={19} />
                         Download Bukti Konfirmasi (PDF)
                       </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setSubmitStatus(null);
+                        }}
+                        className="btn-outline"
+                        style={{ fontSize: '0.88rem', padding: '0.75rem 1.8rem', width: '100%', maxWidth: '380px' }}
+                      >
+                        Ubah / Kirim Konfirmasi Baru
+                      </button>
                     </div>
-                  </div>
-                ) : selectedStudent ? (
-                  <div className="verified-student-banner">
-                    <CheckCircle2 size={19} style={{ color: '#059669', flexShrink: 0 }} />
-                    <span>
-                      Terverifikasi sebagai calon wisudawan resmi: <strong>{selectedStudent.name}</strong>
-                    </span>
-                  </div>
+                  </motion.div>
                 ) : (
-                  <div style={{
-                    padding: '0.85rem 1rem',
-                    background: '#f8fafc',
-                    border: '1px dashed #cbd5e1',
-                    borderRadius: '12px',
-                    fontSize: '0.88rem',
-                    color: '#64748b',
-                    textAlign: 'left',
-                    marginBottom: '1.25rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    <Info size={18} style={{ color: '#0f2b5c', flexShrink: 0 }} />
-                    <span>Pilih nama Anda dari daftar 16 calon wisudawan di atas untuk membuka formulir kehadiran.</span>
-                  </div>
-                )}
+                  <form onSubmit={handleSubmit}>
+                    {/* 1. Input Teks Nama Calon Wisudawan (Cukup mengetik saja tanpa dropdown) */}
+                    <div className="form-group" style={{ textAlign: 'left' }}>
+                      <label className="form-label" htmlFor="student_name">
+                        Nama Lengkap Calon Wisudawan <span style={{ color: '#dc2626' }}>*</span>
+                      </label>
+                      <input 
+                        type="text"
+                        id="student_name" 
+                        name="name"
+                        className="form-control"
+                        placeholder="Ketik nama lengkap Anda (contoh: Muhammad Zidane)..."
+                        value={formData.name} 
+                        onChange={handleNameInputChange}
+                        autoComplete="off"
+                        required
+                      />
 
-                {/* Pilihan Status Kehadiran Interaktif (Hanya aktif jika nama terverifikasi & belum pernah mengisi) */}
-                <div className="form-group" style={{ opacity: (!selectedStudent || alreadySubmittedData) ? 0.55 : 1 }}>
-                  <label className="form-label">Konfirmasi Kehadiran</label>
-                  <div className="attendance-toggle-grid">
-                    <button
-                      type="button"
-                      disabled={!selectedStudent || !!alreadySubmittedData}
-                      className={`attendance-option-btn ${formData.attendance === 'yes' ? 'selected-yes' : ''}`}
-                      onClick={() => setFormData(prev => ({ ...prev, attendance: 'yes', pax: prev.pax === '0' ? '3' : prev.pax }))}
-                    >
-                      <CheckCircle2 size={24} className="attendance-icon" />
-                      <div>
-                        <span className="attendance-title">Ya, Saya Hadir</span>
-                        <span className="attendance-desc">Akan hadir memenuhi undangan</span>
+                      {/* Saran Nama Cepat saat Mengetik */}
+                      {nameSuggestions.length > 0 && (
+                        <div className="name-suggestion-chips">
+                          <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>Saran nama:</span>
+                          {nameSuggestions.map(st => (
+                            <button
+                              key={st.id}
+                              type="button"
+                              className="name-suggestion-chip"
+                              onClick={() => handleSelectSuggestion(st)}
+                            >
+                              {st.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Status Verifikasi Nama Calon Wisudawan */}
+                      {selectedStudent ? (
+                        <div className="verified-student-banner">
+                          <CheckCircle2 size={18} style={{ color: '#059669', flexShrink: 0 }} />
+                          <span>
+                            Terverifikasi resmi: <strong>{selectedStudent.name}</strong> (Calon Wisudawan SMK 6)
+                          </span>
+                        </div>
+                      ) : formData.name.trim().length >= 3 && !alreadySubmittedData ? (
+                        <div className="unverified-student-banner">
+                          <AlertCircle size={17} style={{ color: '#d97706', flexShrink: 0 }} />
+                          <span>
+                            Nama belum cocok dengan 16 calon wisudawan resmi SMK Negeri 6 Surakarta. Mohon ketik nama lengkap sesuai ijazah.
+                          </span>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {/* 2. Input Kelas & Jurusan */}
+                    <div className="form-group" style={{ textAlign: 'left' }}>
+                      <label className="form-label" htmlFor="student_class">
+                        Kelas & Jurusan <span style={{ color: '#dc2626' }}>*</span>
+                      </label>
+                      <input 
+                        type="text"
+                        id="student_class" 
+                        name="student_class"
+                        className="form-control"
+                        placeholder="Contoh: XII RPL"
+                        value={formData.student_class} 
+                        onChange={handleInputChange}
+                        autoComplete="off"
+                        required
+                      />
+                      <div className="class-quick-tags">
+                        <span style={{ fontSize: '0.74rem', color: '#64748b', marginRight: '4px', alignSelf: 'center', fontWeight: 500 }}>
+                          Pilihan Cepat:
+                        </span>
+                        {['XII RPL', 'XII RPL 1', 'XII RPL 2', 'XII AKL', 'XII MP', 'XII DKV'].map(cls => (
+                          <button
+                            key={cls}
+                            type="button"
+                            className={`class-tag-pill ${formData.student_class === cls ? 'active' : ''}`}
+                            onClick={() => setFormData(prev => ({ ...prev, student_class: cls }))}
+                          >
+                            {cls}
+                          </button>
+                        ))}
                       </div>
-                    </button>
+                    </div>
 
-                    <button
-                      type="button"
-                      disabled={!selectedStudent || !!alreadySubmittedData}
-                      className={`attendance-option-btn ${formData.attendance === 'no' ? 'selected-no' : ''}`}
-                      onClick={() => setFormData(prev => ({ ...prev, attendance: 'no' }))}
-                    >
-                      <XCircle size={24} className="attendance-icon" />
-                      <div>
-                        <span className="attendance-title">Tidak Dapat Hadir</span>
-                        <span className="attendance-desc">Mohon maaf berhalangan</span>
+                    {/* Notifikasi Bila Siswa Sudah Pernah Mengisi Kehadiran */}
+                    {alreadySubmittedData && (
+                      <div className="already-submitted-notice">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#b45309', fontWeight: 700, fontSize: '0.96rem', marginBottom: '0.4rem' }}>
+                          <AlertCircle size={20} style={{ flexShrink: 0, color: '#d97706' }} />
+                          <span>Konfirmasi Kehadiran Sudah Pernah Dikirim</span>
+                        </div>
+                        <p style={{ margin: '0.2rem 0 0.75rem', color: '#4b5563', fontSize: '0.88rem', lineHeight: '1.5' }}>
+                          Siswa atas nama <strong>{alreadySubmittedData.name}</strong> sudah tercatat mengirim konfirmasi kehadiran sebelumnya.
+                        </p>
+                        <div style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: '0.5rem',
+                          background: '#ffffff',
+                          padding: '0.75rem 0.9rem',
+                          borderRadius: '10px',
+                          border: '1px solid #fde68a',
+                          fontSize: '0.85rem'
+                        }}>
+                          <span>Status: <strong style={{ color: alreadySubmittedData.attendance === 'yes' ? '#059669' : '#dc2626' }}>
+                            {alreadySubmittedData.attendance === 'yes' ? '✓ Pasti Hadir' : '✕ Tidak Hadir'}
+                          </strong></span>
+                          {alreadySubmittedData.attendance === 'yes' && (
+                            <span>| Kursi: <strong>{alreadySubmittedData.pax} Kursi</strong></span>
+                          )}
+                          {alreadySubmittedData.created_at && (
+                            <span style={{ color: '#6b7280' }}>
+                              | Waktu: {new Date(alreadySubmittedData.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </span>
+                          )}
+                        </div>
+                        {alreadySubmittedData.message && (
+                          <p style={{ margin: '0.6rem 0 0', fontStyle: 'italic', fontSize: '0.85rem', color: '#6b7280' }}>
+                            Pesan: "{alreadySubmittedData.message}"
+                          </p>
+                        )}
+                        <p style={{ margin: '0.75rem 0 0', fontSize: '0.8rem', color: '#92400e', lineHeight: '1.4' }}>
+                          *Satu siswa hanya dapat mengisi konfirmasi 1 kali demi mencegah duplikasi kursi. Silakan unduh bukti tiket resmi Anda melalui tombol di bawah:
+                        </p>
+
+                        <div style={{ marginTop: '0.9rem' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleDownloadPdf(alreadySubmittedData)}
+                            className="btn-download-pdf-prominent"
+                            style={{ maxWidth: '100%' }}
+                          >
+                            <Download size={18} />
+                            Download Bukti Konfirmasi / E-Tiket (PDF)
+                          </button>
+                        </div>
                       </div>
-                    </button>
-                  </div>
-                </div>
+                    )}
 
-                {/* Pemilih Kursi Interaktif (Hanya tampil jika hadir) */}
-                {formData.attendance === 'yes' && (
-                  <div className="form-group" style={{ opacity: (!selectedStudent || alreadySubmittedData) ? 0.55 : 1 }}>
-                    <label className="form-label">Alokasi Kursi yang Dibutuhkan</label>
-                    <div className="pax-selector-grid">
-                      {[
-                        { count: '1', title: '1 Kursi', desc: 'Hanya Siswa' },
-                        { count: '2', title: '2 Kursi', desc: 'Siswa + 1 Orang Tua' },
-                        { count: '3', title: '3 Kursi', desc: 'Siswa + 2 Orang Tua' },
-                      ].map(item => (
+                    {/* 3. Pilihan Status Kehadiran Interaktif */}
+                    <div className="form-group" style={{ opacity: (!selectedStudent || alreadySubmittedData) ? 0.6 : 1, textAlign: 'left' }}>
+                      <label className="form-label">Konfirmasi Kehadiran</label>
+                      <div className="attendance-toggle-grid">
                         <button
-                          key={item.count}
                           type="button"
                           disabled={!selectedStudent || !!alreadySubmittedData}
-                          className={`pax-card-btn ${formData.pax === item.count ? 'active' : ''}`}
-                          onClick={() => setFormData(prev => ({ ...prev, pax: item.count }))}
+                          className={`attendance-option-btn ${formData.attendance === 'yes' ? 'selected-yes' : ''}`}
+                          onClick={() => setFormData(prev => ({ ...prev, attendance: 'yes', pax: prev.pax === '0' ? '3' : prev.pax }))}
                         >
-                          <Armchair size={22} className="pax-icon" />
-                          <span className="pax-num">{item.title}</span>
-                          <span className="pax-desc">{item.desc}</span>
+                          <CheckCircle2 size={24} className="attendance-icon" />
+                          <div>
+                            <span className="attendance-title">Ya, Saya Hadir</span>
+                            <span className="attendance-desc">Akan hadir memenuhi undangan</span>
+                          </div>
                         </button>
-                      ))}
+
+                        <button
+                          type="button"
+                          disabled={!selectedStudent || !!alreadySubmittedData}
+                          className={`attendance-option-btn ${formData.attendance === 'no' ? 'selected-no' : ''}`}
+                          onClick={() => setFormData(prev => ({ ...prev, attendance: 'no' }))}
+                        >
+                          <XCircle size={24} className="attendance-icon" />
+                          <div>
+                            <span className="attendance-title">Tidak Dapat Hadir</span>
+                            <span className="attendance-desc">Mohon maaf berhalangan</span>
+                          </div>
+                        </button>
+                      </div>
                     </div>
-                    <small style={{ display: 'block', marginTop: '0.45rem', color: 'var(--color-text-light)', fontSize: '0.8rem', textAlign: 'left' }}>
-                      *Kapasitas maksimal 3 kursi per wisudawan (1 wisudawan + 2 orang tua / wali pendamping).
-                    </small>
+
+                    {/* 4. Pemilih Kursi Interaktif (Hanya tampil jika hadir) */}
+                    {formData.attendance === 'yes' && (
+                      <div className="form-group" style={{ opacity: (!selectedStudent || alreadySubmittedData) ? 0.6 : 1, textAlign: 'left' }}>
+                        <label className="form-label">Alokasi Kursi yang Dibutuhkan</label>
+                        <div className="pax-selector-grid">
+                          {[
+                            { count: '1', title: '1 Kursi', desc: 'Hanya Siswa' },
+                            { count: '2', title: '2 Kursi', desc: 'Siswa + 1 Orang Tua' },
+                            { count: '3', title: '3 Kursi', desc: 'Siswa + 2 Orang Tua' },
+                          ].map(item => (
+                            <button
+                              key={item.count}
+                              type="button"
+                              disabled={!selectedStudent || !!alreadySubmittedData}
+                              className={`pax-card-btn ${formData.pax === item.count ? 'active' : ''}`}
+                              onClick={() => setFormData(prev => ({ ...prev, pax: item.count }))}
+                            >
+                              <Armchair size={22} className="pax-icon" />
+                              <span className="pax-num">{item.title}</span>
+                              <span className="pax-desc">{item.desc}</span>
+                            </button>
+                          ))}
+                        </div>
+                        <small style={{ display: 'block', marginTop: '0.45rem', color: 'var(--color-text-light)', fontSize: '0.8rem', textAlign: 'left' }}>
+                          *Kapasitas maksimal 3 kursi per wisudawan (1 wisudawan + 2 orang tua / wali pendamping).
+                        </small>
+                      </div>
+                    )}
+
+                    {/* 5. Pesan / Ucapan */}
+                    <div className="form-group" style={{ opacity: (!selectedStudent || alreadySubmittedData) ? 0.6 : 1, textAlign: 'left' }}>
+                      <label className="form-label" htmlFor="message">Pesan / Kesan untuk Sekolah (Opsional)</label>
+                      <textarea 
+                        id="message" 
+                        name="message" 
+                        className="form-control" 
+                        rows="3" 
+                        disabled={!selectedStudent || !!alreadySubmittedData}
+                        placeholder="Tuliskan ucapan terima kasih untuk bapak/ibu guru atau kenangan manis selama bersekolah..."
+                        value={formData.message}
+                        onChange={handleInputChange}
+                      ></textarea>
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      className="btn-primary" 
+                      disabled={isSubmitting || !selectedStudent || !!alreadySubmittedData} 
+                      style={{ 
+                        marginTop: '0.6rem',
+                        opacity: (!selectedStudent || !!alreadySubmittedData) ? 0.6 : 1,
+                        cursor: (!selectedStudent || !!alreadySubmittedData) ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {isSubmitting 
+                        ? 'Mengirim Konfirmasi...' 
+                        : alreadySubmittedData 
+                          ? 'Konfirmasi Sudah Terisi (Terkunci)' 
+                          : !selectedStudent 
+                            ? 'Ketik Nama Calon Wisudawan Terlebih Dahulu' 
+                            : 'Kirim Konfirmasi Kehadiran'}
+                    </button>
+                  </form>
+                )}
+              </>
+            )}
+
+            {/* TAB 2: CEK & UNDUH E-TIKET TAMU (PDF) */}
+            {rsvpActiveTab === 'ticket' && (
+              <div style={{ textAlign: 'left' }}>
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '14px',
+                  padding: '1.25rem 1.1rem',
+                  marginBottom: '1.4rem'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem', color: 'var(--color-primary-dark)' }}>
+                    <Download size={20} style={{ color: 'var(--color-secondary)' }} />
+                    <h4 style={{ margin: 0, fontSize: '1.08rem', fontWeight: 700 }}>
+                      Cari & Download Bukti Kehadiran (E-Tiket PDF)
+                    </h4>
+                  </div>
+                  <p style={{ margin: '0 0 1rem', fontSize: '0.86rem', color: '#64748b', lineHeight: '1.5' }}>
+                    Telah mengisi kehadiran sebelumnya? Ketikkan nama Anda di bawah ini untuk mencari dan mengunduh E-Tiket resmi dalam bentuk file PDF.
+                  </p>
+
+                  <form onSubmit={handleSearchGuestTicket} style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                    <input
+                      type="text"
+                      className="form-control"
+                      style={{ flex: 1, minWidth: '180px' }}
+                      placeholder="Ketik nama siswa / calon wisudawan..."
+                      value={guestTicketSearch}
+                      onChange={(e) => setGuestTicketSearch(e.target.value)}
+                    />
+                    <button
+                      type="submit"
+                      className="btn-primary"
+                      style={{ padding: '0.75rem 1.25rem', whiteSpace: 'nowrap' }}
+                    >
+                      <Search size={16} />
+                      Cari E-Tiket
+                    </button>
+                  </form>
+                </div>
+
+                {ticketSearchError && (
+                  <div className="unverified-student-banner" style={{ marginBottom: '1.2rem' }}>
+                    <AlertCircle size={18} style={{ flexShrink: 0 }} />
+                    <span>{ticketSearchError}</span>
                   </div>
                 )}
 
-                <div className="form-group" style={{ opacity: (!selectedStudent || alreadySubmittedData) ? 0.55 : 1 }}>
-                  <label className="form-label" htmlFor="message">Pesan / Kesan untuk Sekolah (Opsional)</label>
-                  <textarea 
-                    id="message" 
-                    name="message" 
-                    className="form-control" 
-                    rows="3" 
-                    disabled={!selectedStudent || !!alreadySubmittedData}
-                    placeholder="Tuliskan ucapan terima kasih untuk bapak/ibu guru atau kenangan manis selama bersekolah..."
-                    value={formData.message}
-                    onChange={handleInputChange}
-                  ></textarea>
-                </div>
+                {searchedGuestTicket && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="confirmed-details-box"
+                    style={{ border: '2px solid #0f2b5c' }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+                      <span style={{ fontSize: '0.82rem', background: '#0f2b5c', color: '#fff', padding: '0.2rem 0.6rem', borderRadius: '4px', fontWeight: 700 }}>
+                        E-Tiket Ditemukan
+                      </span>
+                      <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                        {searchedGuestTicket.created_at ? new Date(searchedGuestTicket.created_at).toLocaleDateString('id-ID', { dateStyle: 'medium' }) : ''}
+                      </span>
+                    </div>
 
-                <button 
-                  type="submit" 
-                  className="btn-primary" 
-                  disabled={isSubmitting || !selectedStudent || !!alreadySubmittedData} 
-                  style={{ 
-                    marginTop: '0.6rem',
-                    opacity: (!selectedStudent || !!alreadySubmittedData) ? 0.6 : 1,
-                    cursor: (!selectedStudent || !!alreadySubmittedData) ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  {isSubmitting 
-                    ? 'Mengirim Konfirmasi...' 
-                    : alreadySubmittedData 
-                      ? 'Konfirmasi Sudah Terisi (Terkunci)' 
-                      : !selectedStudent 
-                        ? 'Pilih Nama Siswa Terlebih Dahulu' 
-                        : 'Kirim Konfirmasi Kehadiran'}
-                </button>
-              </form>
+                    <div className="confirmed-detail-row">
+                      <span className="confirmed-detail-label">Nama Siswa:</span>
+                      <strong className="confirmed-detail-value">{searchedGuestTicket.name}</strong>
+                    </div>
+                    <div className="confirmed-detail-row">
+                      <span className="confirmed-detail-label">Kelas & Jurusan:</span>
+                      <span className="confirmed-detail-badge">{searchedGuestTicket.student_class || 'XII RPL'}</span>
+                    </div>
+                    <div className="confirmed-detail-row">
+                      <span className="confirmed-detail-label">Status Kehadiran:</span>
+                      <span className={`confirmed-status-pill ${searchedGuestTicket.attendance === 'yes' ? 'status-hadir' : 'status-absen'}`}>
+                        {searchedGuestTicket.attendance === 'yes' ? '✓ Pasti Hadir' : '✕ Tidak Hadir'}
+                      </span>
+                    </div>
+                    {searchedGuestTicket.attendance === 'yes' && (
+                      <div className="confirmed-detail-row">
+                        <span className="confirmed-detail-label">Alokasi Kursi:</span>
+                        <strong className="confirmed-detail-value" style={{ color: 'var(--color-primary)' }}>
+                          🪑 {searchedGuestTicket.pax || 3} Kursi (Siswa + Pendamping)
+                        </strong>
+                      </div>
+                    )}
+                    {searchedGuestTicket.message && (
+                      <div className="confirmed-detail-row" style={{ flexDirection: 'column', alignItems: 'flex-start', borderBottom: 'none' }}>
+                        <span className="confirmed-detail-label" style={{ marginBottom: '0.35rem' }}>Pesan / Kesan:</span>
+                        <p style={{ fontStyle: 'italic', color: 'var(--color-text-muted)', fontSize: '0.88rem', margin: 0 }}>
+                          "{searchedGuestTicket.message}"
+                        </p>
+                      </div>
+                    )}
+
+                    <div style={{ marginTop: '1.4rem', textAlign: 'center' }}>
+                      <button
+                        type="button"
+                        className="btn-download-pdf-prominent"
+                        onClick={() => handleDownloadPdf(searchedGuestTicket)}
+                      >
+                        <Download size={18} />
+                        Download E-Tiket Ini (PDF)
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
             )}
           </motion.div>
         </div>

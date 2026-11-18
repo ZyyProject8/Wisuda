@@ -35,8 +35,8 @@
   --color-border-gold: rgba(217, 119, 6, 0.25);
 
   /* Fonts */
-  --font-heading: 'Cormorant Garamond', serif;
-  --font-body: 'Montserrat', sans-serif;
+  --font-heading: 'Cormorant Garamond', 'Playfair Display', 'Times New Roman', Georgia, serif;
+  --font-body: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
   /* Soft Luxury Shadows */
   --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
@@ -1411,134 +1411,231 @@ select.form-control option {
   }
 }
 
+/* Filigree Corner Styling */
+.filigree-corner {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  pointer-events: none;
+  z-index: 4;
+}
+
 @media (max-width: 480px) {
   .cover-overlay {
-    padding: 2rem 0.75rem 1.25rem;
+    padding: 1.5rem 0.65rem 1rem;
   }
 
   .cover-card {
-    padding: 2.2rem 0.9rem 1.4rem;
-    margin-top: 28px;
+    padding: 2.1rem 0.85rem 1.3rem;
+    margin-top: 24px;
+    border-radius: 18px;
+  }
+
+  .filigree-corner {
+    width: 24px !important;
+    height: 24px !important;
   }
 
   .cover-badge-top {
-    width: 72px;
-    height: 72px;
-    top: -36px;
+    width: 66px;
+    height: 66px;
+    top: -33px;
+    border-width: 2px;
   }
 
   .cover-badge-logo {
-    width: 46px;
-    height: 46px;
+    width: 42px;
+    height: 42px;
   }
 
   .cover-card-inner-frame {
-    inset: 6px;
-    border-radius: 16px;
+    inset: 5px;
+    border-radius: 14px;
+  }
+
+  .cover-title-main {
+    font-size: clamp(1.3rem, 4.6vw, 1.75rem);
+    line-height: 1.22;
   }
 
   .recipient-badge-v2 {
-    padding: 0.95rem 0.85rem;
-    margin: 1rem 0 1.15rem;
+    padding: 0.85rem 0.85rem;
+    margin: 0.9rem 0 1.1rem;
+    border-radius: 14px;
   }
 
   .recipient-badge-v2 strong {
-    font-size: 1.18rem !important;
+    font-size: 1.05rem !important;
     line-height: 1.35 !important;
   }
 
   .cover-btn-open {
-    padding: 0.85rem 1.2rem;
+    padding: 0.8rem 1.2rem;
     font-size: 0.88rem;
+    letter-spacing: 0.1em;
+  }
+
+  .section-padding {
+    padding: 3rem 0.85rem;
   }
 
   .section-title {
-    font-size: 1.85rem;
+    font-size: clamp(1.4rem, 4.8vw, 1.85rem);
     line-height: 1.25;
   }
 
+  .section-subtitle {
+    font-size: 0.86rem;
+    margin-bottom: 1.4rem;
+    line-height: 1.55;
+  }
+
+  .hero {
+    padding: 4.8rem 0.85rem 3.8rem;
+  }
+
+  .hero-school-logo {
+    width: 68px;
+    height: 68px;
+  }
+
+  .hero-subtitle {
+    font-size: 0.76rem;
+    letter-spacing: 0.12em;
+    line-height: 1.4;
+  }
+
   .hero-title {
-    font-size: 2.15rem;
+    font-size: clamp(1.5rem, 5.2vw, 2.05rem);
     line-height: 1.2;
+    margin-bottom: 0.6rem;
   }
 
   .hero-quote {
-    font-size: 0.95rem;
+    font-size: 0.88rem;
     line-height: 1.55;
+    margin-bottom: 1.4rem;
+    padding: 0 0.25rem;
+  }
+
+  .hero-date {
+    font-size: 0.82rem;
+    padding: 0.4rem 0.9rem;
+    letter-spacing: 0.06em;
+  }
+
+  .countdown-grid {
+    gap: 0.35rem;
+    margin-top: 1.8rem;
+  }
+
+  .countdown-box {
+    padding: 0.55rem 0.15rem;
+    border-radius: 10px;
+  }
+
+  .countdown-val {
+    font-size: 1.35rem;
+  }
+
+  .countdown-lbl {
+    font-size: 0.64rem;
+    letter-spacing: 0.05em;
+  }
+
+  .glass-card {
+    padding: 1.35rem 0.95rem;
+    border-radius: 16px;
+  }
+
+  .sambutan-text {
+    font-size: 0.92rem;
+    line-height: 1.7;
+    margin-bottom: 1.2rem;
   }
 
   .btn-outline {
     width: 100%;
     padding: 0.75rem 1rem;
-    font-size: 0.88rem;
+    font-size: 0.86rem;
   }
 
   .timeline-item {
-    padding-left: 2rem;
+    padding-left: 1.75rem;
+    margin-bottom: 1.25rem;
   }
 
   .timeline-dot {
-    width: 15px;
-    height: 15px;
+    width: 13px;
+    height: 13px;
     top: 5px;
   }
 
   .info-card {
-    padding: 1.3rem 1rem;
+    padding: 1.15rem 0.85rem;
+    margin-top: 2rem !important;
+  }
+
+  .info-card ul {
+    padding-left: 1.2rem;
+    font-size: 0.88rem;
+    line-height: 1.65;
   }
 
   .form-control {
-    padding: 0.85rem 0.95rem;
+    padding: 0.75rem 0.85rem;
     font-size: 0.92rem;
-  }
-
-  select.form-control {
-    font-size: 0.9rem;
+    border-radius: 10px;
   }
 
   .btn-primary {
-    padding: 0.95rem 1.4rem;
-    font-size: 0.92rem;
-    letter-spacing: 0.08em;
-  }
-
-  .message-card {
-    padding: 1.2rem 1rem;
+    padding: 0.85rem 1.2rem;
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    border-radius: 10px;
   }
 
   .footer {
-    padding: 3.2rem 1.2rem 2.2rem;
+    padding: 2.8rem 1rem 2rem;
+  }
+
+  .footer-title {
+    font-size: 1.25rem;
   }
 }
 
 @media (max-width: 360px) {
   .cover-card {
-    padding: 2rem 0.7rem 1.2rem;
+    padding: 1.8rem 0.65rem 1.1rem;
   }
 
   .recipient-badge-v2 strong {
-    font-size: 1.1rem !important;
+    font-size: 0.98rem !important;
   }
 
   .section-title {
-    font-size: 1.65rem;
+    font-size: 1.35rem;
   }
 
   .hero-title {
-    font-size: 1.95rem;
+    font-size: 1.45rem;
   }
 
   .countdown-box {
-    padding: 0.55rem 0.15rem;
+    padding: 0.45rem 0.1rem;
+  }
+
+  .countdown-val {
+    font-size: 1.15rem;
   }
 
   .countdown-lbl {
-    font-size: 0.6rem;
+    font-size: 0.58rem;
   }
 
   .hero-date {
-    font-size: 0.82rem;
-    padding: 0.35rem 0.75rem;
+    font-size: 0.76rem;
+    padding: 0.35rem 0.65rem;
   }
 }
 
@@ -1547,77 +1644,135 @@ select.form-control option {
   background: #ecfdf5;
   border: 1.5px solid #a7f3d0;
   border-radius: 12px;
-  padding: 0.85rem 1rem;
+  padding: 0.75rem 0.95rem;
   color: #065f46;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  margin-bottom: 1.25rem;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1.1rem;
   text-align: left;
+  line-height: 1.45;
+}
+
+.unverified-student-banner {
+  background: #fffbeb;
+  border: 1.5px solid #fcd34d;
+  border-radius: 12px;
+  padding: 0.75rem 0.95rem;
+  color: #92400e;
+  font-size: 0.84rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1.1rem;
+  text-align: left;
+  line-height: 1.45;
 }
 
 .already-submitted-notice {
   background: #fffbeb;
   border: 1.5px solid #fcd34d;
   border-radius: 14px;
-  padding: 1.25rem 1.1rem;
-  margin-bottom: 1.5rem;
+  padding: 1.15rem 1rem;
+  margin-bottom: 1.4rem;
   text-align: left;
 }
 
-.student-search-box {
-  position: relative;
-  margin-bottom: 1.25rem;
-}
-
-.student-suggestions-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: #ffffff;
-  border: 1px solid rgba(197, 155, 39, 0.35);
-  border-radius: 12px;
-  box-shadow: 0 12px 28px rgba(15, 43, 92, 0.12);
-  z-index: 20;
-  max-height: 230px;
-  overflow-y: auto;
-  margin-top: 4px;
-  padding: 0.35rem 0;
-}
-
-.student-suggestion-item {
-  padding: 0.7rem 1rem;
+/* Quick Name Autocomplete Chips */
+.name-suggestion-chips {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem;
   align-items: center;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  border-bottom: 1px solid #f1f5f9;
+  margin-top: 0.5rem;
   text-align: left;
 }
 
-.student-suggestion-item:last-child {
-  border-bottom: none;
-}
-
-.student-suggestion-item:hover {
-  background-color: #f8fafc;
-}
-
-.student-suggestion-name {
+.name-suggestion-chip {
+  background: #f1f5f9;
+  color: var(--color-primary);
+  border: 1px solid #cbd5e1;
+  border-radius: 20px;
+  padding: 0.28rem 0.7rem;
+  font-size: 0.78rem;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
+}
+
+.name-suggestion-chip:hover {
+  background: var(--color-primary-dark);
+  color: #ffffff;
+  border-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
+/* RSVP Segment Switcher (Form vs Cek Tiket) */
+.rsvp-tab-switcher {
+  display: flex;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 1.4rem;
+  border: 1px solid #e2e8f0;
+}
+
+.rsvp-tab-btn {
+  flex: 1;
+  padding: 0.65rem 0.8rem;
+  border: none;
+  background: transparent;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #64748b;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.rsvp-tab-btn.active {
+  background: #ffffff;
   color: var(--color-primary-dark);
-  font-size: 0.92rem;
+  box-shadow: 0 2px 8px rgba(15, 43, 92, 0.08);
+  font-weight: 700;
 }
 
-.student-suggestion-class {
-  font-size: 0.8rem;
-  color: var(--color-secondary);
-  font-weight: 600;
-  background: #fcfaf2;
-  border: 1px solid rgba(197, 155, 39, 0.25);
-  padding: 0.2rem 0.55rem;
-  border-radius: 6px;
+/* Prominent PDF Download Button */
+.btn-download-pdf-prominent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.6rem;
+  background: linear-gradient(135deg, #0f2b5c 0%, #1e3a8a 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(15, 43, 92, 0.2);
+  width: 100%;
+  max-width: 380px;
+  transition: all 0.25s ease;
+  font-family: var(--font-body);
+}
+
+.btn-download-pdf-prominent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(15, 43, 92, 0.3);
+  background: linear-gradient(135deg, #0b2553 0%, #173b7d 100%);
+}
+
+.btn-download-pdf-prominent:active {
+  transform: translateY(0);
 }

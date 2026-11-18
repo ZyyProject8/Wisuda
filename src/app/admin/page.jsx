@@ -19,7 +19,9 @@ import {
   RotateCcw,
   Share2,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Download,
+  Printer
 } from 'lucide-react';
 
 export default function Admin() {
@@ -152,6 +154,182 @@ export default function Admin() {
       localStorage.setItem('smk6_rsvps_cache', JSON.stringify(updated));
     } catch {}
     alert(`Konfirmasi untuk ${student.name} berhasil direset. Siswa sekarang dapat mengisi kembali.`);
+  };
+
+  // Unduh E-Tiket perorangan tamu sebagai PDF
+  const handleDownloadPdf = (record) => {
+    if (!record) return;
+    const ticketId = `SMK6-WSD-${record.id ? String(record.id).slice(-4) : '2027'}`;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Izinkan pop-up peramban Anda untuk mengunduh PDF bukti konfirmasi kehadiran.');
+      return;
+    }
+
+    const htmlContent = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Tiket Wisuda - ${record.name}</title>
+  <style>
+    @page { size: A4 portrait; margin: 1.2cm; }
+    * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0f172a; background: #fff; margin: 0; padding: 16px; }
+    .ticket-container { max-width: 680px; margin: 0 auto; border: 2px solid #c59b27; border-radius: 18px; padding: 28px; background: #fff; position: relative; }
+    .ticket-container::before { content: ''; position: absolute; inset: 8px; border: 1px dashed rgba(197, 155, 39, 0.45); border-radius: 12px; pointer-events: none; }
+    .header { display: flex; align-items: center; gap: 16px; border-bottom: 2px solid #0f2b5c; padding-bottom: 16px; margin-bottom: 20px; }
+    .header-logo { width: 65px; height: 65px; object-fit: contain; }
+    .header-text h1 { font-size: 18px; color: #0f2b5c; margin: 0 0 3px 0; font-weight: 800; }
+    .header-text h2 { font-size: 13px; color: #c59b27; margin: 0 0 4px 0; font-weight: 700; }
+    .header-text p { font-size: 11px; color: #64748b; margin: 0; line-height: 1.4; }
+    .badge-bar { text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 10px; margin-bottom: 20px; }
+    .badge-bar h3 { margin: 0 0 4px; color: #0f2b5c; font-size: 15px; font-weight: 800; }
+    .ticket-num { display: inline-block; background: #0f2b5c; color: #fff; padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+    .data-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .data-table td { padding: 8px 6px; font-size: 13px; border-bottom: 1px solid #f1f5f9; }
+    .data-table td.col-label { width: 160px; color: #64748b; font-weight: 600; }
+    .data-table td.col-val { color: #0f2b5c; font-weight: 700; }
+    .status-alert { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; background: ${record.attendance === 'yes' ? '#ecfdf5' : '#fef2f2'}; border: 1.5px solid ${record.attendance === 'yes' ? '#a7f3d0' : '#fecaca'}; }
+    .status-alert-text { font-size: 14px; font-weight: 700; color: ${record.attendance === 'yes' ? '#065f46' : '#991b1b'}; }
+    .footer-section { display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #e2e8f0; padding-top: 14px; margin-top: 20px; }
+    .footer-desc { font-size: 10px; color: #94a3b8; max-width: 340px; }
+    .footer-sign { text-align: center; font-size: 11px; color: #334155; }
+    .space { height: 48px; }
+    .no-print-bar { margin-top: 16px; text-align: center; }
+    .print-btn { padding: 10px 24px; background: #0f2b5c; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    @media print { body { padding: 0; } .no-print-bar { display: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="ticket-container">
+    <div class="header">
+      <img class="header-logo" src="/images/smk6.png" alt="Logo SMK 6" onerror="this.style.display='none'">
+      <div class="header-text">
+        <h1>SMK NEGERI 6 SURAKARTA</h1>
+        <h2>Panitia Sidang Terbuka Wisuda & Pelepasan Siswa 2024/2027</h2>
+        <p>Jl. Adi Sucipto No. 38, Kelurahan Kerten, Kecamatan Laweyan, Kota Surakarta</p>
+      </div>
+    </div>
+    <div class="badge-bar">
+      <h3>Bukti Resmi Konfirmasi Kehadiran (E-Tiket)</h3>
+      <span class="ticket-num">${ticketId}</span>
+    </div>
+    <table class="data-table">
+      <tr><td class="col-label">Nama Wisudawan</td><td class="col-val">: ${record.name}</td></tr>
+      <tr><td class="col-label">Kelas & Jurusan</td><td class="col-val">: ${record.student_class || 'XII RPL'}</td></tr>
+      <tr><td class="col-label">Waktu Acara</td><td class="col-val">: Sabtu, 20 Juni 2027 (07:30 - 12:30 WIB)</td></tr>
+      <tr><td class="col-label">Tempat</td><td class="col-val">: Gedung SMK Negeri 6 Surakarta</td></tr>
+      <tr><td class="col-label">Waktu Konfirmasi</td><td class="col-val">: ${record.created_at ? new Date(record.created_at).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' }) : new Date().toLocaleString('id-ID')}</td></tr>
+    </table>
+    <div class="status-alert">
+      <span class="status-alert-text">${record.attendance === 'yes' ? '✓ STATUS: PASTI HADIR' : '✕ STATUS: TIDAK DAPAT HADIR'}</span>
+      ${record.attendance === 'yes' ? `<strong>🪑 Alokasi: ${record.pax || 3} Kursi (Siswa + Orang Tua)</strong>` : ''}
+    </div>
+    <div class="footer-section">
+      <div class="footer-desc">*Dokumen resmi panitia wisuda SMK Negeri 6 Surakarta.</div>
+      <div class="footer-sign"><span>Surakarta, 20 Juni 2027</span><br><span>Ketua Panitia Wisuda</span><div class="space"></div><strong>SMK Negeri 6 Surakarta</strong></div>
+    </div>
+  </div>
+  <div class="no-print-bar">
+    <button class="print-btn" onclick="window.print()">🖨️ Cetak Tiket / Simpan PDF</button>
+  </div>
+  <script>window.onload = function() { setTimeout(function(){ window.print(); }, 400); };</script>
+</body>
+</html>`;
+
+    printWindow.document.open();
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
+
+  // Cetak Rekapitulasi Seluruh Tamu / Wisudawan sebagai Dokumen PDF
+  const handlePrintAllPdf = (guestList) => {
+    if (!guestList || guestList.length === 0) {
+      alert('Tidak ada data tamu untuk dicetak.');
+      return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Izinkan pop-up peramban Anda untuk mencetak rekapitulasi.');
+      return;
+    }
+
+    const rowsHtml = guestList.map((g, idx) => `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="padding: 7px 8px; text-align: center;">${idx + 1}</td>
+        <td style="padding: 7px 8px; font-weight: 700; color: #0f2b5c;">${g.name}</td>
+        <td style="padding: 7px 8px; text-align: center;">${g.student_class || '-'}</td>
+        <td style="padding: 7px 8px; text-align: center; font-weight: 700; color: ${g.attendance === 'yes' ? '#059669' : '#dc2626'};">
+          ${g.attendance === 'yes' ? 'Hadir' : 'Tidak Hadir'}
+        </td>
+        <td style="padding: 7px 8px; text-align: center;">${g.attendance === 'yes' ? (g.pax || 1) : 0}</td>
+        <td style="padding: 7px 8px; font-size: 11px; color: #475569;">${g.message || '-'}</td>
+        <td style="padding: 7px 8px; font-size: 11px; color: #64748b; text-align: center;">
+          ${g.created_at ? new Date(g.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '-'}
+        </td>
+      </tr>
+    `).join('');
+
+    const totalHadirList = guestList.filter(g => g.attendance === 'yes').length;
+    const totalPaxList = guestList.reduce((acc, g) => acc + (g.attendance === 'yes' ? (parseInt(g.pax, 10) || 1) : 0), 0);
+
+    const rekapHtml = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Rekapitulasi Daftar Hadir Tamu & Siswa Wisuda</title>
+  <style>
+    @page { size: A4 landscape; margin: 1cm; }
+    * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; padding: 15px; color: #0f172a; }
+    .header { text-align: center; border-bottom: 2px solid #0f2b5c; padding-bottom: 12px; margin-bottom: 16px; }
+    .header h1 { margin: 0 0 4px; font-size: 18px; color: #0f2b5c; }
+    .header p { margin: 0; font-size: 12px; color: #475569; }
+    .summary-box { display: flex; gap: 20px; margin-bottom: 16px; font-size: 12px; }
+    .summary-item { background: #f8fafc; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { background: #0f2b5c; color: #fff; padding: 8px; font-weight: 700; text-align: center; }
+    .no-print { text-align: center; margin-top: 18px; }
+    .no-print button { padding: 9px 20px; background: #0f2b5c; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
+    @media print { .no-print { display: none !important; } body { padding: 0; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>REKAPITULASI BUKU TAMU & KONFIRMASI KEHADIRAN (RSVP)</h1>
+    <p>Sidang Terbuka Wisuda & Pelepasan Siswa SMK Negeri 6 Surakarta Angkatan 2024/2027</p>
+  </div>
+  <div class="summary-box">
+    <div class="summary-item">Total Respon: <strong>${guestList.length}</strong></div>
+    <div class="summary-item">Siswa Hadir: <strong style="color: #059669;">${totalHadirList}</strong></div>
+    <div class="summary-item">Total Kursi Digunakan: <strong style="color: #0f2b5c;">${totalPaxList} Kursi</strong></div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 40px;">No</th>
+        <th>Nama Siswa / Tamu</th>
+        <th style="width: 100px;">Kelas</th>
+        <th style="width: 100px;">Status</th>
+        <th style="width: 60px;">Kursi</th>
+        <th>Pesan / Ucapan</th>
+        <th style="width: 110px;">Tanggal</th>
+      </tr>
+    </thead>
+    <tbody>${rowsHtml}</tbody>
+  </table>
+  <div class="no-print">
+    <button onclick="window.print()">🖨️ Cetak / Simpan Rekap PDF</button>
+  </div>
+  <script>window.onload = function(){ setTimeout(function(){ window.print(); }, 400); };</script>
+</body>
+</html>`;
+
+    printWindow.document.open();
+    printWindow.document.write(rekapHtml);
+    printWindow.document.close();
   };
 
   // Tambah siswa baru ke Master Data
@@ -638,7 +816,7 @@ export default function Admin() {
                 <small style={{ color: '#64748b' }}>Data tersinkronisasi otomatis dengan database panitia</small>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <div style={{ position: 'relative' }}>
                   <Search size={17} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                   <input
@@ -649,6 +827,27 @@ export default function Admin() {
                     style={{ padding: '0.6rem 1rem 0.6rem 2.2rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', width: '220px' }}
                   />
                 </div>
+
+                <button
+                  onClick={() => handlePrintAllPdf(filteredRsvps)}
+                  style={{
+                    padding: '0.6rem 1.1rem',
+                    borderRadius: '8px',
+                    border: '1.5px solid #0f2b5c',
+                    background: '#ffffff',
+                    color: '#0f2b5c',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem'
+                  }}
+                  title="Cetak atau simpan seluruh rekap daftar hadir tamu sebagai PDF"
+                >
+                  <Printer size={15} />
+                  Cetak Rekap Tamu (PDF)
+                </button>
 
                 <button
                   onClick={fetchData}
@@ -706,14 +905,36 @@ export default function Admin() {
                       <td style={{ padding: '0.9rem 0.6rem', maxWidth: '280px', fontSize: '0.85rem', lineHeight: '1.4', color: '#4b5563' }}>
                         {rsvp.message || <span style={{ color: '#cbd5e1', fontStyle: 'italic' }}>Tanpa pesan</span>}
                       </td>
-                      <td style={{ padding: '0.9rem 0.6rem', textAlign: 'center' }}>
-                        <button
-                          onClick={() => handleDeleteRsvp(rsvp.id, rsvp.name)}
-                          title="Hapus data konfirmasi ini"
-                          style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer', padding: '0.3rem' }}
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                      <td style={{ padding: '0.9rem 0.6rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+                          <button
+                            onClick={() => handleDownloadPdf(rsvp)}
+                            title="Cetak / Unduh E-Tiket PDF Siswa Ini"
+                            style={{
+                              border: '1px solid #cbd5e1',
+                              background: '#f8fafc',
+                              color: '#0f2b5c',
+                              cursor: 'pointer',
+                              padding: '0.35rem 0.65rem',
+                              borderRadius: '6px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.3rem',
+                              fontSize: '0.78rem',
+                              fontWeight: 600
+                            }}
+                          >
+                            <Download size={14} />
+                            E-Tiket PDF
+                          </button>
+                          <button
+                            onClick={() => handleDeleteRsvp(rsvp.id, rsvp.name)}
+                            title="Hapus data konfirmasi ini"
+                            style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer', padding: '0.35rem' }}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

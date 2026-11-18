@@ -27,16 +27,18 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
 4. **Rundown Acara & Tata Tertib Resmi**
    - Susunan jadwal bertahap dari registrasi, sidang terbuka, prosesi pengalungan medali, hingga ramah tamah.
    - Ketentuan resmi berpakaian: seragam putih dan almamater SMK Negeri 6 Surakarta bagi wisudawan, batik/kebaya bagi orang tua, serta alokasi maksimal 3 kursi.
-5. **Sistem Verifikasi 16 Calon Wisudawan Resmi & Anti-Duplikasi**
-   - **Pemilih Nama Langsung**: Siswa memilih namanya langsung dari daftar 16 calon wisudawan resmi yang telah disiapkan panitia, atau menggunakan kotak pencarian cepat nama.
-   - **Blokir Nama Tidak Terdaftar**: Pengguna di luar daftar master tidak dapat mengirim data konfirmasi kehadiran.
-   - **Pencegahan Duplikasi (1 Siswa = 1 Kali Konfirmasi)**: Jika nama yang dipilih sudah pernah mengirim konfirmasi, sistem langsung mengunci formulir, menampilkan ringkasan data yang telah masuk, dan menolak pengisian ulang untuk mencegah duplikasi alokasi kursi.
-6. **Unduh Bukti Konfirmasi Kehadiran (PDF / E-Tiket Resmi)** 📥
-   - Setelah konfirmasi terkirim, siswa dapat langsung mengunduh **E-Tiket / Bukti Konfirmasi Kehadiran berformat PDF**.
-   - Dilengkapi kop resmi sekolah, nomor tiket unik (`SMK6-WSD-...`), detail identitas siswa, alokasi kursi, tata tertib, dan tanda tangan panitia.
-   - Siswa yang sudah pernah mengisi dapat mengunduh ulang bukti PDF kapan saja cukup dengan memilih namanya di formulir.
-7. **Buku Tamu / Live Feed Ucapan**
-   - Pesan, doa, dan status kehadiran ditampilkan secara transparan dan dinamis langsung dari database.
+5. **Formulir RSVP: Input Teks Nama & Kelas dengan Verifikasi Otomatis**
+   - **Ketik Nama & Kelas**: Siswa cukup mengetikkan nama lengkapnya dan kelas/jurusannya secara langsung (tanpa dropdown kaku). Dilengkapi tombol pilihan cepat kelas (`XII RPL`, `XII RPL 1`, dll).
+   - **Saran Nama Otomatis (Autocomplete)**: Saat mengetik, sistem memberikan saran nama calon wisudawan yang cocok untuk mempercepat pengisian dan mencegah salah ketik.
+   - **Verifikasi 16 Calon Wisudawan Resmi**: Sistem memvalidasi nama terhadap data 16 calon wisudawan resmi SMK 6. Nama di luar daftar resmi tidak dapat mengirim formulir.
+   - **Pencegahan Duplikasi (1 Siswa = 1 Kali Konfirmasi)**: Jika nama yang diketik sudah pernah mengisi konfirmasi, sistem langsung menampilkan ringkasan data yang telah masuk, mengunci formulir, dan menyediakan tombol unduh E-Tiket PDF untuk mencegah kursi ganda.
+6. **Unduh Bukti Konfirmasi Kehadiran / E-Tiket Tamu (PDF Resmi)** 📥
+   - **Unduh Langsung Setelah Kirim**: Setelah berhasil mengisi formulir, siswa dapat langsung mengunduh E-Tiket resmi berformat PDF.
+   - **Tab Cek & Unduh E-Tiket Tamu**: Disediakan tab pencarian khusus bagi siswa/tamu yang sudah pernah konfirmasi untuk mencari nama dan mengunduh ulang file E-Tiket PDF kapan saja.
+   - Dilengkapi kop resmi sekolah, nomor tiket unik (`SMK6-WSD-...`), identitas siswa, kelas, status kehadiran, alokasi kursi, tata tertib, dan cap/tanda tangan panitia.
+7. **Tampilan Elegan & Responsif Mobile Sempurna**
+   - Tipografi yang proporsional dan nyaman dibaca di desktop maupun layar ponsel kecil (360px - 480px).
+   - Tanpa audio pemutar musik latar sesuai permintaan agar pengalaman pengguna tenang, ringan, dan fokus.
 
 ---
 
@@ -51,9 +53,11 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
    - Estimasi Total Kursi & Konsumsi (*Pax*).
    - Jumlah Berhalangan Hadir.
    - Jumlah Belum Konfirmasi.
-3. **Tab 1: Data Respon Kehadiran (RSVP)**
-   - Rekap seluruh formulir konfirmasi yang telah masuk.
-   - Fitur pencarian instan (*live search filter*) berdasarkan nama atau pesan.
+3. **Tab 1: Data Respon Kehadiran (RSVP & Buku Tamu)**
+   - Rekap seluruh formulir konfirmasi yang telah masuk secara real-time.
+   - **Cetak Rekap Tamu (PDF)**: Tombol untuk mengunduh/mencetak rekapitulasi kehadiran seluruh tamu & wisudawan dalam format dokumen cetak resmi A4.
+   - **Unduh E-Tiket PDF Per Siswa**: Aksi unduh tiket PDF langsung untuk masing-masing baris data tamu.
+   - Fitur pencarian instan (*live search filter*) berdasarkan nama atau kelas siswa.
    - Aksi hapus data konfirmasi dengan konfirmasi keamanan.
 4. **Tab 2: Master Data Calon Wisudawan**
    - Tabel 16 calon wisudawan resmi beserta status langsung: *Sudah Konfirmasi (Hadir/Tidak)* atau *Belum Mengisi*.
