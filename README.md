@@ -21,22 +21,17 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
    - Tombol *"Buka Undangan"* membuka animasi tirai transisi yang halus dan responsif.
 2. **Countdown Timer Interaktif**
    - Penghitungan waktu mundur presisi (*Hari, Jam, Menit, Detik*) menuju waktu prosesi wisuda (Sabtu, 20 Juni 2027, 07:30 WIB).
-3. **Detail Acara & Informasi Lokasi**
+3. **Detail Acara & Google Maps Interaktif Tertanam**
    - Lokasi resmi: **Gedung SMK Negeri 6 Surakarta**, Jl. Adi Sucipto No. 38, Kelurahan Kerten, Kecamatan Laweyan, Kota Surakarta, Jawa Tengah.
-   - Dilengkapi tautan navigasi langsung ke Google Maps.
+   - **Peta Interaktif Langsung (Embedded Google Maps)**: Ditampilkan langsung di dalam halaman web sehingga pengguna dapat melihat lokasi, memperbesar/memperkecil peta, dan menekan tombol navigasi rute ke aplikasi Google Maps secara instan.
 4. **Rundown Acara & Tata Tertib Resmi**
    - Susunan jadwal bertahap dari registrasi, sidang terbuka, prosesi pengalungan medali, hingga ramah tamah.
    - Ketentuan resmi berpakaian: seragam putih dan almamater SMK Negeri 6 Surakarta bagi wisudawan, batik/kebaya bagi orang tua, serta alokasi maksimal 3 kursi.
-5. **Formulir RSVP: Input Teks Nama & Kelas dengan Verifikasi Otomatis**
-   - **Ketik Nama & Kelas**: Siswa cukup mengetikkan nama lengkapnya dan kelas/jurusannya secara langsung (tanpa dropdown kaku). Dilengkapi tombol pilihan cepat kelas (`XII RPL`, `XII RPL 1`, dll).
-   - **Saran Nama Otomatis (Autocomplete)**: Saat mengetik, sistem memberikan saran nama calon wisudawan yang cocok untuk mempercepat pengisian dan mencegah salah ketik.
+5. **Formulir RSVP Siswa & Wali Murid (Input Teks Bersih)**
+   - **Ketik Nama & Kelas**: Siswa cukup mengetikkan nama lengkapnya dan kelas/jurusannya secara langsung pada kolom input teks yang bersih dan elegan (tanpa tombol pilihan cepat yang memadati layar).
    - **Verifikasi 16 Calon Wisudawan Resmi**: Sistem memvalidasi nama terhadap data 16 calon wisudawan resmi SMK 6. Nama di luar daftar resmi tidak dapat mengirim formulir.
-   - **Pencegahan Duplikasi (1 Siswa = 1 Kali Konfirmasi)**: Jika nama yang diketik sudah pernah mengisi konfirmasi, sistem langsung menampilkan ringkasan data yang telah masuk, mengunci formulir, dan menyediakan tombol unduh E-Tiket PDF untuk mencegah kursi ganda.
-6. **Unduh Bukti Konfirmasi Kehadiran / E-Tiket Tamu (PDF Resmi)** 📥
-   - **Unduh Langsung Setelah Kirim**: Setelah berhasil mengisi formulir, siswa dapat langsung mengunduh E-Tiket resmi berformat PDF.
-   - **Tab Cek & Unduh E-Tiket Tamu**: Disediakan tab pencarian khusus bagi siswa/tamu yang sudah pernah konfirmasi untuk mencari nama dan mengunduh ulang file E-Tiket PDF kapan saja.
-   - Dilengkapi kop resmi sekolah, nomor tiket unik (`SMK6-WSD-...`), identitas siswa, kelas, status kehadiran, alokasi kursi, tata tertib, dan cap/tanda tangan panitia.
-7. **Tampilan Elegan & Responsif Mobile Sempurna**
+   - **Pencegahan Duplikasi (1 Siswa = 1 Kali Konfirmasi)**: Jika nama yang diketik sudah pernah mengisi konfirmasi, sistem langsung mengunci formulir dan menampilkan ringkasan data yang telah masuk untuk mencegah kursi ganda.
+6. **Tampilan Elegan & Responsif Mobile Sempurna**
    - Tipografi yang proporsional dan nyaman dibaca di desktop maupun layar ponsel kecil (360px - 480px).
    - Tanpa audio pemutar musik latar sesuai permintaan agar pengalaman pengguna tenang, ringan, dan fokus.
 
@@ -53,10 +48,10 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
    - Estimasi Total Kursi & Konsumsi (*Pax*).
    - Jumlah Berhalangan Hadir.
    - Jumlah Belum Konfirmasi.
-3. **Tab 1: Data Respon Kehadiran (RSVP & Buku Tamu)**
-   - Rekap seluruh formulir konfirmasi yang telah masuk secara real-time.
-   - **Cetak Rekap Tamu (PDF)**: Tombol untuk mengunduh/mencetak rekapitulasi kehadiran seluruh tamu & wisudawan dalam format dokumen cetak resmi A4.
-   - **Unduh E-Tiket PDF Per Siswa**: Aksi unduh tiket PDF langsung untuk masing-masing baris data tamu.
+3. **Tab 1: Data Respon Kehadiran & Fitur Cetak/Unduh PDF Khusus Admin** 📥
+   - **Download Tamu Hadir (PDF)**: Tombol khusus untuk langsung mengunduh/mencetak dokumen resmi A4 *landscape* daftar seluruh tamu & wisudawan yang mengonfirmasi **Pasti Hadir** beserta kelas, jumlah kursi, pesan, dan waktu konfirmasi.
+   - **Cetak Semua Rekap (PDF)**: Mencetak seluruh rekapitulasi data respon kehadiran (baik yang hadir maupun yang tidak hadir).
+   - **Unduh E-Tiket PDF Per Siswa**: Aksi unduh tiket PDF resmi perorangan langsung pada masing-masing baris data tamu.
    - Fitur pencarian instan (*live search filter*) berdasarkan nama atau kelas siswa.
    - Aksi hapus data konfirmasi dengan konfirmasi keamanan.
 4. **Tab 2: Master Data Calon Wisudawan**

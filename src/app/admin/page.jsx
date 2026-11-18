@@ -243,10 +243,14 @@ export default function Admin() {
     printWindow.document.close();
   };
 
-  // Cetak Rekapitulasi Seluruh Tamu / Wisudawan sebagai Dokumen PDF
-  const handlePrintAllPdf = (guestList) => {
-    if (!guestList || guestList.length === 0) {
-      alert('Tidak ada data tamu untuk dicetak.');
+  // Cetak Dokumen PDF Rekapitulasi Tamu (Bisa filter khusus yang Hadir atau Semua Tamu)
+  const handlePrintGuestsPdf = (guestList, onlyAttending = false) => {
+    const listToPrint = onlyAttending 
+      ? guestList.filter(g => g.attendance === 'yes')
+      : guestList;
+
+    if (!listToPrint || listToPrint.length === 0) {
+      alert(onlyAttending ? 'Belum ada data tamu yang mengonfirmasi hadir.' : 'Tidak ada data tamu untuk dicetak.');
       return;
     }
 
@@ -256,72 +260,76 @@ export default function Admin() {
       return;
     }
 
-    const rowsHtml = guestList.map((g, idx) => `
+    const rowsHtml = listToPrint.map((g, idx) => `
       <tr style="border-bottom: 1px solid #e2e8f0;">
-        <td style="padding: 7px 8px; text-align: center;">${idx + 1}</td>
-        <td style="padding: 7px 8px; font-weight: 700; color: #0f2b5c;">${g.name}</td>
-        <td style="padding: 7px 8px; text-align: center;">${g.student_class || '-'}</td>
-        <td style="padding: 7px 8px; text-align: center; font-weight: 700; color: ${g.attendance === 'yes' ? '#059669' : '#dc2626'};">
-          ${g.attendance === 'yes' ? 'Hadir' : 'Tidak Hadir'}
+        <td style="padding: 8px; text-align: center;">${idx + 1}</td>
+        <td style="padding: 8px; font-weight: 700; color: #0f2b5c;">${g.name}</td>
+        <td style="padding: 8px; text-align: center;">${g.student_class || '-'}</td>
+        <td style="padding: 8px; text-align: center; font-weight: 700; color: ${g.attendance === 'yes' ? '#059669' : '#dc2626'};">
+          ${g.attendance === 'yes' ? '✓ Pasti Hadir' : '✕ Tidak Hadir'}
         </td>
-        <td style="padding: 7px 8px; text-align: center;">${g.attendance === 'yes' ? (g.pax || 1) : 0}</td>
-        <td style="padding: 7px 8px; font-size: 11px; color: #475569;">${g.message || '-'}</td>
-        <td style="padding: 7px 8px; font-size: 11px; color: #64748b; text-align: center;">
-          ${g.created_at ? new Date(g.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '-'}
+        <td style="padding: 8px; text-align: center; font-weight: 700;">${g.attendance === 'yes' ? (g.pax || 1) : 0} Kursi</td>
+        <td style="padding: 8px; font-size: 11.5px; color: #475569;">${g.message || '-'}</td>
+        <td style="padding: 8px; font-size: 11px; color: #64748b; text-align: center;">
+          ${g.created_at ? new Date(g.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
         </td>
       </tr>
     `).join('');
 
-    const totalHadirList = guestList.filter(g => g.attendance === 'yes').length;
-    const totalPaxList = guestList.reduce((acc, g) => acc + (g.attendance === 'yes' ? (parseInt(g.pax, 10) || 1) : 0), 0);
+    const totalHadirList = listToPrint.filter(g => g.attendance === 'yes').length;
+    const totalPaxList = listToPrint.reduce((acc, g) => acc + (g.attendance === 'yes' ? (parseInt(g.pax, 10) || 1) : 0), 0);
+
+    const titleDoc = onlyAttending 
+      ? 'DAFTAR RESMI TAMU & WISUDAWAN YANG AKAN HADIR' 
+      : 'REKAPITULASI BUKU TAMU & KONFIRMASI KEHADIRAN (RSVP)';
 
     const rekapHtml = `<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="utf-8">
-  <title>Rekapitulasi Daftar Hadir Tamu & Siswa Wisuda</title>
+  <title>${titleDoc}</title>
   <style>
     @page { size: A4 landscape; margin: 1cm; }
     * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; padding: 15px; color: #0f172a; }
     .header { text-align: center; border-bottom: 2px solid #0f2b5c; padding-bottom: 12px; margin-bottom: 16px; }
-    .header h1 { margin: 0 0 4px; font-size: 18px; color: #0f2b5c; }
+    .header h1 { margin: 0 0 4px; font-size: 18px; color: #0f2b5c; text-transform: uppercase; }
     .header p { margin: 0; font-size: 12px; color: #475569; }
     .summary-box { display: flex; gap: 20px; margin-bottom: 16px; font-size: 12px; }
-    .summary-item { background: #f8fafc; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; }
+    .summary-item { background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px 14px; border-radius: 6px; }
     table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    th { background: #0f2b5c; color: #fff; padding: 8px; font-weight: 700; text-align: center; }
+    th { background: #0f2b5c; color: #fff; padding: 9px 8px; font-weight: 700; text-align: center; }
     .no-print { text-align: center; margin-top: 18px; }
-    .no-print button { padding: 9px 20px; background: #0f2b5c; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
+    .no-print button { padding: 10px 22px; background: #0f2b5c; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
     @media print { .no-print { display: none !important; } body { padding: 0; } }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>REKAPITULASI BUKU TAMU & KONFIRMASI KEHADIRAN (RSVP)</h1>
+    <h1>${titleDoc}</h1>
     <p>Sidang Terbuka Wisuda & Pelepasan Siswa SMK Negeri 6 Surakarta Angkatan 2024/2027</p>
   </div>
   <div class="summary-box">
-    <div class="summary-item">Total Respon: <strong>${guestList.length}</strong></div>
-    <div class="summary-item">Siswa Hadir: <strong style="color: #059669;">${totalHadirList}</strong></div>
-    <div class="summary-item">Total Kursi Digunakan: <strong style="color: #0f2b5c;">${totalPaxList} Kursi</strong></div>
+    <div class="summary-item">Total Tamu Tercatat: <strong>${listToPrint.length} Siswa</strong></div>
+    <div class="summary-item">Tamu Konfirmasi Hadir: <strong style="color: #059669;">${totalHadirList} Siswa</strong></div>
+    <div class="summary-item">Total Kursi Digunakan: <strong style="color: #0f2b5c;">${totalPaxList} Kursi (Siswa + Orang Tua)</strong></div>
   </div>
   <table>
     <thead>
       <tr>
         <th style="width: 40px;">No</th>
-        <th>Nama Siswa / Tamu</th>
+        <th>Nama Wisudawan / Tamu</th>
         <th style="width: 100px;">Kelas</th>
-        <th style="width: 100px;">Status</th>
-        <th style="width: 60px;">Kursi</th>
+        <th style="width: 110px;">Status</th>
+        <th style="width: 90px;">Alokasi Kursi</th>
         <th>Pesan / Ucapan</th>
-        <th style="width: 110px;">Tanggal</th>
+        <th style="width: 110px;">Waktu Konfirmasi</th>
       </tr>
     </thead>
     <tbody>${rowsHtml}</tbody>
   </table>
   <div class="no-print">
-    <button onclick="window.print()">🖨️ Cetak / Simpan Rekap PDF</button>
+    <button onclick="window.print()">🖨️ Cetak / Simpan sebagai PDF</button>
   </div>
   <script>window.onload = function(){ setTimeout(function(){ window.print(); }, 400); };</script>
 </body>
@@ -829,7 +837,29 @@ export default function Admin() {
                 </div>
 
                 <button
-                  onClick={() => handlePrintAllPdf(filteredRsvps)}
+                  onClick={() => handlePrintGuestsPdf(filteredRsvps, true)}
+                  style={{
+                    padding: '0.6rem 1.1rem',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: '#059669',
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    boxShadow: '0 2px 8px rgba(5, 150, 105, 0.2)'
+                  }}
+                  title="Download / cetak dokumen PDF resmi khusus daftar tamu yang akan hadir"
+                >
+                  <Download size={15} />
+                  Download Tamu Hadir (PDF)
+                </button>
+
+                <button
+                  onClick={() => handlePrintGuestsPdf(filteredRsvps, false)}
                   style={{
                     padding: '0.6rem 1.1rem',
                     borderRadius: '8px',
@@ -843,10 +873,10 @@ export default function Admin() {
                     alignItems: 'center',
                     gap: '0.4rem'
                   }}
-                  title="Cetak atau simpan seluruh rekap daftar hadir tamu sebagai PDF"
+                  title="Cetak atau simpan seluruh rekapitulasi data tamu sebagai PDF"
                 >
                   <Printer size={15} />
-                  Cetak Rekap Tamu (PDF)
+                  Cetak Semua Rekap (PDF)
                 </button>
 
                 <button
