@@ -778,13 +778,13 @@ function InvitationContent() {
               }}>
                 <iframe
                   title="Lokasi SMK Negeri 6 Surakarta"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3955.1438965902264!2d110.7937397758784!3d-7.559288174646706!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a1670984920e1%3A0x6b9d62d04a62e08!2sSMK%20Negeri%206%20Surakarta!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3955.199544281692!2d110.79663727404574!3d-7.553208074577405!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a14248f7a300b%3A0x8147b47e94da5fa2!2sSMK%20Negeri%206%20Surakarta!5e0!3m2!1sen!2sid!4v1795043599056!5m2!1sen!2sid"
                   width="100%"
-                  height="220"
+                  height="240"
                   style={{ border: 0 }}
                   allowFullScreen=""
                   loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
+                  referrerPolicy="strict-origin-when-cross-origin"
                 ></iframe>
               </div>
 
