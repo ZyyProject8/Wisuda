@@ -13,7 +13,7 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
 
 ---
 
-## 2. Tangkapan Layar & Bagian-Bagian Antarmuka Web
+## 2. Bagian-Bagian Antarmuka Web
 
 Berikut adalah tangkapan layar antarmuka sistem beserta penjelasan ringkas dan akurat pada setiap bagian:
 
