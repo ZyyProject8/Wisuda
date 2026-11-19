@@ -1,11 +1,11 @@
-# 🎓 Undangan Digital Wisuda — SMK Negeri 6 Surakarta
+# Undangan Digital Wisuda — SMK Negeri 6 Surakarta
 > **Projek Ujian Akhir Keahlian Rekayasa Perangkat Lunak (RPL)**  
 > Acara Sidang Terbuka Wisuda & Pelepasan Siswa-Siswi **Angkatan 2024/2027**  
 > **SMK Negeri 6 Surakarta**
 
 ---
 
-## 📌 1. Latar Belakang & Ringkasan Projek
+## 1. Latar Belakang & Ringkasan Projek
 
 Projek ini merupakan aplikasi web modern yang dibangun untuk mendigitalkan proses publikasi undangan dan manajemen kehadiran (RSVP) pada acara Sidang Terbuka Wisuda & Pelepasan Siswa SMK Negeri 6 Surakarta Angkatan 2024/2027.
 
@@ -13,7 +13,7 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
 
 ---
 
-## ✨ 2. Fitur-Fitur Utama
+## 2. Fitur-Fitur Utama
 
 ### A. Halaman Undangan Siswa & Tamu (`/`)
 1. **Interactive Opening Gate (Cover Gate Angkatan)**
@@ -40,7 +40,7 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
 ### B. Dashboard Panel Admin Panitia (`/admin`)
 1. **Sistem Autentikasi Keamanan**
    - Akses panel dilindungi oleh sistem otentikasi kata sandi terintegrasi.
-   - **Kata sandi masuk admin:-
+   - **Kata sandi masuk admin:** `wisuda24`
 2. **6 Kartu Analitik Statistik Real-time**
    - Total Calon Wisudawan Terdaftar (Master Data).
    - Jumlah Siswa Sudah Konfirmasi.
@@ -48,7 +48,7 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
    - Estimasi Total Kursi & Konsumsi (*Pax*).
    - Jumlah Berhalangan Hadir.
    - Jumlah Belum Konfirmasi.
-3. **Tab 1: Data Respon Kehadiran & Fitur Download PDF Khusus Admin** 📥
+3. **Tab 1: Data Respon Kehadiran & Fitur Download PDF Khusus Admin**
    - **Download Tamu Hadir (PDF)**: Tombol eksklusif panitia untuk langsung membuat dan mengunduh berkas PDF resmi (`Daftar_Resmi_Tamu_Hadir_SMK6.pdf`) berformat A4 *landscape* berisi daftar seluruh tamu & wisudawan yang mengonfirmasi **Pasti Hadir** secara kolektif beserta kelas, total kebutuhan kursi, pesan doa, dan tanggal konfirmasi.
    - Seluruh proses ekspor PDF berjalan otomatis (*client-side*) dan langsung terunduh ke komputer/perangkat tanpa perlu melalui dialog cetak printer (*print dialog*).
    - Fitur pencarian instan (*live search filter*) berdasarkan nama atau kelas siswa.
@@ -64,7 +64,7 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
 
 ---
 
-## 👥 3. Daftar 16 Calon Wisudawan Resmi Terdaftar
+## 3. Daftar 16 Calon Wisudawan Resmi Terdaftar
 
 | No. | Nama Calon Wisudawan | Kelas / Jurusan |
 | :---: | :--- | :---: |
@@ -87,7 +87,7 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
 
 ---
 
-## 🛠️ 4. Teknologi yang Digunakan (Tech Stack)
+## 4. Teknologi yang Digunakan (Tech Stack)
 
 | Lapisan / Komponen | Teknologi | Keterangan |
 | :--- | :--- | :--- |
@@ -100,7 +100,7 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
 
 ---
 
-## 🚀 5. Panduan Menjalankan Proyek Secara Lokal
+## 5. Panduan Menjalankan Proyek Secara Lokal
 
 ### Prasyarat Sistem
 - **Node.js** versi `18.x` atau lebih baru
@@ -133,7 +133,7 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
 
 ---
 
-## 🔑 6. Kredensial & Pengujian Sistem (Demo Ujian)
+## 6. Kredensial & Pengujian Sistem (Demo Ujian)
 
 Untuk keperluan pengujian/penilaian oleh guru dan penguji:
 
@@ -144,7 +144,7 @@ Untuk keperluan pengujian/penilaian oleh guru dan penguji:
 
 ---
 
-## 🗄️ 7. Skema Basis Data Supabase (`rsvps`)
+## 7. Skema Basis Data Supabase (`rsvps`)
 
 ```sql
 -- Pembuatan tabel konfirmasi kehadiran
@@ -173,7 +173,7 @@ CREATE POLICY "Public Delete RSVP" ON rsvps FOR DELETE USING (true);
 
 ---
 
-## 📁 8. Struktur Direktori Proyek
+## 8. Struktur Direktori Proyek
 
 ```text
 UndanganDigital/
@@ -201,7 +201,7 @@ UndanganDigital/
 
 ---
 
-## 💡 9. Aspek Penilaian Kualitas Perangkat Lunak (Nilai Unggulan RPL)
+## 9. Aspek Penilaian Kualitas Perangkat Lunak (Nilai Unggulan RPL)
 
 Projek ini menerapkan standar kompetensi Rekayasa Perangkat Lunak:
 - **Clean Architecture & Component-Based Design**: Kode modular, terstruktur, dan mudah dipelihara (*maintainable*).
@@ -212,7 +212,7 @@ Projek ini menerapkan standar kompetensi Rekayasa Perangkat Lunak:
 
 ---
 
-## 👨‍💻 10. Identitas Pengembang
+## 10. Identitas Pengembang
 
 - **Projek**: Ujian Praktik / Penugasan Keahlian Rekayasa Perangkat Lunak (RPL)
 - **Sekolah**: **SMK Negeri 6 Surakarta**

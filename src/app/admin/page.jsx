@@ -22,7 +22,8 @@ import {
   AlertCircle,
   Download,
   Edit2,
-  X
+  X,
+  ExternalLink
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -308,7 +309,7 @@ export default function Admin() {
       student_class: newStudent.student_class
     });
 
-    setAddSuccessMsg(`✓ Siswa "${createdStudent.name}" berhasil ditambahkan ke daftar wisuda.`);
+    setAddSuccessMsg(`Siswa "${createdStudent.name}" berhasil ditambahkan ke daftar wisuda.`);
     setTimeout(() => setAddSuccessMsg(''), 3000);
   };
 
@@ -429,7 +430,7 @@ export default function Admin() {
 
   const getWaBroadcastMessage = () => {
     const link = getOfficialWebsiteUrl();
-    return `🎓 *UNDANGAN RESMI WISUDA & PELEPASAN SISWA SMK NEGERI 6 SURAKARTA* 🎓\n\nKepada Yth.\n*Bapak/Ibu Orang Tua / Wali Murid & Seluruh Siswa-Siswi Calon Wisudawan*\nKeluarga Besar Angkatan 2024/2027\n\nDengan hormat, kami mengundang Bapak/Ibu serta ananda untuk menghadiri acara Sidang Terbuka Wisuda & Pelepasan Siswa SMK Negeri 6 Surakarta Angkatan 2024/2027.\n\nDetail susunan acara & formulir konfirmasi kehadiran (RSVP) dapat diakses melalui link resmi berikut:\n👉 ${link}\n\n*Catatan Penting:*\n1. Setiap siswa wajib memilih nama dan kelas sesuai daftar resmi sekolah.\n2. Konfirmasi hanya dapat dilakukan 1 kali per siswa demi mencegah duplikasi kursi.\n3. Alokasi maksimal 3 kursi (1 Siswa + 2 Orang Tua / Pendamping).\n\nTerima kasih atas perhatian dan kerja samanya.\n\n*Panitia Wisuda SMK Negeri 6 Surakarta*`;
+    return `*UNDANGAN RESMI WISUDA & PELEPASAN SISWA SMK NEGERI 6 SURAKARTA*\n\nKepada Yth.\n*Bapak/Ibu Orang Tua / Wali Murid & Seluruh Siswa-Siswi Calon Wisudawan*\nKeluarga Besar Angkatan 2024/2027\n\nDengan hormat, kami mengundang Bapak/Ibu serta ananda untuk menghadiri acara Sidang Terbuka Wisuda & Pelepasan Siswa SMK Negeri 6 Surakarta Angkatan 2024/2027.\n\nDetail susunan acara & formulir konfirmasi kehadiran (RSVP) dapat diakses melalui link resmi berikut:\n${link}\n\n*Catatan Penting:*\n1. Setiap siswa wajib memilih nama dan kelas sesuai daftar resmi sekolah.\n2. Konfirmasi hanya dapat dilakukan 1 kali per siswa demi mencegah duplikasi kursi.\n3. Alokasi maksimal 3 kursi (1 Siswa + 2 Orang Tua / Pendamping).\n\nTerima kasih atas perhatian dan kerja samanya.\n\n*Panitia Wisuda SMK Negeri 6 Surakarta*`;
   };
 
   if (!isAuthenticated) {
@@ -677,9 +678,10 @@ export default function Admin() {
           <div style={{ display: 'flex', gap: '0.8rem' }}>
             <button
               onClick={() => window.open('/', '_blank')}
-              style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', border: '1.5px solid #0f2b5c', background: '#fff', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', color: '#0f2b5c' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1.2rem', borderRadius: '8px', border: '1.5px solid #0f2b5c', background: '#fff', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', color: '#0f2b5c' }}
             >
-              Lihat Undangan Siswa ↗
+              <ExternalLink size={15} />
+              Lihat Undangan Siswa
             </button>
             <button
               onClick={() => setIsAuthenticated(false)}
@@ -924,7 +926,7 @@ export default function Admin() {
                           color: rsvp.attendance === 'yes' ? '#059669' : '#dc2626',
                           border: rsvp.attendance === 'yes' ? '1px solid #a7f3d0' : '1px solid #fecaca'
                         }}>
-                          {rsvp.attendance === 'yes' ? '✓ Hadir' : '✕ Tidak Hadir'}
+                          {rsvp.attendance === 'yes' ? 'Hadir' : 'Tidak Hadir'}
                         </span>
                       </td>
                       <td style={{ padding: '0.9rem 0.6rem', fontSize: '0.88rem', fontWeight: 600 }}>
@@ -1126,8 +1128,9 @@ export default function Admin() {
                           {/* Kolom Status Konfirmasi */}
                           <td style={{ padding: '0.85rem 0.6rem' }}>
                             {isEditing ? (
-                              <span style={{ fontSize: '0.78rem', color: '#0f2b5c', fontWeight: 600, fontStyle: 'italic' }}>
-                                ✏️ Mode Edit Data
+                              <span style={{ fontSize: '0.78rem', color: '#0f2b5c', fontWeight: 600, fontStyle: 'italic', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                                <Edit2 size={12} />
+                                Mode Edit Data
                               </span>
                             ) : matchingRsvp ? (
                               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -1140,7 +1143,7 @@ export default function Admin() {
                                   color: matchingRsvp.attendance === 'yes' ? '#059669' : '#dc2626',
                                   border: matchingRsvp.attendance === 'yes' ? '1px solid #a7f3d0' : '1px solid #fecaca'
                                 }}>
-                                  {matchingRsvp.attendance === 'yes' ? `✓ Sudah Konfirmasi (Hadir - ${matchingRsvp.pax} Kursi)` : '✕ Sudah Konfirmasi (Tidak Hadir)'}
+                                  {matchingRsvp.attendance === 'yes' ? `Sudah Konfirmasi (Hadir - ${matchingRsvp.pax} Kursi)` : 'Sudah Konfirmasi (Tidak Hadir)'}
                                 </span>
                               </div>
                             ) : (
@@ -1153,7 +1156,7 @@ export default function Admin() {
                                 color: '#b45309',
                                 border: '1px solid #fde68a'
                               }}>
-                                ⏳ Belum Mengisi
+                                Belum Mengisi
                               </span>
                             )}
                           </td>

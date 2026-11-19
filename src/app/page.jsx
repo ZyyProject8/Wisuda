@@ -15,7 +15,8 @@ import {
   ChevronUp,
   Navigation,
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getMasterStudents } from '../data/studentsData';
@@ -953,7 +954,7 @@ function InvitationContent() {
                   <div className="confirmed-detail-row">
                     <span className="confirmed-detail-label">Status Kehadiran:</span>
                     <span className={`confirmed-status-pill ${lastSubmitted.attendance === 'yes' ? 'status-hadir' : 'status-absen'}`}>
-                      {lastSubmitted.attendance === 'yes' ? '✓ Pasti Hadir' : '✕ Tidak Dapat Hadir'}
+                      {lastSubmitted.attendance === 'yes' ? 'Pasti Hadir' : 'Tidak Dapat Hadir'}
                     </span>
                   </div>
 
@@ -961,7 +962,7 @@ function InvitationContent() {
                     <div className="confirmed-detail-row">
                       <span className="confirmed-detail-label">Total Kursi:</span>
                       <strong className="confirmed-detail-value" style={{ color: 'var(--color-primary)' }}>
-                        🪑 {lastSubmitted.pax} Kursi (Siswa + Pendamping)
+                        {lastSubmitted.pax} Kursi (Siswa + Pendamping)
                       </strong>
                     </div>
                   )}
@@ -1070,7 +1071,7 @@ function InvitationContent() {
                       fontSize: '0.85rem'
                     }}>
                       <span>Status: <strong style={{ color: alreadySubmittedData.attendance === 'yes' ? '#059669' : '#dc2626' }}>
-                        {alreadySubmittedData.attendance === 'yes' ? '✓ Pasti Hadir' : '✕ Tidak Hadir'}
+                        {alreadySubmittedData.attendance === 'yes' ? 'Pasti Hadir' : 'Tidak Hadir'}
                       </strong></span>
                       {alreadySubmittedData.attendance === 'yes' && (
                         <span>| Kursi: <strong>{alreadySubmittedData.pax || 3} Kursi</strong></span>
@@ -1095,9 +1096,13 @@ function InvitationContent() {
                       color: '#92400e',
                       fontSize: '0.84rem',
                       lineHeight: '1.5',
-                      fontWeight: 600
+                      fontWeight: 600,
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '0.5rem'
                     }}>
-                      🔒 Formulir Terkunci: Satu siswa hanya dapat mengisi konfirmasi 1 kali demi mencegah duplikasi kursi aula. Apabila terdapat perubahan mendesak, silakan menghubungi Panitia Wisuda SMK Negeri 6 Surakarta.
+                      <Lock size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+                      <span>Formulir Terkunci: Satu siswa hanya dapat mengisi konfirmasi 1 kali demi mencegah duplikasi kursi aula. Apabila terdapat perubahan mendesak, silakan menghubungi Panitia Wisuda SMK Negeri 6 Surakarta.</span>
                     </div>
                   </div>
                 ) : (
