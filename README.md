@@ -66,24 +66,24 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
 
 ## 👥 3. Daftar 16 Calon Wisudawan Resmi Terdaftar
 
-| No. | Nama Calon Wisudawan | Kelas / Jurusan | NIS |
-| :---: | :--- | :---: | :---: |
-| 1 | Muhammad Ba'sin Khoirur Roziqin Raharjo | XII RPL | 240101 |
-| 2 | Lubaid Arfa Casilas | XII RPL | 240102 |
-| 3 | Donald Terrifortino | XII RPL | 240103 |
-| 4 | Mohammad Hilmi Azzam | XII RPL | 240104 |
-| 5 | Abryan Yoga Pratama | XII RPL | 240105 |
-| 6 | Byatara Ade Wisnu Brata | XII RPL | 240106 |
-| 7 | Muhammad Zidane | XII RPL | 240107 |
-| 8 | Alvaro Danendra Kurniawanb | XII RPL | 240108 |
-| 9 | Adrian Valentino | XII RPL | 240109 |
-| 10 | Valentino Santoso | XII RPL | 240110 |
-| 11 | Stefano Budi | XII RPL | 240111 |
-| 12 | Aziz Ahmad Juniar | XII RPL | 240112 |
-| 13 | Junior Alfrefo Berned | XII RPL | 240113 |
-| 14 | Damay Mada Setyawan | XII RPL | 240114 |
-| 15 | Desiderius Aditya | XII RPL | 240115 |
-| 16 | Kritiano Agustav | XII RPL | 240116 |
+| No. | Nama Calon Wisudawan | Kelas / Jurusan |
+| :---: | :--- | :---: |
+| 1 | Muhammad Ba'sin Khoirur Roziqin Raharjo | XII RPL |
+| 2 | Lubaid Arfa Casilas | XII RPL |
+| 3 | Donald Terrifortino | XII RPL |
+| 4 | Mohammad Hilmi Azzam | XII RPL |
+| 5 | Abryan Yoga Pratama | XII RPL |
+| 6 | Byatara Ade Wisnu Brata | XII RPL |
+| 7 | Muhammad Zidane | XII RPL |
+| 8 | Alvaro Danendra Kurniawanb | XII RPL |
+| 9 | Adrian Valentino | XII RPL |
+| 10 | Valentino Santoso | XII RPL |
+| 11 | Stefano Budi | XII RPL |
+| 12 | Aziz Ahmad Juniar | XII RPL |
+| 13 | Junior Alfrefo Berned | XII RPL |
+| 14 | Damay Mada Setyawan | XII RPL |
+| 15 | Desiderius Aditya | XII RPL |
+| 16 | Kritiano Agustav | XII RPL |
 
 ---
 

@@ -45,8 +45,7 @@ export default function Admin() {
   // Form Tambah Siswa Baru
   const [newStudent, setNewStudent] = useState({
     name: '',
-    student_class: SCHOOL_CLASSES[0] || 'XII RPL 1',
-    nis: ''
+    student_class: SCHOOL_CLASSES[0] || 'XII RPL 1'
   });
   const [addSuccessMsg, setAddSuccessMsg] = useState('');
 
@@ -412,7 +411,6 @@ export default function Admin() {
 
     const createdStudent = {
       id: `CUSTOM-${Date.now()}`,
-      nis: newStudent.nis.trim() || '-',
       name: newStudent.name.trim(),
       student_class: newStudent.student_class
     };
@@ -423,8 +421,7 @@ export default function Admin() {
 
     setNewStudent({
       name: '',
-      student_class: newStudent.student_class,
-      nis: ''
+      student_class: newStudent.student_class
     });
 
     setAddSuccessMsg(`✓ Siswa "${createdStudent.name}" berhasil ditambahkan ke daftar wisuda.`);
@@ -689,8 +686,7 @@ export default function Admin() {
   const filteredMasterStudents = masterStudents.filter(s => {
     const matchClass = filterClass === 'ALL' || s.student_class === filterClass;
     const matchQuery = !studentSearch.trim() || 
-      s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-      (s.nis && s.nis.includes(studentSearch));
+      s.name.toLowerCase().includes(studentSearch.toLowerCase());
     return matchClass && matchQuery;
   });
 
@@ -1058,17 +1054,6 @@ export default function Admin() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginBottom: '0.3rem' }}>NIS (Opsional)</label>
-                  <input
-                    type="text"
-                    placeholder="Contoh: 240106"
-                    value={newStudent.nis}
-                    onChange={(e) => setNewStudent(prev => ({ ...prev, nis: e.target.value }))}
-                    style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', boxSizing: 'border-box' }}
-                  />
-                </div>
-
-                <div>
                   <button
                     type="submit"
                     style={{ width: '100%', padding: '0.68rem 1rem', borderRadius: '8px', border: 'none', background: '#0f2b5c', color: '#fff', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer' }}
@@ -1107,10 +1092,10 @@ export default function Admin() {
                     <Search size={17} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                     <input
                       type="text"
-                      placeholder="Cari nama atau NIS..."
+                      placeholder="Cari nama calon wisudawan..."
                       value={studentSearch}
                       onChange={(e) => setStudentSearch(e.target.value)}
-                      style={{ padding: '0.6rem 1rem 0.6rem 2.2rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', width: '200px' }}
+                      style={{ padding: '0.6rem 1rem 0.6rem 2.2rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', width: '220px' }}
                     />
                   </div>
                 </div>
@@ -1121,7 +1106,6 @@ export default function Admin() {
                   <thead>
                     <tr style={{ borderBottom: '2px solid #f1f5f9', color: '#64748b', fontSize: '0.84rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       <th style={{ padding: '0.85rem 0.6rem' }}>No.</th>
-                      <th style={{ padding: '0.85rem 0.6rem' }}>NIS</th>
                       <th style={{ padding: '0.85rem 0.6rem' }}>Nama Calon Wisudawan</th>
                       <th style={{ padding: '0.85rem 0.6rem' }}>Kelas</th>
                       <th style={{ padding: '0.85rem 0.6rem' }}>Status Konfirmasi Kehadiran</th>
@@ -1138,9 +1122,6 @@ export default function Admin() {
                         <tr key={st.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                           <td style={{ padding: '0.85rem 0.6rem', fontSize: '0.82rem', color: '#94a3b8' }}>
                             {idx + 1}
-                          </td>
-                          <td style={{ padding: '0.85rem 0.6rem', fontSize: '0.84rem', color: '#64748b' }}>
-                            {st.nis || '-'}
                           </td>
                           <td style={{ padding: '0.85rem 0.6rem', fontWeight: 600, color: '#0f2b5c' }}>
                             {st.name}
@@ -1222,7 +1203,7 @@ export default function Admin() {
                     })}
                     {filteredMasterStudents.length === 0 && (
                       <tr>
-                        <td colSpan="6" style={{ textAlign: 'center', padding: '2.5rem 0', color: '#94a3b8' }}>
+                        <td colSpan="5" style={{ textAlign: 'center', padding: '2.5rem 0', color: '#94a3b8' }}>
                           Tidak ada siswa yang sesuai dengan filter atau pencarian.
                         </td>
                       </tr>
