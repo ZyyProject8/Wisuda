@@ -58,6 +58,7 @@ export default function Admin() {
   // State untuk Berbagi Link Broadcast
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedWA, setCopiedWA] = useState(false);
+  const [showWaPreview, setShowWaPreview] = useState(false);
 
   // Password admin
   const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'wisuda24';
@@ -812,85 +813,102 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* 5 Kartu Metrik Analitik */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-          <div style={{ background: '#fff', padding: '1.3rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #0f2b5c' }}>
+        {/* 6 Kartu Metrik Analitik: Rapi & Seimbang */}
+        <div className="admin-metrics-grid">
+          <div style={{ background: '#fff', padding: '1.15rem 1rem', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '4px solid #0f2b5c' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#0f2b5c' }}>{totalSiswaMaster}</div>
-                <div style={{ color: '#64748b', fontSize: '0.86rem', marginTop: '0.2rem' }}>Total Calon Wisudawan</div>
+                <div style={{ fontSize: '1.85rem', fontWeight: 'bold', color: '#0f2b5c', lineHeight: 1.1 }}>{totalSiswaMaster}</div>
+                <div style={{ color: '#64748b', fontSize: '0.82rem', marginTop: '0.35rem', fontWeight: 500 }}>Total Calon Wisudawan</div>
               </div>
-              <GraduationCap size={28} style={{ color: '#0f2b5c', opacity: 0.6 }} />
+              <GraduationCap size={24} style={{ color: '#0f2b5c', opacity: 0.55 }} />
             </div>
           </div>
 
-          <div style={{ background: '#fff', padding: '1.3rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #2563eb' }}>
+          <div style={{ background: '#fff', padding: '1.15rem 1rem', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '4px solid #2563eb' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#2563eb' }}>{totalRSVP}</div>
-                <div style={{ color: '#64748b', fontSize: '0.86rem', marginTop: '0.2rem' }}>Sudah Konfirmasi</div>
+                <div style={{ fontSize: '1.85rem', fontWeight: 'bold', color: '#2563eb', lineHeight: 1.1 }}>{totalRSVP}</div>
+                <div style={{ color: '#64748b', fontSize: '0.82rem', marginTop: '0.35rem', fontWeight: 500 }}>Sudah Konfirmasi</div>
               </div>
-              <Users size={28} style={{ color: '#2563eb', opacity: 0.6 }} />
+              <Users size={24} style={{ color: '#2563eb', opacity: 0.55 }} />
             </div>
           </div>
 
-          <div style={{ background: '#fff', padding: '1.3rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #059669' }}>
+          <div style={{ background: '#fff', padding: '1.15rem 1rem', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '4px solid #059669' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#059669' }}>{totalHadir}</div>
-                <div style={{ color: '#64748b', fontSize: '0.86rem', marginTop: '0.2rem' }}>Siswa Hadir</div>
+                <div style={{ fontSize: '1.85rem', fontWeight: 'bold', color: '#059669', lineHeight: 1.1 }}>{totalHadir}</div>
+                <div style={{ color: '#64748b', fontSize: '0.82rem', marginTop: '0.35rem', fontWeight: 500 }}>Siswa Hadir</div>
               </div>
-              <CheckCircle size={28} style={{ color: '#059669', opacity: 0.7 }} />
+              <CheckCircle size={24} style={{ color: '#059669', opacity: 0.65 }} />
             </div>
           </div>
 
-          <div style={{ background: '#fff', padding: '1.3rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #d97706' }}>
+          <div style={{ background: '#fff', padding: '1.15rem 1rem', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '4px solid #d97706' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#d97706' }}>{totalPax}</div>
-                <div style={{ color: '#64748b', fontSize: '0.86rem', marginTop: '0.2rem' }}>Total Kursi / Konsumsi</div>
-                <small style={{ color: '#94a3b8', fontSize: '0.72rem' }}>*Siswa + Wali Murid</small>
+                <div style={{ fontSize: '1.85rem', fontWeight: 'bold', color: '#d97706', lineHeight: 1.1 }}>{totalPax}</div>
+                <div style={{ color: '#64748b', fontSize: '0.82rem', marginTop: '0.35rem', fontWeight: 500 }}>Total Kursi Aula</div>
+                <small style={{ color: '#94a3b8', fontSize: '0.7rem', display: 'block' }}>*Siswa + Wali</small>
               </div>
-              <Armchair size={28} style={{ color: '#d97706', opacity: 0.7 }} />
+              <Armchair size={24} style={{ color: '#d97706', opacity: 0.65 }} />
             </div>
           </div>
 
-          <div style={{ background: '#fff', padding: '1.3rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #ef4444' }}>
+          <div style={{ background: '#fff', padding: '1.15rem 1rem', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '4px solid #ef4444' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>{totalTidakHadir}</div>
-                <div style={{ color: '#64748b', fontSize: '0.86rem', marginTop: '0.2rem' }}>Berhalangan Hadir</div>
+                <div style={{ fontSize: '1.85rem', fontWeight: 'bold', color: '#ef4444', lineHeight: 1.1 }}>{totalTidakHadir}</div>
+                <div style={{ color: '#64748b', fontSize: '0.82rem', marginTop: '0.35rem', fontWeight: 500 }}>Berhalangan Hadir</div>
               </div>
-              <XCircle size={28} style={{ color: '#ef4444', opacity: 0.6 }} />
+              <XCircle size={24} style={{ color: '#ef4444', opacity: 0.55 }} />
             </div>
           </div>
 
-          <div style={{ background: '#fff', padding: '1.3rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '5px solid #94a3b8' }}>
+          <div style={{ background: '#fff', padding: '1.15rem 1rem', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', borderLeft: '4px solid #94a3b8' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#64748b' }}>{totalBelumKonfirmasi}</div>
-                <div style={{ color: '#64748b', fontSize: '0.86rem', marginTop: '0.2rem' }}>Belum Konfirmasi</div>
+                <div style={{ fontSize: '1.85rem', fontWeight: 'bold', color: '#64748b', lineHeight: 1.1 }}>{totalBelumKonfirmasi}</div>
+                <div style={{ color: '#64748b', fontSize: '0.82rem', marginTop: '0.35rem', fontWeight: 500 }}>Belum Konfirmasi</div>
               </div>
-              <AlertCircle size={28} style={{ color: '#94a3b8', opacity: 0.6 }} />
+              <AlertCircle size={24} style={{ color: '#94a3b8', opacity: 0.55 }} />
             </div>
           </div>
         </div>
 
         {/* Kotak Broadcast WhatsApp Resmi (Untuk Seluruh Angkatan) */}
         <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', marginBottom: '2rem', border: '1px solid #e2e8f0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
-            <Share2 size={20} style={{ color: '#c59b27' }} />
-            <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#0f2b5c' }}>Link Undangan & Broadcast WhatsApp Angkatan 2024/2027</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.4rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <Share2 size={20} style={{ color: '#c59b27' }} />
+              <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#0f2b5c' }}>Link Undangan & Broadcast WhatsApp Angkatan 2024/2027</h3>
+            </div>
+            <button
+              onClick={() => setShowWaPreview(!showWaPreview)}
+              style={{
+                background: 'transparent',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                padding: '0.35rem 0.75rem',
+                fontSize: '0.8rem',
+                color: '#0f2b5c',
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+            >
+              {showWaPreview ? '▲ Sembunyikan Teks Pesan' : '👁️ Lihat / Intip Teks Pesan WA'}
+            </button>
           </div>
           <p style={{ color: '#64748b', fontSize: '0.88rem', margin: '0 0 1rem' }}>
-            Bagikan link resmi ini ke grup WhatsApp kelas atau wali murid. Setiap siswa akan memilih nama dan kelasnya sendiri untuk melakukan konfirmasi kehadiran 1 kali.
+            Bagikan pesan resmi ini ke grup WhatsApp kelas atau wali murid. Setiap siswa akan memilih nama dan kelasnya sendiri untuk melakukan konfirmasi kehadiran 1 kali.
           </p>
 
           <div style={{ background: '#f8fafc', padding: '0.9rem 1.1rem', borderRadius: '10px', border: '1px dashed #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.8rem' }}>
             <div style={{ fontSize: '0.9rem', color: '#1e293b' }}>
               <strong>URL Undangan:</strong> <span style={{ color: '#0f2b5c', textDecoration: 'underline' }}>{getOfficialWebsiteUrl()}</span>
             </div>
-            <div style={{ display: 'flex', gap: '0.6rem' }}>
+            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
               <button
                 onClick={() => copyToClipboard(getOfficialWebsiteUrl(), 'link')}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', borderRadius: '8px', border: 'none', background: '#0f2b5c', color: '#fff', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
@@ -905,8 +923,35 @@ export default function Admin() {
                 {copiedWA ? <Check size={16} /> : <Copy size={16} />}
                 {copiedWA ? 'Pesan WA Tersalin!' : 'Salin Pesan Broadcast WA'}
               </button>
+              <button
+                onClick={() => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(getWaBroadcastMessage())}`, '_blank')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', borderRadius: '8px', border: '1.5px solid #25D366', background: '#ecfdf5', color: '#065f46', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700 }}
+              >
+                Kirim Langsung ke WA ↗
+              </button>
             </div>
           </div>
+
+          {/* Kotak Preview Pesan WhatsApp yang Siap Dikirim */}
+          {showWaPreview && (
+            <div style={{
+              marginTop: '1rem',
+              background: '#f8fafc',
+              border: '1.5px solid #a7f3d0',
+              borderRadius: '10px',
+              padding: '1.2rem',
+              fontSize: '0.86rem',
+              color: '#1e293b',
+              lineHeight: '1.6',
+              whiteSpace: 'pre-line',
+              fontFamily: 'monospace'
+            }}>
+              <strong style={{ display: 'block', color: '#065f46', marginBottom: '0.5rem', fontFamily: 'inherit' }}>
+                📄 Isi Pesan Broadcast WhatsApp yang Disalin:
+              </strong>
+              {getWaBroadcastMessage()}
+            </div>
+          )}
         </div>
 
         {/* Tab Navigasi Admin */}
