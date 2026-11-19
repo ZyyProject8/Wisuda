@@ -162,128 +162,6 @@ export default function Admin() {
     alert(`Konfirmasi untuk ${student.name} berhasil direset. Siswa sekarang dapat mengisi kembali.`);
   };
 
-  // Download E-Tiket perorangan tamu sebagai file PDF langsung (tanpa dialog cetak)
-  const handleDownloadPdf = (record) => {
-    if (!record) return;
-
-    try {
-      const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a5'
-      });
-
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-
-      // Bingkai Emas Luar
-      doc.setDrawColor(197, 155, 39);
-      doc.setLineWidth(1.2);
-      doc.rect(8, 8, pageWidth - 16, pageHeight - 16);
-
-      // Header Atas Biru Navy
-      doc.setFillColor(15, 43, 92);
-      doc.rect(8, 8, pageWidth - 16, 26, 'F');
-
-      // Garis Aksen Emas
-      doc.setFillColor(197, 155, 39);
-      doc.rect(8, 34, pageWidth - 16, 1, 'F');
-
-      doc.setTextColor(255, 255, 255);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(13);
-      doc.text('SMK NEGERI 6 SURAKARTA', pageWidth / 2, 18, { align: 'center' });
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8.5);
-      doc.text('Panitia Wisuda & Pelepasan Siswa Angkatan 2024/2027', pageWidth / 2, 24, { align: 'center' });
-      doc.setFontSize(7.5);
-      doc.setTextColor(220, 230, 242);
-      doc.text('Jl. Adi Sucipto No. 38, Kelurahan Kerten, Kecamatan Laweyan, Kota Surakarta', pageWidth / 2, 29, { align: 'center' });
-
-      // Judul Tiket
-      doc.setTextColor(197, 155, 39);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.text('E-TIKET RESMI KONFIRMASI KEHADIRAN', pageWidth / 2, 44, { align: 'center' });
-
-      const ticketId = `SMK6-WSD-${record.id ? String(record.id).slice(-4) : '2027'}`;
-      doc.setFillColor(241, 245, 249);
-      doc.setDrawColor(203, 213, 225);
-      doc.roundedRect(pageWidth / 2 - 32, 48, 64, 8, 2, 2, 'FD');
-      doc.setTextColor(15, 43, 92);
-      doc.setFontSize(9);
-      doc.text(`NO. TIKET: ${ticketId}`, pageWidth / 2, 53.5, { align: 'center' });
-
-      // Tabel Rincian Data
-      const details = [
-        ['Nama Wisudawan', `: ${record.name || '-'}`],
-        ['Kelas & Jurusan', `: ${record.student_class || 'XII RPL'}`],
-        ['Waktu Acara', ': Sabtu, 20 Juni 2027 (07:30 - 12:30 WIB)'],
-        ['Tempat Acara', ': Gedung SMK Negeri 6 Surakarta'],
-        ['Status Kehadiran', `: ${record.attendance === 'yes' ? 'PASTI HADIR' : 'TIDAK DAPAT HADIR'}`],
-        ['Alokasi Kursi', `: ${record.attendance === 'yes' ? `${record.pax || 3} Kursi (Siswa + Orang Tua)` : '0 Kursi'}`],
-        ['Waktu Konfirmasi', `: ${record.created_at ? new Date(record.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-'}`]
-      ];
-
-      autoTable(doc, {
-        startY: 61,
-        body: details,
-        theme: 'plain',
-        styles: {
-          fontSize: 9,
-          cellPadding: 2.6,
-          textColor: [15, 43, 92]
-        },
-        columnStyles: {
-          0: { fontStyle: 'bold', cellWidth: 38, textColor: [100, 116, 139] },
-          1: { fontStyle: 'bold', textColor: [15, 43, 92] }
-        },
-        margin: { left: 16, right: 16 }
-      });
-
-      const finalY = doc.lastAutoTable?.finalY || 120;
-
-      // Kotak Status
-      if (record.attendance === 'yes') {
-        doc.setFillColor(236, 253, 245);
-        doc.setDrawColor(167, 243, 208);
-        doc.roundedRect(16, finalY + 4, pageWidth - 32, 14, 2, 2, 'FD');
-        doc.setTextColor(5, 150, 105);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9.5);
-        doc.text('STATUS: TERKONFIRMASI PASTI HADIR', pageWidth / 2, finalY + 10, { align: 'center' });
-        doc.setFontSize(8);
-        doc.text(`Alokasi kursi aula telah disiapkan untuk ${record.pax || 3} orang`, pageWidth / 2, finalY + 15, { align: 'center' });
-      } else {
-        doc.setFillColor(254, 242, 242);
-        doc.setDrawColor(254, 202, 202);
-        doc.roundedRect(16, finalY + 4, pageWidth - 32, 14, 2, 2, 'FD');
-        doc.setTextColor(220, 38, 38);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9.5);
-        doc.text('STATUS: BERHALANGAN / TIDAK HADIR', pageWidth / 2, finalY + 12, { align: 'center' });
-      }
-
-      // Catatan Footer & Pengesahan
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7.5);
-      doc.setTextColor(148, 163, 184);
-      doc.text('*Dokumen resmi panitia wisuda SMK Negeri 6 Surakarta.', 16, pageHeight - 20);
-
-      doc.setFontSize(8);
-      doc.setTextColor(51, 65, 85);
-      doc.text('Ketua Panitia Wisuda,', pageWidth - 55, pageHeight - 26);
-      doc.setFont('helvetica', 'bold');
-      doc.text('SMK Negeri 6 Surakarta', pageWidth - 55, pageHeight - 16);
-
-      const safeName = (record.name || 'Siswa').replace(/[^a-zA-Z0-9]/g, '_');
-      doc.save(`E-Tiket_${safeName}.pdf`);
-    } catch (err) {
-      console.error('Gagal generate tiket PDF:', err);
-      alert('Terjadi kendala saat mengunduh file E-Tiket PDF.');
-    }
-  };
 
   // Download PDF Resmi Khusus Daftar Tamu yang Akan Hadir (Tanpa dialog cetak)
   const handleDownloadAttendingPdf = (guestList) => {
@@ -1056,35 +934,13 @@ export default function Admin() {
                         {rsvp.message || <span style={{ color: '#cbd5e1', fontStyle: 'italic' }}>Tanpa pesan</span>}
                       </td>
                       <td style={{ padding: '0.9rem 0.6rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
-                          <button
-                            onClick={() => handleDownloadPdf(rsvp)}
-                            title="Download E-Tiket PDF Siswa Ini"
-                            style={{
-                              border: '1px solid #cbd5e1',
-                              background: '#f8fafc',
-                              color: '#0f2b5c',
-                              cursor: 'pointer',
-                              padding: '0.35rem 0.65rem',
-                              borderRadius: '6px',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.3rem',
-                              fontSize: '0.78rem',
-                              fontWeight: 600
-                            }}
-                          >
-                            <Download size={14} />
-                            Download PDF
-                          </button>
-                          <button
-                            onClick={() => handleDeleteRsvp(rsvp.id, rsvp.name)}
-                            title="Hapus data konfirmasi ini"
-                            style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer', padding: '0.35rem' }}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => handleDeleteRsvp(rsvp.id, rsvp.name)}
+                          title="Hapus data konfirmasi ini"
+                          style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer', padding: '0.35rem' }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </td>
                     </tr>
                   ))}
