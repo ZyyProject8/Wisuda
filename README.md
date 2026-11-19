@@ -48,10 +48,10 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
    - Estimasi Total Kursi & Konsumsi (*Pax*).
    - Jumlah Berhalangan Hadir.
    - Jumlah Belum Konfirmasi.
-3. **Tab 1: Data Respon Kehadiran & Fitur Cetak/Unduh PDF Khusus Admin** 📥
-   - **Download Tamu Hadir (PDF)**: Tombol khusus untuk langsung mengunduh/mencetak dokumen resmi A4 *landscape* daftar seluruh tamu & wisudawan yang mengonfirmasi **Pasti Hadir** beserta kelas, jumlah kursi, pesan, dan waktu konfirmasi.
-   - **Cetak Semua Rekap (PDF)**: Mencetak seluruh rekapitulasi data respon kehadiran (baik yang hadir maupun yang tidak hadir).
-   - **Unduh E-Tiket PDF Per Siswa**: Aksi unduh tiket PDF resmi perorangan langsung pada masing-masing baris data tamu.
+3. **Tab 1: Data Respon Kehadiran & Fitur Download PDF Khusus Admin** 📥
+   - **Download Tamu Hadir (PDF)**: Tombol eksklusif panitia untuk langsung membuat dan mengunduh berkas PDF resmi (`Daftar_Resmi_Tamu_Hadir_SMK6.pdf`) berformat A4 *landscape* berisi daftar seluruh tamu & wisudawan yang mengonfirmasi **Pasti Hadir** beserta kelas, total kebutuhan kursi, pesan doa, dan tanggal konfirmasi.
+   - **Download PDF Tiket Siswa**: Tombol unduh file PDF bukti kehadiran resmi perorangan (`E-Tiket_[Nama].pdf`) berformat A5 *portrait* langsung pada masing-masing baris siswa.
+   - Seluruh proses ekspor PDF berjalan otomatis (*client-side*) dan langsung terunduh ke komputer/perangkat tanpa perlu melalui dialog cetak printer (*print dialog*).
    - Fitur pencarian instan (*live search filter*) berdasarkan nama atau kelas siswa.
    - Aksi hapus data konfirmasi dengan konfirmasi keamanan.
 4. **Tab 2: Master Data Calon Wisudawan**
