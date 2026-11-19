@@ -860,7 +860,7 @@ function InvitationContent() {
                 <div className="timeline-dot"></div>
                 <strong style={{ color: 'var(--color-primary-dark)', display: 'block', fontSize: '1rem' }}>11.30 - 12.30 WIB</strong>
                 <span style={{ color: 'var(--color-secondary)', fontWeight: 600 }}>Penutupan</span>
-                <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Penampilan perpisahan, foto bersama angkatan, dan santap siang.</p>
+                <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Penampilan perpisahan dan foto bersama angkatan.</p>
               </div>
             </motion.div>
           </div>
