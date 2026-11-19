@@ -1,4 +1,4 @@
-# 🎓 Sistem Informasi & Undangan Digital Wisuda — SMK Negeri 6 Surakarta
+# 🎓 Undangan Digital Wisuda — SMK Negeri 6 Surakarta
 > **Projek Ujian Akhir Keahlian Rekayasa Perangkat Lunak (RPL)**  
 > Acara Sidang Terbuka Wisuda & Pelepasan Siswa-Siswi **Angkatan 2024/2027**  
 > **SMK Negeri 6 Surakarta**
