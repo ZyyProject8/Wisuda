@@ -30,7 +30,7 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
 5. **Formulir RSVP Siswa & Wali Murid (Input Teks Bersih)**
    - **Ketik Nama & Kelas**: Siswa cukup mengetikkan nama lengkapnya dan kelas/jurusannya secara langsung pada kolom input teks yang bersih dan elegan (tanpa tombol pilihan cepat yang memadati layar).
    - **Verifikasi 16 Calon Wisudawan Resmi**: Sistem memvalidasi nama terhadap data 16 calon wisudawan resmi SMK 6. Nama di luar daftar resmi tidak dapat mengirim formulir.
-   - **Pencegahan Duplikasi (1 Siswa = 1 Kali Konfirmasi)**: Jika nama yang diketik sudah pernah mengisi konfirmasi, sistem langsung mengunci formulir dan menampilkan ringkasan data yang telah masuk untuk mencegah kursi ganda.
+   - **Pencegahan Duplikasi & Kunci Permanen (1 Siswa = 1 Kali Konfirmasi)**: Setelah siswa mengirim konfirmasi, formulir langsung terkunci secara permanen dan tidak dapat diisi ulang demi mencegah duplikasi alokasi kursi aula. Jika siswa memasukkan namanya kembali, sistem menampilkan ringkasan data resmi yang telah terdaftar dan menutup akses pengiriman formulir.
 6. **Tampilan Elegan & Responsif Mobile Sempurna**
    - Tipografi yang proporsional dan nyaman dibaca di desktop maupun layar ponsel kecil (360px - 480px).
    - Tanpa audio pemutar musik latar sesuai permintaan agar pengalaman pengguna tenang, ringan, dan fokus.
@@ -56,6 +56,7 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
    - Aksi hapus data konfirmasi dengan konfirmasi keamanan.
 4. **Tab 2: Master Data Calon Wisudawan**
    - Tabel 16 calon wisudawan resmi beserta status langsung: *Sudah Konfirmasi (Hadir/Tidak)* atau *Belum Mengisi*.
+   - **Fitur Edit Data Siswa (Inline Edit)**: Memperbarui kelas atau nama siswa secara instan tanpa perlu menghapus dan mendaftarkan ulang, serta otomatis menyinkronkan data respon kehadiran jika siswa sudah pernah konfirmasi.
    - **Fitur Tambah Siswa Baru**: Form untuk mendaftarkan siswa baru ke daftar wisuda.
    - **Fitur Reset Konfirmasi**: Mengizinkan siswa tertentu mengisi ulang jika sebelumnya terjadi kesalahan pengisian data.
    - **Fitur Hapus Siswa**: Menghapus siswa dari daftar master.

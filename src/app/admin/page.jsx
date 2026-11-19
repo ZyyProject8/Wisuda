@@ -20,7 +20,9 @@ import {
   Share2,
   FileText,
   AlertCircle,
-  Download
+  Download,
+  Edit2,
+  X
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -48,6 +50,10 @@ export default function Admin() {
     student_class: SCHOOL_CLASSES[0] || 'XII RPL 1'
   });
   const [addSuccessMsg, setAddSuccessMsg] = useState('');
+
+  // State Edit Data Siswa Master
+  const [editingStudentId, setEditingStudentId] = useState(null);
+  const [editFormData, setEditFormData] = useState({ name: '', student_class: '' });
 
   // State untuk Berbagi Link Broadcast
   const [copiedLink, setCopiedLink] = useState(false);
@@ -437,6 +443,93 @@ export default function Admin() {
     const updated = masterStudents.filter(s => s.id !== studentId);
     setMasterStudents(updated);
     saveMasterStudents(updated);
+  };
+
+  // Edit Siswa Master (Ubah Kelas atau Nama secara langsung)
+  const handleStartEdit = (student) => {
+    setEditingStudentId(student.id);
+    setEditFormData({
+      name: student.name,
+      student_class: student.student_class || 'XII RPL'
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingStudentId(null);
+    setEditFormData({ name: '', student_class: '' });
+  };
+
+  const handleSaveEdit = async (studentId) => {
+    if (!editFormData.name.trim()) {
+      alert('Nama siswa tidak boleh kosong!');
+      return;
+    }
+
+    const trimmedName = editFormData.name.trim();
+    const classVal = editFormData.student_class.trim();
+
+    // Validasi duplikasi dengan siswa lain
+    const duplicate = masterStudents.some(s => 
+      s.id !== studentId && 
+      s.name.toLowerCase().trim() === trimmedName.toLowerCase() && 
+      s.student_class === classVal
+    );
+
+    if (duplicate) {
+      alert(`Siswa "${trimmedName}" di kelas ${classVal} sudah ada di daftar.`);
+      return;
+    }
+
+    const oldStudent = masterStudents.find(s => s.id === studentId);
+    const oldName = oldStudent ? oldStudent.name : '';
+
+    const updated = masterStudents.map(s => {
+      if (s.id === studentId) {
+        return {
+          ...s,
+          name: trimmedName,
+          student_class: classVal
+        };
+      }
+      return s;
+    });
+
+    setMasterStudents(updated);
+    saveMasterStudents(updated);
+
+    // Sinkronisasi otomatis ke data respon RSVP jika siswa sudah pernah mengisi kehadiran
+    if (oldName) {
+      const matchingRsvp = rsvps.find(r => 
+        r.name?.toLowerCase().trim() === oldName.toLowerCase().trim()
+      );
+
+      if (matchingRsvp) {
+        const updatedRsvps = rsvps.map(r => {
+          if (r.id === matchingRsvp.id) {
+            return {
+              ...r,
+              name: trimmedName,
+              student_class: classVal
+            };
+          }
+          return r;
+        });
+
+        setRsvps(updatedRsvps);
+        try {
+          localStorage.setItem('smk6_rsvps_cache', JSON.stringify(updatedRsvps));
+          await supabase
+            .from('rsvps')
+            .update({ name: trimmedName, student_class: classVal })
+            .eq('id', matchingRsvp.id);
+        } catch (err) {
+          console.warn('Gagal sinkronisasi update data ke Supabase:', err);
+        }
+      }
+    }
+
+    setEditingStudentId(null);
+    alert(`Data siswa "${trimmedName}" (${classVal}) berhasil diperbarui!`);
   };
 
   // Broadcast Link Generator
@@ -1114,25 +1207,73 @@ export default function Admin() {
                   </thead>
                   <tbody>
                     {filteredMasterStudents.map((st, idx) => {
+                      const isEditing = editingStudentId === st.id;
                       const matchingRsvp = rsvps.find(r => 
                         r.name?.toLowerCase().trim() === st.name.toLowerCase().trim()
                       );
 
                       return (
-                        <tr key={st.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <tr key={st.id} style={{ borderBottom: '1px solid #f1f5f9', background: isEditing ? '#f8fafc' : 'transparent' }}>
                           <td style={{ padding: '0.85rem 0.6rem', fontSize: '0.82rem', color: '#94a3b8' }}>
                             {idx + 1}
                           </td>
+
+                          {/* Kolom Nama Siswa */}
                           <td style={{ padding: '0.85rem 0.6rem', fontWeight: 600, color: '#0f2b5c' }}>
-                            {st.name}
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                value={editFormData.name}
+                                onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
+                                style={{
+                                  padding: '0.45rem 0.65rem',
+                                  borderRadius: '6px',
+                                  border: '1.5px solid #0f2b5c',
+                                  fontSize: '0.85rem',
+                                  width: '100%',
+                                  boxSizing: 'border-box',
+                                  fontWeight: 600
+                                }}
+                                autoFocus
+                              />
+                            ) : (
+                              st.name
+                            )}
                           </td>
+
+                          {/* Kolom Kelas & Jurusan */}
                           <td style={{ padding: '0.85rem 0.6rem' }}>
-                            <span style={{ fontSize: '0.8rem', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '0.2rem 0.6rem', borderRadius: '6px', color: '#334155', fontWeight: 600 }}>
-                              {st.student_class}
-                            </span>
+                            {isEditing ? (
+                              <select
+                                value={editFormData.student_class}
+                                onChange={(e) => setEditFormData(prev => ({ ...prev, student_class: e.target.value }))}
+                                style={{
+                                  padding: '0.45rem 0.65rem',
+                                  borderRadius: '6px',
+                                  border: '1.5px solid #0f2b5c',
+                                  fontSize: '0.82rem',
+                                  background: '#fff',
+                                  fontWeight: 600
+                                }}
+                              >
+                                {SCHOOL_CLASSES.map(cls => (
+                                  <option key={cls} value={cls}>{cls}</option>
+                                ))}
+                              </select>
+                            ) : (
+                              <span style={{ fontSize: '0.8rem', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '0.2rem 0.6rem', borderRadius: '6px', color: '#334155', fontWeight: 600 }}>
+                                {st.student_class}
+                              </span>
+                            )}
                           </td>
+
+                          {/* Kolom Status Konfirmasi */}
                           <td style={{ padding: '0.85rem 0.6rem' }}>
-                            {matchingRsvp ? (
+                            {isEditing ? (
+                              <span style={{ fontSize: '0.78rem', color: '#0f2b5c', fontWeight: 600, fontStyle: 'italic' }}>
+                                ✏️ Mode Edit Data
+                              </span>
+                            ) : matchingRsvp ? (
                               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
                                 <span style={{
                                   padding: '0.25rem 0.75rem',
@@ -1160,16 +1301,38 @@ export default function Admin() {
                               </span>
                             )}
                           </td>
+
+                          {/* Kolom Aksi */}
                           <td style={{ padding: '0.85rem 0.6rem', textAlign: 'center' }}>
-                            <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
-                              {matchingRsvp && (
+                            {isEditing ? (
+                              <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
                                 <button
-                                  onClick={() => handleResetStudentConfirmation(st)}
-                                  title="Reset konfirmasi siswa ini agar dapat mengisi ulang"
+                                  onClick={() => handleSaveEdit(st.id)}
+                                  title="Simpan perubahan nama dan kelas"
+                                  style={{
+                                    border: 'none',
+                                    background: '#059669',
+                                    color: '#ffffff',
+                                    borderRadius: '6px',
+                                    padding: '0.35rem 0.65rem',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.25rem'
+                                  }}
+                                >
+                                  <Check size={13} />
+                                  Simpan
+                                </button>
+                                <button
+                                  onClick={handleCancelEdit}
+                                  title="Batalkan perubahan"
                                   style={{
                                     border: '1px solid #cbd5e1',
                                     background: '#ffffff',
-                                    color: '#0f2b5c',
+                                    color: '#64748b',
                                     borderRadius: '6px',
                                     padding: '0.35rem 0.6rem',
                                     fontSize: '0.75rem',
@@ -1179,24 +1342,68 @@ export default function Admin() {
                                     gap: '0.25rem'
                                   }}
                                 >
-                                  <RotateCcw size={13} />
-                                  Reset
+                                  <X size={13} />
+                                  Batal
                                 </button>
-                              )}
-                              <button
-                                onClick={() => handleDeleteMasterStudent(st.id, st.name)}
-                                title="Hapus dari daftar calon wisudawan"
-                                style={{
-                                  border: 'none',
-                                  background: 'transparent',
-                                  color: '#ef4444',
-                                  cursor: 'pointer',
-                                  padding: '0.35rem'
-                                }}
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </div>
+                              </div>
+                            ) : (
+                              <div style={{ display: 'inline-flex', gap: '0.35rem', alignItems: 'center' }}>
+                                <button
+                                  onClick={() => handleStartEdit(st)}
+                                  title="Edit nama atau kelas siswa ini"
+                                  style={{
+                                    border: '1px solid #cbd5e1',
+                                    background: '#ffffff',
+                                    color: '#0f2b5c',
+                                    borderRadius: '6px',
+                                    padding: '0.35rem 0.6rem',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.25rem'
+                                  }}
+                                >
+                                  <Edit2 size={13} />
+                                  Edit
+                                </button>
+                                {matchingRsvp && (
+                                  <button
+                                    onClick={() => handleResetStudentConfirmation(st)}
+                                    title="Reset konfirmasi siswa ini agar dapat mengisi ulang"
+                                    style={{
+                                      border: '1px solid #cbd5e1',
+                                      background: '#ffffff',
+                                      color: '#b45309',
+                                      borderRadius: '6px',
+                                      padding: '0.35rem 0.6rem',
+                                      fontSize: '0.75rem',
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '0.25rem'
+                                    }}
+                                  >
+                                    <RotateCcw size={13} />
+                                    Reset
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleDeleteMasterStudent(st.id, st.name)}
+                                  title="Hapus dari daftar calon wisudawan"
+                                  style={{
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: '#ef4444',
+                                    cursor: 'pointer',
+                                    padding: '0.35rem'
+                                  }}
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
+                            )}
                           </td>
                         </tr>
                       );

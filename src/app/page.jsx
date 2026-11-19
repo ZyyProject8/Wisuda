@@ -153,6 +153,8 @@ function InvitationContent() {
   const [existingRsvps, setExistingRsvps] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [alreadySubmittedData, setAlreadySubmittedData] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
 
   // Form RSVP state
   const [formData, setFormData] = useState({
@@ -163,35 +165,6 @@ function InvitationContent() {
     message: ''
   });
 
-  // Muat data siswa master & data konfirmasi yang sudah ada
-  useEffect(() => {
-    const students = getMasterStudents();
-    setMasterStudents(students);
-
-    const fetchExistingRsvps = async () => {
-      try {
-        const { data, error } = await supabase.from('rsvps').select('*');
-        if (!error && data) {
-          setExistingRsvps(data);
-          try {
-            localStorage.setItem('smk6_rsvps_cache', JSON.stringify(data));
-          } catch {}
-        } else {
-          try {
-            const cached = localStorage.getItem('smk6_rsvps_cache');
-            if (cached) setExistingRsvps(JSON.parse(cached));
-          } catch {}
-        }
-      } catch {
-        try {
-          const cached = localStorage.getItem('smk6_rsvps_cache');
-          if (cached) setExistingRsvps(JSON.parse(cached));
-        } catch {}
-      }
-    };
-    fetchExistingRsvps();
-  }, []);
-
   // Helper normalisasi nama agar pencocokan nama siswa fleksibel & tidak sensitif tanda petik/spasi
   const cleanName = (str) => {
     if (!str) return '';
@@ -201,6 +174,57 @@ function InvitationContent() {
       .replace(/\s+/g, ' ')
       .trim();
   };
+
+  // Muat data siswa master & data konfirmasi yang sudah ada
+  useEffect(() => {
+    const students = getMasterStudents();
+    setMasterStudents(students);
+
+    const fetchExistingRsvps = async () => {
+      let rsvpList = [];
+      try {
+        const { data, error } = await supabase.from('rsvps').select('*');
+        if (!error && data) {
+          rsvpList = data;
+          setExistingRsvps(data);
+          try {
+            localStorage.setItem('smk6_rsvps_cache', JSON.stringify(data));
+          } catch {}
+        } else {
+          try {
+            const cached = localStorage.getItem('smk6_rsvps_cache');
+            if (cached) {
+              rsvpList = JSON.parse(cached);
+              setExistingRsvps(rsvpList);
+            }
+          } catch {}
+        }
+      } catch {
+        try {
+          const cached = localStorage.getItem('smk6_rsvps_cache');
+          if (cached) {
+            rsvpList = JSON.parse(cached);
+            setExistingRsvps(rsvpList);
+          }
+        } catch {}
+      }
+
+      // Deteksi jika pengguna di browser ini sudah pernah mengisi konfirmasi kehadiran
+      try {
+        const mySavedRsvp = localStorage.getItem('smk6_my_submitted_rsvp');
+        if (mySavedRsvp) {
+          const parsed = JSON.parse(mySavedRsvp);
+          if (parsed && parsed.name) {
+            const matchedInDb = rsvpList.find(r => cleanName(r.name) === cleanName(parsed.name));
+            setLastSubmitted(matchedInDb || parsed);
+            setSubmitStatus('success');
+            setAlreadySubmittedData(matchedInDb || parsed);
+          }
+        }
+      } catch {}
+    };
+    fetchExistingRsvps();
+  }, []);
 
   // Handler saat siswa mengetikkan nama di kolom input teks
   const handleNameInputChange = (e) => {
@@ -247,9 +271,6 @@ function InvitationContent() {
       }
     }
   };
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState(null);
 
   // Countdown timer state: Wisuda 20 Juni 2027 08:00 WIB
   const [timeLeft, setTimeLeft] = useState({
@@ -404,6 +425,7 @@ function InvitationContent() {
       setExistingRsvps(prev => [newSubmittedRecord, ...prev]);
       try {
         localStorage.setItem('smk6_rsvps_cache', JSON.stringify([newSubmittedRecord, ...existingRsvps]));
+        localStorage.setItem('smk6_my_submitted_rsvp', JSON.stringify(newSubmittedRecord));
       } catch {}
       setSubmitStatus('success');
 
@@ -426,6 +448,7 @@ function InvitationContent() {
       setExistingRsvps(prev => [newSubmittedRecord, ...prev]);
       try {
         localStorage.setItem('smk6_rsvps_cache', JSON.stringify([newSubmittedRecord, ...existingRsvps]));
+        localStorage.setItem('smk6_my_submitted_rsvp', JSON.stringify(newSubmittedRecord));
       } catch {}
       setSubmitStatus('success');
     } finally {
@@ -953,18 +976,22 @@ function InvitationContent() {
                   )}
                 </div>
 
-                {/* Tombol Kembali / Ubah */}
-                <div style={{ marginTop: '1.6rem', textAlign: 'center' }}>
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      setSubmitStatus(null);
-                    }}
-                    className="btn-outline"
-                    style={{ fontSize: '0.88rem', padding: '0.75rem 2rem' }}
-                  >
-                    Kirim Konfirmasi Baru
-                  </button>
+                {/* Status Terkunci (Final) */}
+                <div style={{
+                  marginTop: '1.6rem',
+                  padding: '1.1rem 1.4rem',
+                  borderRadius: '12px',
+                  background: '#f8fafc',
+                  border: '1.5px solid #e2e8f0',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', color: '#0f2b5c', fontWeight: 700, fontSize: '0.94rem', marginBottom: '0.35rem' }}>
+                    <CheckCircle2 size={19} style={{ color: '#059669' }} />
+                    <span>Konfirmasi Kehadiran Telah Terkunci (Final)</span>
+                  </div>
+                  <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem', lineHeight: '1.5' }}>
+                    Data kehadiran Anda telah tercatat resmi di database panitia dan tidak dapat diisi ulang demi mencegah duplikasi kursi aula. Apabila terdapat perubahan mendesak, silakan menghubungi Panitia Wisuda SMK Negeri 6 Surakarta.
+                  </p>
                 </div>
               </motion.div>
             ) : (
@@ -1023,14 +1050,14 @@ function InvitationContent() {
                 </div>
 
                 {/* Notifikasi Bila Siswa Sudah Pernah Mengisi Kehadiran */}
-                {alreadySubmittedData && (
-                  <div className="already-submitted-notice">
+                {alreadySubmittedData ? (
+                  <div className="already-submitted-notice" style={{ marginTop: '1.2rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#b45309', fontWeight: 700, fontSize: '0.96rem', marginBottom: '0.4rem' }}>
                       <AlertCircle size={20} style={{ flexShrink: 0, color: '#d97706' }} />
                       <span>Konfirmasi Kehadiran Sudah Pernah Dikirim</span>
                     </div>
                     <p style={{ margin: '0.2rem 0 0.75rem', color: '#4b5563', fontSize: '0.88rem', lineHeight: '1.5' }}>
-                      Siswa atas nama <strong>{alreadySubmittedData.name}</strong> sudah tercatat mengirim konfirmasi kehadiran sebelumnya.
+                      Siswa atas nama <strong>{alreadySubmittedData.name}</strong> sudah tercatat mengirim konfirmasi kehadiran resmi sebelumnya.
                     </p>
                     <div style={{
                       display: 'flex',
@@ -1046,7 +1073,7 @@ function InvitationContent() {
                         {alreadySubmittedData.attendance === 'yes' ? '✓ Pasti Hadir' : '✕ Tidak Hadir'}
                       </strong></span>
                       {alreadySubmittedData.attendance === 'yes' && (
-                        <span>| Kursi: <strong>{alreadySubmittedData.pax} Kursi</strong></span>
+                        <span>| Kursi: <strong>{alreadySubmittedData.pax || 3} Kursi</strong></span>
                       )}
                       {alreadySubmittedData.created_at && (
                         <span style={{ color: '#6b7280' }}>
@@ -1059,106 +1086,116 @@ function InvitationContent() {
                         Pesan: "{alreadySubmittedData.message}"
                       </p>
                     )}
-                    <p style={{ margin: '0.75rem 0 0', fontSize: '0.8rem', color: '#92400e', lineHeight: '1.4' }}>
-                      *Satu siswa hanya dapat mengisi konfirmasi 1 kali demi mencegah duplikasi kursi. Jika terdapat perubahan data, silakan hubungi panitia wisuda.
-                    </p>
-                  </div>
-                )}
-
-                {/* 3. Pilihan Status Kehadiran Interaktif */}
-                <div className="form-group" style={{ opacity: (!selectedStudent || alreadySubmittedData) ? 0.6 : 1, textAlign: 'left' }}>
-                  <label className="form-label">Konfirmasi Kehadiran</label>
-                  <div className="attendance-toggle-grid">
-                    <button
-                      type="button"
-                      disabled={!selectedStudent || !!alreadySubmittedData}
-                      className={`attendance-option-btn ${formData.attendance === 'yes' ? 'selected-yes' : ''}`}
-                      onClick={() => setFormData(prev => ({ ...prev, attendance: 'yes', pax: prev.pax === '0' ? '3' : prev.pax }))}
-                    >
-                      <CheckCircle2 size={24} className="attendance-icon" />
-                      <div>
-                        <span className="attendance-title">Ya, Saya Hadir</span>
-                        <span className="attendance-desc">Akan hadir memenuhi undangan</span>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      disabled={!selectedStudent || !!alreadySubmittedData}
-                      className={`attendance-option-btn ${formData.attendance === 'no' ? 'selected-no' : ''}`}
-                      onClick={() => setFormData(prev => ({ ...prev, attendance: 'no' }))}
-                    >
-                      <XCircle size={24} className="attendance-icon" />
-                      <div>
-                        <span className="attendance-title">Tidak Dapat Hadir</span>
-                        <span className="attendance-desc">Mohon maaf berhalangan</span>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-
-                {/* 4. Pemilih Kursi Interaktif (Hanya tampil jika hadir) */}
-                {formData.attendance === 'yes' && (
-                  <div className="form-group" style={{ opacity: (!selectedStudent || alreadySubmittedData) ? 0.6 : 1, textAlign: 'left' }}>
-                    <label className="form-label">Alokasi Kursi yang Dibutuhkan</label>
-                    <div className="pax-selector-grid">
-                      {[
-                        { count: '1', title: '1 Kursi', desc: 'Hanya Siswa' },
-                        { count: '2', title: '2 Kursi', desc: 'Siswa + 1 Orang Tua' },
-                        { count: '3', title: '3 Kursi', desc: 'Siswa + 2 Orang Tua' },
-                      ].map(item => (
-                        <button
-                          key={item.count}
-                          type="button"
-                          disabled={!selectedStudent || !!alreadySubmittedData}
-                          className={`pax-card-btn ${formData.pax === item.count ? 'active' : ''}`}
-                          onClick={() => setFormData(prev => ({ ...prev, pax: item.count }))}
-                        >
-                          <Armchair size={22} className="pax-icon" />
-                          <span className="pax-num">{item.title}</span>
-                          <span className="pax-desc">{item.desc}</span>
-                        </button>
-                      ))}
+                    <div style={{
+                      marginTop: '1rem',
+                      padding: '0.85rem 1.1rem',
+                      borderRadius: '8px',
+                      background: '#fffbeb',
+                      border: '1.5px solid #fde68a',
+                      color: '#92400e',
+                      fontSize: '0.84rem',
+                      lineHeight: '1.5',
+                      fontWeight: 600
+                    }}>
+                      🔒 Formulir Terkunci: Satu siswa hanya dapat mengisi konfirmasi 1 kali demi mencegah duplikasi kursi aula. Apabila terdapat perubahan mendesak, silakan menghubungi Panitia Wisuda SMK Negeri 6 Surakarta.
                     </div>
-                    <small style={{ display: 'block', marginTop: '0.45rem', color: 'var(--color-text-light)', fontSize: '0.8rem', textAlign: 'left' }}>
-                      *Kapasitas maksimal 3 kursi per wisudawan (1 wisudawan + 2 orang tua / wali pendamping).
-                    </small>
                   </div>
+                ) : (
+                  <>
+                    {/* 3. Pilihan Status Kehadiran Interaktif */}
+                    <div className="form-group" style={{ opacity: !selectedStudent ? 0.6 : 1, textAlign: 'left' }}>
+                      <label className="form-label">Konfirmasi Kehadiran</label>
+                      <div className="attendance-toggle-grid">
+                        <button
+                          type="button"
+                          disabled={!selectedStudent}
+                          className={`attendance-option-btn ${formData.attendance === 'yes' ? 'selected-yes' : ''}`}
+                          onClick={() => setFormData(prev => ({ ...prev, attendance: 'yes', pax: prev.pax === '0' ? '3' : prev.pax }))}
+                        >
+                          <CheckCircle2 size={24} className="attendance-icon" />
+                          <div>
+                            <span className="attendance-title">Ya, Saya Hadir</span>
+                            <span className="attendance-desc">Akan hadir memenuhi undangan</span>
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={!selectedStudent}
+                          className={`attendance-option-btn ${formData.attendance === 'no' ? 'selected-no' : ''}`}
+                          onClick={() => setFormData(prev => ({ ...prev, attendance: 'no' }))}
+                        >
+                          <XCircle size={24} className="attendance-icon" />
+                          <div>
+                            <span className="attendance-title">Tidak Dapat Hadir</span>
+                            <span className="attendance-desc">Mohon maaf berhalangan</span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* 4. Pemilih Kursi Interaktif (Hanya tampil jika hadir) */}
+                    {formData.attendance === 'yes' && (
+                      <div className="form-group" style={{ opacity: !selectedStudent ? 0.6 : 1, textAlign: 'left' }}>
+                        <label className="form-label">Alokasi Kursi yang Dibutuhkan</label>
+                        <div className="pax-selector-grid">
+                          {[
+                            { count: '1', title: '1 Kursi', desc: 'Hanya Siswa' },
+                            { count: '2', title: '2 Kursi', desc: 'Siswa + 1 Orang Tua' },
+                            { count: '3', title: '3 Kursi', desc: 'Siswa + 2 Orang Tua' },
+                          ].map(item => (
+                            <button
+                              key={item.count}
+                              type="button"
+                              disabled={!selectedStudent}
+                              className={`pax-card-btn ${formData.pax === item.count ? 'active' : ''}`}
+                              onClick={() => setFormData(prev => ({ ...prev, pax: item.count }))}
+                            >
+                              <Armchair size={22} className="pax-icon" />
+                              <span className="pax-num">{item.title}</span>
+                              <span className="pax-desc">{item.desc}</span>
+                            </button>
+                          ))}
+                        </div>
+                        <small style={{ display: 'block', marginTop: '0.45rem', color: 'var(--color-text-light)', fontSize: '0.8rem', textAlign: 'left' }}>
+                          *Kapasitas maksimal 3 kursi per wisudawan (1 wisudawan + 2 orang tua / wali pendamping).
+                        </small>
+                      </div>
+                    )}
+
+                    {/* 5. Pesan / Ucapan */}
+                    <div className="form-group" style={{ opacity: !selectedStudent ? 0.6 : 1, textAlign: 'left' }}>
+                      <label className="form-label" htmlFor="message">Pesan / Kesan untuk Sekolah (Opsional)</label>
+                      <textarea 
+                        id="message" 
+                        name="message" 
+                        className="form-control" 
+                        rows="3" 
+                        disabled={!selectedStudent}
+                        placeholder="Tuliskan ucapan terima kasih untuk bapak/ibu guru atau kenangan manis selama bersekolah..."
+                        value={formData.message}
+                        onChange={handleInputChange}
+                      ></textarea>
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      className="btn-primary" 
+                      disabled={isSubmitting || !selectedStudent} 
+                      style={{ 
+                        marginTop: '0.6rem',
+                        opacity: !selectedStudent ? 0.6 : 1,
+                        cursor: !selectedStudent ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {isSubmitting 
+                        ? 'Mengirim Konfirmasi...' 
+                        : !selectedStudent 
+                          ? 'Ketik Nama Calon Wisudawan Terlebih Dahulu' 
+                          : 'Kirim Konfirmasi Kehadiran'}
+                    </button>
+                  </>
                 )}
-
-                {/* 5. Pesan / Ucapan */}
-                <div className="form-group" style={{ opacity: (!selectedStudent || alreadySubmittedData) ? 0.6 : 1, textAlign: 'left' }}>
-                  <label className="form-label" htmlFor="message">Pesan / Kesan untuk Sekolah (Opsional)</label>
-                  <textarea 
-                    id="message" 
-                    name="message" 
-                    className="form-control" 
-                    rows="3" 
-                    disabled={!selectedStudent || !!alreadySubmittedData}
-                    placeholder="Tuliskan ucapan terima kasih untuk bapak/ibu guru atau kenangan manis selama bersekolah..."
-                    value={formData.message}
-                    onChange={handleInputChange}
-                  ></textarea>
-                </div>
-
-                <button 
-                  type="submit" 
-                  className="btn-primary" 
-                  disabled={isSubmitting || !selectedStudent || !!alreadySubmittedData} 
-                  style={{ 
-                    marginTop: '0.6rem',
-                    opacity: (!selectedStudent || !!alreadySubmittedData) ? 0.6 : 1,
-                    cursor: (!selectedStudent || !!alreadySubmittedData) ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  {isSubmitting 
-                    ? 'Mengirim Konfirmasi...' 
-                    : alreadySubmittedData 
-                      ? 'Konfirmasi Sudah Terisi (Terkunci)' 
-                      : !selectedStudent 
-                        ? 'Ketik Nama Calon Wisudawan Terlebih Dahulu' 
-                        : 'Kirim Konfirmasi Kehadiran'}
-                </button>
               </form>
             )}
           </motion.div>
