@@ -58,7 +58,6 @@ export default function Admin() {
   // State untuk Berbagi Link Broadcast
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedWA, setCopiedWA] = useState(false);
-  const [showWaPreview, setShowWaPreview] = useState(false);
 
   // Password admin
   const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'wisuda24';
@@ -879,36 +878,19 @@ export default function Admin() {
 
         {/* Kotak Broadcast WhatsApp Resmi (Untuk Seluruh Angkatan) */}
         <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', marginBottom: '2rem', border: '1px solid #e2e8f0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.4rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <Share2 size={20} style={{ color: '#c59b27' }} />
-              <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#0f2b5c' }}>Link Undangan & Broadcast WhatsApp Angkatan 2024/2027</h3>
-            </div>
-            <button
-              onClick={() => setShowWaPreview(!showWaPreview)}
-              style={{
-                background: 'transparent',
-                border: '1px solid #cbd5e1',
-                borderRadius: '6px',
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.8rem',
-                color: '#0f2b5c',
-                cursor: 'pointer',
-                fontWeight: 600
-              }}
-            >
-              {showWaPreview ? '▲ Sembunyikan Teks Pesan' : '👁️ Lihat / Intip Teks Pesan WA'}
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
+            <Share2 size={20} style={{ color: '#c59b27' }} />
+            <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#0f2b5c' }}>Link Undangan & Broadcast WhatsApp Angkatan 2024/2027</h3>
           </div>
           <p style={{ color: '#64748b', fontSize: '0.88rem', margin: '0 0 1rem' }}>
-            Bagikan pesan resmi ini ke grup WhatsApp kelas atau wali murid. Setiap siswa akan memilih nama dan kelasnya sendiri untuk melakukan konfirmasi kehadiran 1 kali.
+            Bagikan link resmi ini ke grup WhatsApp kelas atau wali murid. Setiap siswa akan memilih nama dan kelasnya sendiri untuk melakukan konfirmasi kehadiran 1 kali.
           </p>
 
           <div style={{ background: '#f8fafc', padding: '0.9rem 1.1rem', borderRadius: '10px', border: '1px dashed #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.8rem' }}>
             <div style={{ fontSize: '0.9rem', color: '#1e293b' }}>
               <strong>URL Undangan:</strong> <span style={{ color: '#0f2b5c', textDecoration: 'underline' }}>{getOfficialWebsiteUrl()}</span>
             </div>
-            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '0.6rem' }}>
               <button
                 onClick={() => copyToClipboard(getOfficialWebsiteUrl(), 'link')}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', borderRadius: '8px', border: 'none', background: '#0f2b5c', color: '#fff', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
@@ -923,35 +905,8 @@ export default function Admin() {
                 {copiedWA ? <Check size={16} /> : <Copy size={16} />}
                 {copiedWA ? 'Pesan WA Tersalin!' : 'Salin Pesan Broadcast WA'}
               </button>
-              <button
-                onClick={() => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(getWaBroadcastMessage())}`, '_blank')}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', borderRadius: '8px', border: '1.5px solid #25D366', background: '#ecfdf5', color: '#065f46', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700 }}
-              >
-                Kirim Langsung ke WA ↗
-              </button>
             </div>
           </div>
-
-          {/* Kotak Preview Pesan WhatsApp yang Siap Dikirim */}
-          {showWaPreview && (
-            <div style={{
-              marginTop: '1rem',
-              background: '#f8fafc',
-              border: '1.5px solid #a7f3d0',
-              borderRadius: '10px',
-              padding: '1.2rem',
-              fontSize: '0.86rem',
-              color: '#1e293b',
-              lineHeight: '1.6',
-              whiteSpace: 'pre-line',
-              fontFamily: 'monospace'
-            }}>
-              <strong style={{ display: 'block', color: '#065f46', marginBottom: '0.5rem', fontFamily: 'inherit' }}>
-                📄 Isi Pesan Broadcast WhatsApp yang Disalin:
-              </strong>
-              {getWaBroadcastMessage()}
-            </div>
-          )}
         </div>
 
         {/* Tab Navigasi Admin */}
