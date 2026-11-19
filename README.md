@@ -40,7 +40,7 @@ Dengan memanfaatkan teknologi web modern berbasis **Next.js (App Router)** dan *
 ### B. Dashboard Panel Admin Panitia (`/admin`)
 1. **Sistem Autentikasi Keamanan**
    - Akses panel dilindungi oleh sistem otentikasi kata sandi terintegrasi.
-   - **Kata sandi masuk admin:** `wisuda24`.
+   - **Kata sandi masuk admin:-
 2. **6 Kartu Analitik Statistik Real-time**
    - Total Calon Wisudawan Terdaftar (Master Data).
    - Jumlah Siswa Sudah Konfirmasi.
