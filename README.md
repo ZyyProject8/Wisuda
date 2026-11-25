@@ -50,7 +50,7 @@ Berikut adalah tangkapan layar antarmuka sistem beserta penjelasan ringkas dan a
 * **Penjelasan:** 
   * **6 Kartu Ringkasan Real-Time:** Menampilkan angka Total Wisudawan, Jumlah Sudah Konfirmasi, Siswa Hadir, Total Kursi Aula, Berhalangan Hadir, dan Belum Konfirmasi.
   * **Kotak Broadcast WhatsApp:** Tombol cepat untuk *Salin Link Undangan* dan *Salin Pesan Broadcast WA* dengan format kedinasan resmi.
-  * **Tabel Konfirmasi RSVP & Download PDF:** Tabel daftar tamu yang masuk dilengkapi tombol hijau **"Download Tamu Hadir (PDF)"** untuk mengunduh rekapitulasi dokumen resmi A4 Landscape secara langsung tanpa dialog print.
+  * **Tabel Konfirmasi RSVP & Download PDF:** Tabel daftar tamu yang masuk dilengkapi tombol hijau **"Download Tamu Hadir ({jumlah}) (PDF)"** untuk mengunduh rekapitulasi dokumen resmi A4 Landscape secara langsung tanpa dialog print, lengkap dengan kotak ringkasan total wisudawan hadir, total kursi aula, dan baris total di bawah tabel.
 
 #### 6. Manajemen Master Data Calon Wisudawan & Fitur Inline Edit
 ![Master Data Wisudawan](./public/screenshots/06-master-data-siswa.png)
@@ -148,8 +148,8 @@ Ikuti langkah-langkah berikut untuk mengunduh dan menjalankan projek ini di komp
 3. **Menyebarkan Pesan Broadcast WhatsApp**:
    * Pada kotak broadcast, klik tombol biru **"Salin Link"** untuk membagikan URL saja, atau klik tombol hijau **"Salin Pesan Broadcast WA"** untuk menyalin pesan pengumuman resmi ke grup chat WhatsApp.
 4. **Mengunduh Rekapitulasi Tamu (PDF)**:
-   * Pada tab **"Data Respon Kehadiran"**, klik tombol hijau **"Download Tamu Hadir (PDF)"**.
-   * Dokumen PDF A4 Landscape (`Daftar_Resmi_Tamu_Hadir_SMK6.pdf`) akan otomatis terunduh ke komputer Anda, siap dicetak untuk daftar meja registrasi.
+   * Pada tab **"Data Respon Kehadiran"**, klik tombol hijau **"Download Tamu Hadir ({jumlah}) (PDF)"**.
+   * Dokumen PDF A4 Landscape (`Daftar_Resmi_Tamu_Hadir_SMK6.pdf`) akan otomatis terunduh ke komputer Anda, lengkap dengan kotak ringkasan total wisudawan hadir, total kebutuhan kursi, dan baris total di bagian bawah tabel. Siap dicetak untuk daftar meja registrasi.
 5. **Mengelola Master Data Siswa**:
    * Klik tab **"Master Data Siswa Wisuda"**.
    * **Edit Siswa**: Klik tombol **"Edit"** pada baris siswa untuk mengganti nama atau kelas secara langsung, lalu klik tombol centang hijau **"Simpan"**.

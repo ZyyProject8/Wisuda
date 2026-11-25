@@ -212,10 +212,23 @@ export default function Admin() {
       const totalKursi = listToDownload.reduce((acc, g) => acc + (parseInt(g.pax, 10) || 1), 0);
       const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
+      // Kotak Ringkasan Total Hadir yang Jelas dan Menonjol
+      doc.setFillColor(240, 253, 244);
+      doc.setDrawColor(187, 247, 208);
+      doc.roundedRect(14, 42, pageWidth - 28, 14, 2, 2, 'FD');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.setTextColor(5, 150, 105);
+      doc.text(`TOTAL TAMU HADIR: ${totalSiswaHadir} SISWA`, 20, 50.5);
+
+      doc.setTextColor(15, 43, 92);
+      doc.text(`TOTAL KEBUTUHAN KURSI: ${totalKursi} KURSI (Siswa + Orang Tua)`, 95, 50.5);
+
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(71, 85, 105);
-      doc.text(`Waktu Unduh: ${dateStr}   |   Total Tamu Hadir: ${totalSiswaHadir} Siswa   |   Total Kebutuhan Kursi: ${totalKursi} Kursi (Siswa + Orang Tua)`, 14, 44);
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Waktu Unduh: ${dateStr}`, pageWidth - 20, 50.5, { align: 'right' });
 
       // Tabel Data Tamu Hadir
       const tableData = listToDownload.map((g, idx) => [
@@ -229,13 +242,29 @@ export default function Admin() {
       ]);
 
       autoTable(doc, {
-        startY: 48,
+        startY: 60,
         head: [['No', 'Nama Wisudawan / Tamu', 'Kelas', 'Status Kehadiran', 'Alokasi Kursi', 'Pesan / Doa', 'Tanggal RSVP']],
         body: tableData,
+        foot: [[
+          'TOTAL',
+          `${totalSiswaHadir} Siswa Terdaftar Hadir`,
+          '-',
+          'Semua Hadir',
+          `${totalKursi} Kursi Total`,
+          '-',
+          '-'
+        ]],
         theme: 'grid',
         headStyles: {
           fillColor: [15, 43, 92],
           textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          fontSize: 9,
+          halign: 'center'
+        },
+        footStyles: {
+          fillColor: [241, 245, 249],
+          textColor: [15, 43, 92],
           fontStyle: 'bold',
           fontSize: 9,
           halign: 'center'
@@ -876,7 +905,7 @@ export default function Admin() {
                   title="Download file PDF resmi daftar tamu dan wisudawan yang akan hadir"
                 >
                   <Download size={15} />
-                  Download Tamu Hadir (PDF)
+                  Download Tamu Hadir ({filteredRsvps.filter(r => r.attendance === 'yes').length}) (PDF)
                 </button>
 
                 <button
